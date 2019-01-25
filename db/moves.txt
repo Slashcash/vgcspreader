@@ -1,0 +1,323 @@
+Accelerock
+Acid Spray
+Acrobatics
+Aerial Ace
+Aeroblast
+Air Cutter
+Air Slash
+Anchor Shot
+AncientPower
+Aqua Jet
+Aqua Tail
+Arm Thrust
+Assurance
+Attack Order
+Aura Sphere
+Aurora Beam
+Avalanche
+Beak Blast
+Bite
+Blaze Kick
+Blizzard
+Blue Flare
+Body Slam
+Bolt Strike
+Bonemerang
+Boomburst
+Bounce
+Brave Bird
+Brick Break
+Brine
+Brutal Swing
+Bug Bite
+Bug Buzz
+Bulldoze
+Bullet Punch
+Bullet Seed
+Burn Up
+Catastropika
+Charge Beam
+Chatter
+Circle Throw
+Clanging Scales
+Clangorous Soulblaze
+Clear Smog
+Close Combat
+Core Enforcer
+Crabhammer
+Cross Chop
+Cross Poison
+Crunch
+Dark Pulse
+Darkest Lariat
+Dazzling Gleam
+Diamond Storm
+Discharge
+Doom Desire
+Double Hit
+Double Kick
+Double-Edge
+Draco Meteor
+Dragon Ascent
+Dragon Claw
+Dragon Hammer
+Dragon Pulse
+Dragon Rush
+Dragon Tail
+Drain Punch
+Draining Kiss
+Drill Peck
+Drill Run
+Dual Chop
+DynamicPunch
+Earth Power
+Earthquake
+Electro Ball
+Electroweb
+Energy Ball
+Eruption
+Explosion
+Extrasensory
+ExtremeSpeed
+Facade
+Faint Attack
+Fake Out
+Feint
+Fiery Dance
+Fire Blast
+Fire Fang
+Fire Lash
+Fire Punch
+First Impression
+Flail
+Flame Charge
+Flame Wheel
+Flamethrower
+Flare Blitz
+Flash Cannon
+Fleur Cannon
+Fling
+Fly
+Flying Press
+Focus Blast
+Focus Punch
+Force Palm
+Foul Play
+Freeze Shock
+Freeze-Dry
+Frost Breath
+Frustration
+Fusion Bolt
+Fusion Flare
+Future Sight
+Gear Grind
+Genesis Supernova
+Giga Drain
+Giga Impact
+Glaciate
+Grass Knot
+Gunk Shot
+Gyro Ball
+Hammer Arm
+Head Charge
+Head Smash
+Headbutt
+Heat Wave
+Heavy Slam
+Hex
+Hi Jump Kick
+Hidden Power Bug
+Hidden Power Dark
+Hidden Power Dragon
+Hidden Power Electric
+Hidden Power Fighting
+Hidden Power Fire
+Hidden Power Flying
+Hidden Power Ghost
+Hidden Power Grass
+Hidden Power Ground
+Hidden Power Ice
+Hidden Power Poison
+Hidden Power Psychic
+Hidden Power Rock
+Hidden Power Steel
+Hidden Power Water
+High Horsepower
+Horn Leech
+Hurricane
+Hydro Pump
+Hyper Beam
+Hyper Voice
+Ice Beam
+Ice Fang
+Ice Hammer
+Ice Punch
+Ice Shard
+Icicle Crash
+Icicle Spear
+Icy Wind
+Incinerate
+Inferno
+Iron Head
+Iron Tail
+Judgment
+Jump Kick
+Knock Off
+Lands Wrath
+Last Resort
+Lava Plume
+Leaf Blade
+Leaf Storm
+Leech Life
+Lets Snuggle Forever
+Light That Burns the Sky
+Light of Ruin
+Liquidation
+Low Kick
+Low Sweep
+Lunge
+Luster Purge
+Mach Punch
+Magma Storm
+Malicious Moonsault
+Megahorn
+Menacing Moonraze Maelstrom
+Meteor Mash
+Mind Blown
+Moonblast
+Moongeist Beam
+Mud Bomb
+Mud Shot
+Muddy Water
+Multi-Attack
+Natural Gift
+Nature Power
+Night Daze
+Night Shade
+Night Slash
+Nuzzle
+Oblivion Wing
+Oceanic Operetta
+Origin Pulse
+Outrage
+Overheat
+Payback
+Petal Dance
+Phantom Force
+Photon Geyser
+Pin Missile
+Plasma Fists
+Play Rough
+Pluck
+Poison Fang
+Poison Jab
+Pollen Puff
+Power Gem
+Power Trip
+Power Whip
+Power-Up Punch
+Precipice Blades
+Prismatic Laser
+Psychic Fangs
+Psycho Boost
+Psycho Cut
+Psyshock
+Psystrike
+Pulverizing Pancake
+Punishment
+Pursuit
+Quick Attack
+Rapid Spin
+Razor Leaf
+Razor Shell
+Relic Song
+Retaliate
+Return
+Revelation Dance
+Revenge
+Reversal
+Rock Blast
+Rock Climb
+Rock Slide
+Rock Smash
+Rock Tomb
+Sacred Fire
+Sacred Sword
+Scald
+Searing Shot
+Searing Sunraze Smash
+Secret Sword
+Seed Bomb
+Seed Flare
+Seismic Toss
+Selfdestruct
+Shadow Ball
+Shadow Bone
+Shadow Claw
+Shadow Force
+Shadow Punch
+Shadow Sneak
+Sheer Cold
+Shell Trap
+Shock Wave
+Signal Beam
+Sinister Arrow Raid
+Sky Attack
+Sky Drop
+Sky Uppercut
+Sludge Bomb
+Sludge Wave
+Smack Down
+Smart Strike
+Snarl
+Solar Blade
+SolarBeam
+Soul-Stealing 7-Star Strike
+Spacial Rend
+Spark
+Sparkling Aria
+Spectral Thief
+Spirit Shackle
+Splintered Stormshards
+Steel Wing
+Stoked Sparksurfer
+Stomping Tantrum
+Stone Edge
+Stored Power
+Storm Throw
+Sucker Punch
+Sunsteel Strike
+Superpower
+Surf
+Swift
+Synchronoise
+Tackle
+Tail Slap
+Thief
+Thousand Arrows
+Thousand Waves
+Thrash
+Throat Chop
+Thunder
+Thunder Fang
+ThunderPunch
+Thunderbolt
+Tri Attack
+Trop Kick
+U-turn
+V-create
+Vacuum Wave
+Volt Switch
+Volt Tackle
+Wake-Up Slap
+Water Pulse
+Water Shuriken
+Water Spout
+Waterfall
+Weather Ball
+Wild Charge
+Wood Hammer
+X-Scissor
+Zap Cannon
+Zen Headbutt
+Zing Zap

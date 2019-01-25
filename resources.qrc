@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>db/abilities.txt</file>
+        <file>db/items.txt</file>
+        <file>db/moves.txt</file>
+        <file>db/natures.txt</file>
+        <file>db/personal_moves.bin</file>
+        <file>db/personal_species.bin</file>
+        <file>db/species.txt</file>
+        <file>db/types.txt</file>
+    </qresource>
+</RCC>
