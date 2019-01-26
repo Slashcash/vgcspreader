@@ -178,8 +178,8 @@ float Pokemon::calculateStabModifier(const Pokemon& theAttacker, const Move& the
 }
 
 float Pokemon::calculateTargetModifier(const Move& theMove) const {
-    if( theMove.getTarget() == Move::DOUBLE ) return 0.75;
-    else return 1;
+    if( theMove.getTarget() == Move::SINGLE || theMove.isZ() ) return 1;
+    else return 0.75;
 }
 
 float Pokemon::calculateCritModifier(const Move& theMove) const {
@@ -212,8 +212,8 @@ uint16_t Pokemon::calculateDefenseInMove(const Move& theMove) const {
     uint16_t defense;
 
     if( theMove.isCrit() ) {
-        if( theMove.getMoveCategory() == Move::PHYSICAL || theMove.getMoveIndex() == Moves::Psyshock ) {
-            if( (getModifier(Stats::DEF) > 0) || (theMove.getMoveIndex() == Moves::Darkest_Lariat) || (theMove.getMoveIndex() == Moves::Sacred_Sword) ) defense = getStat(Stats::DEF);
+        if( theMove.getMoveCategory() == Move::PHYSICAL || (theMove.getMoveIndex() == Moves::Psyshock && !theMove.isZ()) ) {
+            if( (getModifier(Stats::DEF) > 0) || (theMove.getMoveIndex() == Moves::Darkest_Lariat && !theMove.isZ()) || (theMove.getMoveIndex() == Moves::Sacred_Sword && !theMove.isZ()) ) defense = getStat(Stats::DEF);
             else defense = getBoostedStat(Stats::DEF);
         }
 
@@ -224,8 +224,8 @@ uint16_t Pokemon::calculateDefenseInMove(const Move& theMove) const {
     }
 
     else {
-        if( theMove.getMoveCategory() == Move::PHYSICAL || theMove.getMoveIndex() == Moves::Psyshock ) defense = getBoostedStat(Stats::DEF);
-        else if( (theMove.getMoveIndex() == Moves::Darkest_Lariat) || (theMove.getMoveIndex() == Moves::Sacred_Sword) ) defense = getStat(Stats::DEF);
+        if( theMove.getMoveCategory() == Move::PHYSICAL || (theMove.getMoveIndex() == Moves::Psyshock && !theMove.isZ()) ) defense = getBoostedStat(Stats::DEF);
+        else if( (theMove.getMoveIndex() == Moves::Darkest_Lariat && !theMove.isZ()) || (theMove.getMoveIndex() == Moves::Sacred_Sword && !theMove.isZ()) ) defense = getStat(Stats::DEF);
         else defense = getBoostedStat(Stats::SPDEF);
     }
 
@@ -237,7 +237,7 @@ uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& 
 
     if( theMove.isCrit() ) {
         if( theMove.getMoveCategory() == Move::PHYSICAL ) {
-            if( theMove.getMoveIndex() == Moves::Foul_Play ) {
+            if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) {
                 if( getModifier(Stats::ATK) < 0 ) attack = getStat(Stats::ATK);
                 else attack = getBoostedStat(Stats::ATK);
             }
@@ -253,7 +253,7 @@ uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& 
     }
 
     else {
-        if( theMove.getMoveIndex() == Moves::Foul_Play ) attack = getBoostedStat(Stats::ATK);
+        if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) attack = getBoostedStat(Stats::ATK);
         else if( theMove.getMoveCategory() == Move::PHYSICAL ) attack = theAttacker.getBoostedStat(Stats::ATK);
         else attack = theAttacker.getBoostedStat(Stats::SPATK);
     }
@@ -265,17 +265,21 @@ uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& 
 }
 
 unsigned int Pokemon::calculateMoveBasePowerInAttack(const Pokemon& theAttacker, const Move& theMove) const {
-    unsigned int bp = theMove.getBasePower();
+    unsigned int bp;
 
-    if( theAttacker.getAbility() == Ability::Technician && theMove.getBasePower() <= 60 ) bp = bp * 1.5;
+    if( theMove.isZ() ) bp = theMove.getZBasePower();
+
+    else bp = theMove.getBasePower();
+
+    if( theAttacker.getAbility() == Ability::Technician && bp <= 60 ) bp = bp * 1.5;
     if( getAbility() == Dry_Skin && theMove.getMoveType() == Type::Fire ) bp = bp * 1.25;
     if( (getAbility() == Dark_Aura || theMove.isDarkAura()) && theMove.getMoveType() == Type::Dark ) bp = bp * 1.33;
     if( (getAbility() == Fairy_Aura || theMove.isFairyAura()) && theMove.getMoveType() == Type::Fairy ) bp = bp * 1.33;
     if( theMove.getMoveIndex() == Moves::Acrobatics && theAttacker.getItem() == Item::None ) bp = bp * 2;
-    if( theMove.getMoveIndex() == Moves::Facade && (theAttacker.getStatus() == Status::BURNED || theAttacker.getStatus() == Status::POISONED || theAttacker.getStatus() == PARALYZED) ) bp = bp * 2;
-    if( theMove.getMoveIndex() == Moves::Knock_Off ) bp = bp * 1.5;
-    if( theMove.getMoveIndex() == Moves::Brine && getCurrentHPPercentage() <= 50 ) bp = bp * 2;
-    if( theMove.getMoveIndex() == Moves::Water_Spout || theMove.getMoveIndex() == Moves::Eruption ) {
+    if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Facade && (theAttacker.getStatus() == Status::BURNED || theAttacker.getStatus() == Status::POISONED || theAttacker.getStatus() == PARALYZED) ) bp = bp * 2;
+    //if( theMove.getMoveIndex() == Moves::Knock_Off ) bp = bp * 1.5;
+    if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Brine && getCurrentHPPercentage() <= 50 ) bp = bp * 2;
+    if( !theMove.isZ() && (theMove.getMoveIndex() == Moves::Water_Spout || theMove.getMoveIndex() == Moves::Eruption) ) {
         bp = (theAttacker.getCurrentHP() * 150) / theAttacker.getStat(Stats::HP);
         if( bp < 1 ) return 1;
         else return bp;
