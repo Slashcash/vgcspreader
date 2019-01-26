@@ -59,6 +59,8 @@ class MoveWindow : public QDialog {
         QSpinBox* atk1_pokemon_movebp_spinbox;
         QCheckBox* atk1_pokemon_crit_checkbox;
         QLabel* atk1_pokemon_crit_label;
+        QCheckBox* atk1_pokemon_z_checkbox;
+        QLabel* atk1_pokemon_z_label;
         QRadioButton* atk1_pokemon_weather_none;
         QRadioButton* atk1_pokemon_weather_sun;
         QRadioButton* atk1_pokemon_weather_rain;
@@ -98,6 +100,8 @@ class MoveWindow : public QDialog {
         QSpinBox* atk2_pokemon_movebp_spinbox;
         QCheckBox* atk2_pokemon_crit_checkbox;
         QLabel* atk2_pokemon_crit_label;
+        QCheckBox* atk2_pokemon_z_checkbox;
+        QLabel* atk2_pokemon_z_label;
         QRadioButton* atk2_pokemon_weather_none;
         QRadioButton* atk2_pokemon_weather_sun;
         QRadioButton* atk2_pokemon_weather_rain;

@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QButtonGroup>
+#include <QDebug>
 
 #include <tuple>
 
@@ -221,6 +222,14 @@ void MoveWindow::createAtk1GroupBox() {
 
     atk1_pokemon_layout->addLayout(move_modifiers_layout, 6, 5);
 
+    //Z
+    atk1_pokemon_z_checkbox = new QCheckBox;
+    move_modifiers_layout->addWidget(atk1_pokemon_z_checkbox);
+
+    atk1_pokemon_z_label = new QLabel;
+    atk1_pokemon_z_label->setText(tr("Z"));
+    move_modifiers_layout->addWidget(atk1_pokemon_z_label, Qt::AlignLeft);
+
     //WEATHER
     QHBoxLayout* atk1_weather_layout = new QHBoxLayout;
     QLabel* atk1_weather_label = new QLabel(tr("Weather:"));
@@ -435,6 +444,14 @@ void MoveWindow::createAtk2GroupBox() {
     atk2_pokemon_crit_label->setText(tr("Crit"));
     move_modifiers_layout->addWidget(atk2_pokemon_crit_label, Qt::AlignLeft);
 
+    //Z
+    atk2_pokemon_z_checkbox = new QCheckBox;
+    move_modifiers_layout->addWidget(atk2_pokemon_z_checkbox);
+
+    atk2_pokemon_z_label = new QLabel;
+    atk2_pokemon_z_label->setText(tr("Z"));
+    move_modifiers_layout->addWidget(atk2_pokemon_z_label, Qt::AlignLeft);
+
     atk2_pokemon_layout->addLayout(move_modifiers_layout, 6, 5);
 
     //WEATHER
@@ -494,6 +511,8 @@ void MoveWindow::setMove1(int index) {
     atk1_pokemon_movetype_combobox->setCurrentIndex(selected_move.getMoveType());
     atk1_pokemon_movecategory_combobox->setCurrentIndex(selected_move.getMoveCategory());
     atk1_pokemon_movebp_spinbox->setValue(selected_move.getBasePower());
+    if( selected_move.isSignatureZ() ) atk1_pokemon_z_checkbox->setEnabled(false);
+    else atk1_pokemon_z_checkbox->setEnabled(true);
 }
 
 void MoveWindow::setSpecies1(int index) {
@@ -513,6 +532,9 @@ void MoveWindow::setMove2(int index) {
     atk2_pokemon_movetype_combobox->setCurrentIndex(selected_move.getMoveType());
     atk2_pokemon_movecategory_combobox->setCurrentIndex(selected_move.getMoveCategory());
     atk2_pokemon_movebp_spinbox->setValue(selected_move.getBasePower());
+
+    if( selected_move.isSignatureZ() ) atk2_pokemon_z_checkbox->setEnabled(false);
+    else atk2_pokemon_z_checkbox->setEnabled(true);
 }
 
 void MoveWindow::setSpecies2(int index) {
@@ -596,6 +618,10 @@ void MoveWindow::solveMove(void) {
     attacking1_move.setBasePower(atk1_pokemon_movebp_spinbox->value());
     if( atk1_pokemon_crit_checkbox->checkState() == Qt::Checked ) attacking1_move.setCrit(true);
     else if( atk1_pokemon_crit_checkbox->checkState() == Qt::Unchecked ) attacking1_move.setCrit(false);
+
+    if( atk1_pokemon_z_checkbox->checkState() == Qt::Checked ) attacking1_move.setZ(true);
+    else if( atk1_pokemon_z_checkbox->checkState() == Qt::Unchecked ) attacking1_move.setZ(false);
+
     if( atk1_pokemon_weather_none->isChecked() ) attacking1_move.setWeather(Move::Weather::WEATHER_NONE);
     else if(  atk1_pokemon_weather_sun->isChecked() ) attacking1_move.setWeather(Move::Weather::SUN);
     else if(  atk1_pokemon_weather_rain->isChecked() ) attacking1_move.setWeather(Move::Weather::RAIN);
@@ -621,6 +647,10 @@ void MoveWindow::solveMove(void) {
     attacking2_move.setBasePower(atk2_pokemon_movebp_spinbox->value());
     if( atk2_pokemon_crit_checkbox->checkState() == Qt::Checked ) attacking2_move.setCrit(true);
     else if( atk2_pokemon_crit_checkbox->checkState() == Qt::Unchecked ) attacking2_move.setCrit(false);
+
+    if( atk2_pokemon_z_checkbox->checkState() == Qt::Checked ) attacking2_move.setZ(true);
+    else if( atk2_pokemon_z_checkbox->checkState() == Qt::Unchecked ) attacking2_move.setZ(false);
+
     if( atk2_pokemon_weather_none->isChecked() ) attacking2_move.setWeather(Move::Weather::WEATHER_NONE);
     else if(  atk2_pokemon_weather_sun->isChecked() ) attacking2_move.setWeather(Move::Weather::SUN);
     else if(  atk2_pokemon_weather_rain->isChecked() ) attacking2_move.setWeather(Move::Weather::RAIN);
@@ -648,6 +678,7 @@ void MoveWindow::setAsBlank() {
 
     atk1_pokemon_moves_combobox->setCurrentIndex(0);
     atk1_pokemon_crit_checkbox->setChecked(false);
+    atk1_pokemon_z_checkbox->setChecked(false);
     atk1_pokemon_weather_none->setChecked(true);
 
     atk2_pokemon_activated->setChecked(true);
@@ -664,6 +695,7 @@ void MoveWindow::setAsBlank() {
 
     atk2_pokemon_moves_combobox->setCurrentIndex(0);
     atk2_pokemon_crit_checkbox->setChecked(false);
+    atk2_pokemon_z_checkbox->setChecked(false);
     atk2_pokemon_weather_none->setChecked(true);
 }
 
@@ -684,6 +716,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
     atk1_pokemon_movecategory_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveCategory());
     atk1_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[0].second.getBasePower());
     atk1_pokemon_crit_checkbox->setChecked(theTurn.getMoves()[0].second.isCrit());
+    atk1_pokemon_z_checkbox->setChecked(theTurn.getMoves()[0].second.isZ());
     if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::WEATHER_NONE ) atk1_pokemon_weather_none->setChecked(true);
     else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::SUN ) atk1_pokemon_weather_sun->setChecked(true);
     else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::RAIN ) atk1_pokemon_weather_rain->setChecked(true);
@@ -705,6 +738,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
         atk2_pokemon_movecategory_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveCategory());
         atk2_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[1].second.getBasePower());
         atk2_pokemon_crit_checkbox->setChecked(theTurn.getMoves()[1].second.isCrit());
+        atk2_pokemon_z_checkbox->setChecked(theTurn.getMoves()[1].second.isZ());
         if( theTurn.getMoves()[1].second.getWeather() == Move::Weather::WEATHER_NONE ) atk2_pokemon_weather_none->setChecked(true);
         else if( theTurn.getMoves()[1].second.getWeather() == Move::Weather::SUN ) atk2_pokemon_weather_sun->setChecked(true);
         else if( theTurn.getMoves()[1].second.getWeather() == Move::Weather::RAIN ) atk2_pokemon_weather_rain->setChecked(true);
