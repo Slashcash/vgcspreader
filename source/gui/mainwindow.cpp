@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QSpacerItem>
 #include <QHeaderView>
+#include <QDebug>
 
 #include "pokemon.hpp"
 
@@ -411,7 +412,7 @@ void MainWindow::clear() {
 }
 
 void MainWindow::calculate() {
-    Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex());
+    Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex()+1);
     selected_pokemon.setType(0, (Type)defending_pokemon_type1_combobox->currentIndex());
     selected_pokemon.setType(1, (Type)defending_pokemon_type2_combobox->currentIndex());
     selected_pokemon.setNature((Stats::Nature)defending_pokemon_nature_combobox->currentIndex());
