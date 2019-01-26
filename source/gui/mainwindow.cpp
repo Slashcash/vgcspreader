@@ -356,7 +356,7 @@ void MainWindow::solveMove() {
 
         moves_view->resizeColumnToContents(0);
 
-        if( turns.back().getMoveNum() > 1 ) {
+        if( turns[moves_view->currentRow()].getMoveNum() > 1 ) {
             QString move2(species_names[buffer[1].first.getPokedexNumber()-1] + " " + moves_names[buffer[1].second.getMoveIndex()]);
 
             QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
@@ -364,6 +364,11 @@ void MainWindow::solveMove() {
             moves_view->setItem(moves_view->currentRow(), 1, plus_sign);
             moves_view->setItem(moves_view->currentRow(), 2, new QTableWidgetItem(move2));
             moves_view->resizeColumnToContents(2);
+        }
+
+        else {
+            moves_view->takeItem(moves_view->currentRow(), 1);
+            moves_view->takeItem(moves_view->currentRow(), 2);
         }
     }
 }
