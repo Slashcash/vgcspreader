@@ -37,6 +37,9 @@ class Move {
     private:
         Moves index;
         unsigned int base_power;
+        unsigned int z_base_power;
+        bool is_signature_z;
+        bool is_z;
         Category move_category;
         Type move_type;
         bool is_spread;
@@ -54,6 +57,9 @@ class Move {
         Move(const Moves theMoveIndex);
 
         unsigned int getBasePower() const { return base_power; }
+        unsigned int getZBasePower() const { return z_base_power; }
+        bool isSignatureZ() const { return is_signature_z; }
+        bool isZ() const { return is_z; }
         Category getMoveCategory() const { return move_category; }
         Type getMoveType() const { return move_type; }
         bool isSpread() const { return is_spread; }
@@ -67,6 +73,7 @@ class Move {
         Moves getMoveIndex() const { return index; }
 
         void setBasePower(const unsigned int theBasePower) { base_power = theBasePower; }
+        void setZ(const bool isZ) { is_z = isZ; }
         void setMoveCategory(const Category& theMoveCategory) { move_category = theMoveCategory; }
         void setMoveType(const Type& theType) { move_type = theType; }
         void setSpread(const bool isSpread) { is_spread = isSpread; }

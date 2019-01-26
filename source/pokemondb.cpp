@@ -81,6 +81,29 @@ unsigned int PokemonDB::getMoveBasePower(const unsigned int theMoveIndex) const 
     else return 0;
 }
 
+unsigned int PokemonDB::getMoveBasePowerZ(const unsigned int theMoveIndex) const {
+    if( loaded ) {
+        unsigned int offset = MOVE_OFFSET * theMoveIndex + 5;
+
+        uint8_t part1 = db_binary_moves.str().at(offset);
+        uint8_t part2 = db_binary_moves.str().at(offset+1);
+
+        return 256U * part2 + part1; //because it is saved in two separate bytes
+    }
+
+    else return 0;
+}
+
+bool PokemonDB::isSignatureZ(const unsigned int theMoveIndex) const {
+    if( loaded ) {
+        unsigned int offset = MOVE_OFFSET * theMoveIndex + 7;
+
+        return db_binary_moves.str().at(offset);
+    }
+
+    else return 0;
+}
+
 uint8_t PokemonDB::getMoveType(const unsigned int theMoveIndex) const {
     if( loaded ) {
         unsigned int offset = MOVE_OFFSET * theMoveIndex + 2;

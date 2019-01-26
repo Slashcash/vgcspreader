@@ -8,7 +8,7 @@
 class PokemonDB {
     private:
         static const unsigned int POKEMON_OFFSET = 84;
-        static const unsigned int MOVE_OFFSET = 5;
+        static const unsigned int MOVE_OFFSET = 8;
 
         bool loaded;
         std::istringstream db_binary_species;
@@ -24,6 +24,8 @@ class PokemonDB {
         uint16_t getPokemonStat(const unsigned int thePokedexNumber, const Stats::Stat& theStat) const;
         std::array<uint8_t, 2> getPokemonType(const unsigned int thePokedexNumber) const;
         unsigned int getMoveBasePower(const unsigned int theMoveIndex) const;
+        unsigned int getMoveBasePowerZ(const unsigned int theMoveIndex) const;
+        bool isSignatureZ(const unsigned int theMoveIndex) const;
         uint8_t getMoveType(const unsigned int theMoveIndex) const;
         uint8_t getMoveCategory(const unsigned int theMoveIndex) const;
         uint8_t isMoveSpread(const unsigned int theMoveIndex) const;
