@@ -27,6 +27,13 @@ bool PokemonDB::load() {
 
         db_binary_moves.str(moves_data.toStdString());
 
+        //loading the items binary (and then converting it to ostringstream because this was pre-qt legacy code)
+        QFile input_file_binary_items(":/db/personal_items.bin"); //HARDCODED BECAUSE I'M LAZY
+        input_file_binary_items.open(QIODevice::ReadOnly);
+        QByteArray items_data = input_file_binary_items.readAll();
+
+        db_binary_items.str(items_data.toStdString());
+
         return true;
     }
 
@@ -147,4 +154,14 @@ std::array<uint16_t, 3> PokemonDB::getPokemonAbilities(const unsigned int thePok
     }
 
     else return std::array<uint16_t, 3>();
+}
+
+bool PokemonDB::isItemRemovable(const unsigned int theItemIndex) const {
+    if( loaded ) {
+        unsigned int offset = ITEM_OFFSET * theItemIndex;
+
+        return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
 }

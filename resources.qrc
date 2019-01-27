@@ -8,5 +8,6 @@
         <file>db/personal_species.bin</file>
         <file>db/species.txt</file>
         <file>db/types.txt</file>
+        <file>db/personal_items.bin</file>
     </qresource>
 </RCC>
