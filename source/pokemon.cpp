@@ -276,7 +276,7 @@ unsigned int Pokemon::calculateMoveBasePowerInAttack(const Pokemon& theAttacker,
     if( (getAbility() == Fairy_Aura || theMove.isFairyAura()) && theMove.getMoveType() == Type::Fairy ) bp = bp * 1.33;
     if( theMove.getMoveIndex() == Moves::Acrobatics && theAttacker.getItem() == Items::None ) bp = bp * 2;
     if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Facade && (theAttacker.getStatus() == Status::BURNED || theAttacker.getStatus() == Status::POISONED || theAttacker.getStatus() == PARALYZED) ) bp = bp * 2;
-    if( theMove.getMoveIndex() == Moves::Knock_Off && getItem().isRemovable() ) bp = bp * 1.5;
+    if( theMove.getMoveIndex() == Moves::Knock_Off && getItem().isRemovable() && !theMove.isZ() ) bp = bp * 1.5;
     if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Brine && getCurrentHPPercentage() <= 50 ) bp = bp * 2;
     if( !theMove.isZ() && (theMove.getMoveIndex() == Moves::Water_Spout || theMove.getMoveIndex() == Moves::Eruption) ) {
         bp = (theAttacker.getCurrentHP() * 150) / theAttacker.getStat(Stats::HP);
@@ -339,7 +339,7 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
         theUintVector = theDefendingPokemon.getDamage(buffer_it->first, buffer_it->second);
 
         //INFRA TURN MODIFIER
-        if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
+        if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
 
         buffer_it++;
         recursiveDamageCalculation(theDefendingPokemon, theUintVector, buffer, buffer_it);
