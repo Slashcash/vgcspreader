@@ -610,7 +610,7 @@ void MoveWindow::solveMove(void) {
     attacking1.setType(1, (Type)atk1_pokemon_type2_combobox->currentIndex());
     attacking1.setNature((Stats::Nature)atk1_pokemon_nature_combobox->currentIndex());
     attacking1.setAbility((Ability)atk1_pokemon_ability_combobox->currentIndex());
-    attacking1.setItem((Item)atk1_pokemon_item_combobox->currentIndex());
+    attacking1.setItem(Item(atk1_pokemon_item_combobox->currentIndex()));
 
     Move attacking1_move((Moves)atk1_pokemon_moves_combobox->currentIndex());
     attacking1_move.setMoveType((Type)atk1_pokemon_movetype_combobox->currentIndex());
@@ -639,7 +639,7 @@ void MoveWindow::solveMove(void) {
     attacking2.setType(1, (Type)atk2_pokemon_type2_combobox->currentIndex());
     attacking2.setNature((Stats::Nature)atk2_pokemon_nature_combobox->currentIndex());
     attacking2.setAbility((Ability)atk2_pokemon_ability_combobox->currentIndex());
-    attacking2.setItem((Item)atk2_pokemon_item_combobox->currentIndex());
+    attacking2.setItem(Item(atk2_pokemon_item_combobox->currentIndex()));
 
     Move attacking2_move((Moves)atk2_pokemon_moves_combobox->currentIndex());
     attacking2_move.setMoveType((Type)atk2_pokemon_movetype_combobox->currentIndex());
@@ -702,7 +702,7 @@ void MoveWindow::setAsBlank() {
 void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {
     atk1_pokemon_species_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getPokedexNumber()-1);
     atk1_pokemon_nature_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getNature());
-    atk1_pokemon_item_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getItem());
+    atk1_pokemon_item_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getItem().getIndex());
 
     atk1_pokemon_attack_iv_spinbox->setValue(theTurn.getMoves()[0].first.getIV(Stats::ATK));
     atk1_pokemon_attack_ev_spinbox->setValue(theTurn.getMoves()[0].first.getEV(Stats::ATK));
@@ -724,7 +724,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
     if( theTurn.getMoveNum() > 1 ) {
         atk2_pokemon_species_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getPokedexNumber()-1);
         atk2_pokemon_nature_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getNature());
-        atk2_pokemon_item_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getItem());
+        atk2_pokemon_item_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getItem().getIndex());
 
         atk2_pokemon_attack_iv_spinbox->setValue(theTurn.getMoves()[1].first.getIV(Stats::ATK));
         atk2_pokemon_attack_ev_spinbox->setValue(theTurn.getMoves()[1].first.getEV(Stats::ATK));

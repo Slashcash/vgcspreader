@@ -12,7 +12,8 @@ SOURCES += \
     source/turn.cpp \
     source/gui/mainwindow.cpp \
     source/gui/movewindow.cpp \
-    source/gui/resultwindow.cpp
+    source/gui/resultwindow.cpp \
+    source/item.cpp
 
 HEADERS += \
     include/abilities.hpp \
@@ -27,7 +28,8 @@ HEADERS += \
     include/types.hpp \
     include/gui/mainwindow.hpp \
     include/gui/movewindow.hpp \
-    include/gui/resultwindow.hpp
+    include/gui/resultwindow.hpp \
+    include/item.hpp
 
 RESOURCES += \
     resources.qrc

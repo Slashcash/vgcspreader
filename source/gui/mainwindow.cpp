@@ -422,7 +422,7 @@ void MainWindow::calculate() {
     selected_pokemon.setType(1, (Type)defending_pokemon_type2_combobox->currentIndex());
     selected_pokemon.setNature((Stats::Nature)defending_pokemon_nature_combobox->currentIndex());
     selected_pokemon.setAbility((Ability)defending_pokemon_ability_combobox->currentIndex());
-    selected_pokemon.setItem((Item)defending_pokemon_item_combobox->currentIndex());
+    selected_pokemon.setItem(Item(defending_pokemon_item_combobox->currentIndex()));
     selected_pokemon.setIV(Stats::HP, defending_pokemon_hpiv_spinbox->value());
     selected_pokemon.setIV(Stats::DEF, defending_pokemon_defiv_spinbox->value());
     selected_pokemon.setIV(Stats::SPDEF, defending_pokemon_spdefiv_spinbox->value());

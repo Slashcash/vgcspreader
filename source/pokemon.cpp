@@ -34,7 +34,6 @@ Pokemon::Pokemon(const unsigned int thePokedexNumber, const Stats& theStats) {
     current_hp_percentage = 100;
 
     pokedex_number = thePokedexNumber;
-    item = Item::None;
 
     base[Stats::HP] = db.getPokemonStat(thePokedexNumber, Stats::HP);
     base[Stats::ATK] = db.getPokemonStat(thePokedexNumber, Stats::ATK);
@@ -90,7 +89,7 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::ATK] = (((((2 * base[Stats::ATK] + stats.getIV(Stats::ATK) + stats.getEV(Stats::ATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getItem() == Item::Choice_Band ) total[Stats::ATK] = total[Stats::ATK] * 1.5;
+    if( getItem() == Items::Choice_Band ) total[Stats::ATK] = total[Stats::ATK] * 1.5;
     boosted[Stats::ATK] = total[Stats::ATK] * atk_modifier_multiplier;
 
     //calculate def
@@ -119,7 +118,7 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::SPATK] = (((((2 * base[Stats::SPATK] + stats.getIV(Stats::SPATK) + stats.getEV(Stats::SPATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getItem() == Item::Choice_Specs ) total[Stats::SPATK] = total[Stats::SPATK] * 1.5;
+    if( getItem() == Items::Choice_Specs ) total[Stats::SPATK] = total[Stats::SPATK] * 1.5;
     boosted[Stats::SPATK] = total[Stats::SPATK] * spatk_modifier_multiplier;
 
     //calculate spdef
@@ -134,7 +133,7 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::SPDEF] = (((((2 * base[Stats::SPDEF] + stats.getIV(Stats::SPDEF) + stats.getEV(Stats::SPDEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getItem() == Item::Assault_Vest ) total[Stats::SPDEF] = total[Stats::SPDEF] * 1.5;
+    if( getItem() == Items::Assault_Vest ) total[Stats::SPDEF] = total[Stats::SPDEF] * 1.5;
     boosted[Stats::SPDEF] = total[Stats::SPDEF] * spdef_modifier_multiplier;
 
     //calculate spe
@@ -203,7 +202,7 @@ float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& th
     if( getAbility() == Ability::Shadow_Shield && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
     if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theMove) >= 2 ) modifier = modifier * 0.75;
     if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theMove) < 2 ) modifier = modifier * 0;
-    if( theAttacker.getItem() == Item::Life_Orb ) modifier = modifier * 1.3;
+    if( theAttacker.getItem() == Items::Life_Orb ) modifier = modifier * 1.3;
 
     return modifier;
 }
@@ -275,7 +274,7 @@ unsigned int Pokemon::calculateMoveBasePowerInAttack(const Pokemon& theAttacker,
     if( getAbility() == Dry_Skin && theMove.getMoveType() == Type::Fire ) bp = bp * 1.25;
     if( (getAbility() == Dark_Aura || theMove.isDarkAura()) && theMove.getMoveType() == Type::Dark ) bp = bp * 1.33;
     if( (getAbility() == Fairy_Aura || theMove.isFairyAura()) && theMove.getMoveType() == Type::Fairy ) bp = bp * 1.33;
-    if( theMove.getMoveIndex() == Moves::Acrobatics && theAttacker.getItem() == Item::None ) bp = bp * 2;
+    if( theMove.getMoveIndex() == Moves::Acrobatics && theAttacker.getItem() == Items::None ) bp = bp * 2;
     if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Facade && (theAttacker.getStatus() == Status::BURNED || theAttacker.getStatus() == Status::POISONED || theAttacker.getStatus() == PARALYZED) ) bp = bp * 2;
     //if( theMove.getMoveIndex() == Moves::Knock_Off ) bp = bp * 1.5;
     if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Brine && getCurrentHPPercentage() <= 50 ) bp = bp * 2;

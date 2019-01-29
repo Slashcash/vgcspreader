@@ -11,7 +11,7 @@
 #include "pokemondb.hpp"
 #include "types.hpp"
 #include "abilities.hpp"
-#include "items.hpp"
+#include "item.hpp"
 
 class Move;
 class Turn;
