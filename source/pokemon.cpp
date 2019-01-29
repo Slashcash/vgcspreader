@@ -276,7 +276,7 @@ unsigned int Pokemon::calculateMoveBasePowerInAttack(const Pokemon& theAttacker,
     if( (getAbility() == Fairy_Aura || theMove.isFairyAura()) && theMove.getMoveType() == Type::Fairy ) bp = bp * 1.33;
     if( theMove.getMoveIndex() == Moves::Acrobatics && theAttacker.getItem() == Items::None ) bp = bp * 2;
     if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Facade && (theAttacker.getStatus() == Status::BURNED || theAttacker.getStatus() == Status::POISONED || theAttacker.getStatus() == PARALYZED) ) bp = bp * 2;
-    //if( theMove.getMoveIndex() == Moves::Knock_Off ) bp = bp * 1.5;
+    if( theMove.getMoveIndex() == Moves::Knock_Off && getItem().isRemovable() ) bp = bp * 1.5;
     if( !theMove.isZ() && theMove.getMoveIndex() == Moves::Brine && getCurrentHPPercentage() <= 50 ) bp = bp * 2;
     if( !theMove.isZ() && (theMove.getMoveIndex() == Moves::Water_Spout || theMove.getMoveIndex() == Moves::Eruption) ) {
         bp = (theAttacker.getCurrentHP() * 150) / theAttacker.getStat(Stats::HP);
@@ -331,18 +331,25 @@ std::vector<float> Pokemon::getDamagePercentage(const Turn& theTurn) const {
     return buffer;
 }
 
-void Pokemon::recursiveDamageCalculation(std::vector<unsigned int>& theUintVector, std::vector<std::pair<Pokemon, Move>>& theVector, std::vector<std::pair<Pokemon, Move>>::iterator& it) const {
+void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<unsigned int>& theUintVector, std::vector<std::pair<Pokemon, Move>>& theVector, std::vector<std::pair<Pokemon, Move>>::iterator& it) const {
     if( theUintVector.empty() && it == theVector.begin() ) {
-        theUintVector = getDamage(it->first, it->second);
-        it++;
-        recursiveDamageCalculation(theUintVector, theVector, it);
+        std::vector<std::pair<Pokemon, Move>> buffer = theVector; //WE DO THIS BECAUSE LATER ON WE NEED TO MODIFY SOME OF THE TURN FOR DAMAGE CALCULATION PURPOSES AND IT'S BETTER TO MODIFY A COPY OF THE VECTOR
+        std::vector<std::pair<Pokemon, Move>>::iterator buffer_it = buffer.begin();
+
+        theUintVector = theDefendingPokemon.getDamage(buffer_it->first, buffer_it->second);
+
+        //INFRA TURN MODIFIER
+        if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
+
+        buffer_it++;
+        recursiveDamageCalculation(theDefendingPokemon, theUintVector, buffer, buffer_it);
     }
 
     else if( it == theVector.end() ) return;
 
     else {
         std::vector<unsigned int> buffer;
-        std::vector<unsigned int> damages = getDamage(it->first, it->second);
+        std::vector<unsigned int> damages = theDefendingPokemon.getDamage(it->first, it->second);
 
         for(unsigned int i = 0; i < damages.size(); i++) {
             unsigned int value = damages[i];
@@ -353,7 +360,6 @@ void Pokemon::recursiveDamageCalculation(std::vector<unsigned int>& theUintVecto
 
         theUintVector = buffer;
         it++;
-
     }
 }
 
@@ -362,7 +368,7 @@ std::vector<unsigned int> Pokemon::getDamageInt(const Turn& theTurn) const {
     std::vector<std::pair<Pokemon, Move>>::iterator it = buffer.begin();
     std::vector<unsigned int> vec;
 
-    recursiveDamageCalculation(vec, buffer, it);
+    recursiveDamageCalculation(*this, vec, buffer, it);
     return vec;
 }
 
