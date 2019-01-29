@@ -330,14 +330,21 @@ void MainWindow::solveMove() {
 
         auto buffer = turns.back().getMoves();
 
-        QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + moves_names[buffer[0].second.getMoveIndex()]);
+        QString move_name_1;
+        if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
+        else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
+        QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + move_name_1);
 
         moves_view->setItem(turns.size()-1, 0, new QTableWidgetItem(move1));
 
         moves_view->resizeColumnToContents(0);
 
         if( turns.back().getMoveNum() > 1 ) {
-            QString move2(species_names[buffer[1].first.getPokedexNumber()-1] + " " + moves_names[buffer[1].second.getMoveIndex()]);
+            QString move_name_2;
+            if( buffer[1].second.isZ() ) move_name_2 = tr("Z-") + moves_names[buffer[1].second.getMoveIndex()];
+            else move_name_2 = moves_names[buffer[1].second.getMoveIndex()];
+
+            QString move2(species_names[buffer[1].first.getPokedexNumber()-1] + " " + move_name_2);
 
             QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
             plus_sign->setTextAlignment(Qt::AlignCenter);
@@ -350,14 +357,21 @@ void MainWindow::solveMove() {
     else {
         auto buffer = turns[moves_view->currentRow()].getMoves();
 
-        QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + moves_names[buffer[0].second.getMoveIndex()]);
+        QString move_name_1;
+        if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
+        else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
+        QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + move_name_1);
 
         moves_view->setItem(moves_view->currentRow(), 0, new QTableWidgetItem(move1));
 
         moves_view->resizeColumnToContents(0);
 
         if( turns[moves_view->currentRow()].getMoveNum() > 1 ) {
-            QString move2(species_names[buffer[1].first.getPokedexNumber()-1] + " " + moves_names[buffer[1].second.getMoveIndex()]);
+            QString move_name_2;
+            if( buffer[1].second.isZ() ) move_name_2 = tr("Z-") + moves_names[buffer[1].second.getMoveIndex()];
+            else move_name_2 = moves_names[buffer[1].second.getMoveIndex()];
+
+            QString move2(species_names[buffer[1].first.getPokedexNumber()-1] + " " + move_name_2);
 
             QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
             plus_sign->setTextAlignment(Qt::AlignCenter);
