@@ -21,7 +21,6 @@ class Turn {
         std::vector<std::pair<Pokemon, Move>> moves;
         unsigned int hits;
 
-        unsigned int getHits() const { return hits; }
         Type type;
 
     public:
@@ -31,6 +30,7 @@ class Turn {
         void setHits(const unsigned int theHits) { hits = theHits; }
 
         Type getType() const { return type; }
+        unsigned int getHits() const { return hits; }
         unsigned int getMoveNum() const { return moves.size(); }
         std::vector<std::pair<Pokemon, Move>> getMoves() const { return moves; }
 };

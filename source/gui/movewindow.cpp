@@ -503,6 +503,24 @@ void MoveWindow::createDefendingGroupBox() {
     defending_pokemon_spdef_modifier_spinbox = new QSpinBox;
     defending_pokemon_spdef_modifier_spinbox->setRange(-6, 6);
     defending_pokemon_layout->addWidget(defending_pokemon_spdef_modifier_spinbox, Qt::AlignLeft);
+
+    QLabel* defending_pokemon_hp_modifier_label = new QLabel;
+    defending_pokemon_hp_modifier_label->setText(tr("HP percentage:"));
+    defending_pokemon_layout->addWidget(defending_pokemon_hp_modifier_label);
+
+    defending_pokemon_hp_modifier_spinbox = new QSpinBox;
+    defending_pokemon_hp_modifier_spinbox->setRange(0, 100);
+    defending_pokemon_hp_modifier_spinbox->setSuffix("%");
+    defending_pokemon_layout->addWidget(defending_pokemon_hp_modifier_spinbox, Qt::AlignLeft);
+
+    QLabel* defending_pokemon_hits_modifier_label = new QLabel;
+    defending_pokemon_hits_modifier_label->setText(tr("Number of hits:"));
+    defending_pokemon_layout->addWidget(defending_pokemon_hits_modifier_label);
+
+    defending_pokemon_hits_modifier_spinbox = new QSpinBox;
+    defending_pokemon_hits_modifier_spinbox->setRange(2, 5);
+    defending_pokemon_hits_modifier_spinbox->setSuffix("HKO");
+    defending_pokemon_layout->addWidget(defending_pokemon_hits_modifier_spinbox, Qt::AlignLeft);
 }
 
 void MoveWindow::setMove1(int index) {
@@ -658,8 +676,9 @@ void MoveWindow::solveMove(void) {
     Turn turn;
     turn.addMove(attacking1, attacking1_move);
     if( atk2_pokemon_activated->checkState() == Qt::Checked ) turn.addMove(attacking2, attacking2_move);
+    turn.setHits(defending_pokemon_hits_modifier_spinbox->value()-1);
 
-    defense_modifier def_mod = std::make_tuple(100, defending_pokemon_def_modifier_spinbox->value(), defending_pokemon_spdef_modifier_spinbox->value());
+    defense_modifier def_mod = std::make_tuple(defending_pokemon_hp_modifier_spinbox->value(), defending_pokemon_def_modifier_spinbox->value(), defending_pokemon_spdef_modifier_spinbox->value());
 
     ((MainWindow*)parentWidget())->addTurn(turn, def_mod);
 }
@@ -697,6 +716,11 @@ void MoveWindow::setAsBlank() {
     atk2_pokemon_crit_checkbox->setChecked(false);
     atk2_pokemon_z_checkbox->setChecked(false);
     atk2_pokemon_weather_none->setChecked(true);
+
+    defending_pokemon_def_modifier_spinbox->setValue(0);
+    defending_pokemon_spdef_modifier_spinbox->setValue(0);
+    defending_pokemon_hp_modifier_spinbox->setValue(100);
+    defending_pokemon_hits_modifier_spinbox->setValue(2);
 }
 
 void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {
@@ -748,4 +772,6 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
 
     defending_pokemon_def_modifier_spinbox->setValue(std::get<1>(theDefenseModifier));
     defending_pokemon_spdef_modifier_spinbox->setValue(std::get<2>(theDefenseModifier));
+    defending_pokemon_hp_modifier_spinbox->setValue(std::get<0>(theDefenseModifier));
+    defending_pokemon_hits_modifier_spinbox->setValue(theTurn.getHits());
 }

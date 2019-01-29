@@ -110,6 +110,8 @@ class MoveWindow : public QDialog {
         QGroupBox* defending_pokemon_groupbox;
         QSpinBox* defending_pokemon_def_modifier_spinbox;
         QSpinBox* defending_pokemon_spdef_modifier_spinbox;
+        QSpinBox* defending_pokemon_hp_modifier_spinbox;
+        QSpinBox* defending_pokemon_hits_modifier_spinbox;
 
         bool edit_mode;
 
