@@ -5,6 +5,8 @@
 #include "pokemon.hpp"
 #include "turn.hpp"
 
+#include <QDebug>
+
 PokemonDB Pokemon::db;
 
 /*TYPE CHART INITIALIZATION*/
@@ -332,35 +334,43 @@ std::vector<float> Pokemon::getDamagePercentage(const Turn& theTurn) const {
 }
 
 void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<unsigned int>& theUintVector, std::vector<std::pair<Pokemon, Move>>& theVector, std::vector<std::pair<Pokemon, Move>>::iterator& it) const {
-    if( theUintVector.empty() && it == theVector.begin() ) {
-        std::vector<std::pair<Pokemon, Move>> buffer = theVector; //WE DO THIS BECAUSE LATER ON WE NEED TO MODIFY SOME OF THE TURN FOR DAMAGE CALCULATION PURPOSES AND IT'S BETTER TO MODIFY A COPY OF THE VECTOR
-        std::vector<std::pair<Pokemon, Move>>::iterator buffer_it = buffer.begin();
+    std::vector<std::pair<Pokemon, Move>> buffer_vector = theVector; //WE DO THIS BECAUSE LATER ON WE NEED TO MODIFY SOME OF THE TURN FOR DAMAGE CALCULATION PURPOSES AND IT'S BETTER TO MODIFY A COPY OF THE VECTOR
+    std::vector<std::pair<Pokemon, Move>>::iterator buffer_it = it;
 
+    if( it == theVector.begin() ) {
         theUintVector = theDefendingPokemon.getDamage(buffer_it->first, buffer_it->second);
-
-        //INFRA TURN MODIFIER
-        if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
-
-        buffer_it++;
-        recursiveDamageCalculation(theDefendingPokemon, theUintVector, buffer, buffer_it);
     }
 
-    else if( it == theVector.end() ) return;
+    else if( it == theVector.end() ) { return; }
 
     else {
         std::vector<unsigned int> buffer;
-        std::vector<unsigned int> damages = theDefendingPokemon.getDamage(it->first, it->second);
+        //std::vector<unsigned int> damages = theDefendingPokemon.getDamage(it->first, it->second);
 
-        for(unsigned int i = 0; i < damages.size(); i++) {
+        /*for(unsigned int i = 0; i < damages.size(); i++) {
             unsigned int value = damages[i];
             for(unsigned int j = 0; j < theUintVector.size(); j++) {
                 buffer.push_back(value + theUintVector[j]);
             }
+        }*/
+
+        for(unsigned int j = 0; j < theUintVector.size(); j++) {
+            int new_hp = theDefendingPokemon.getCurrentHP() - theUintVector[j];
+            if( new_hp < 0 ) new_hp = 0;
+            if( new_hp > theDefendingPokemon.getBoostedStat(Stats::HP) ) new_hp = theDefendingPokemon.getStat(Stats::HP);
+            theDefendingPokemon.setCurrentHPPercentage((new_hp/theDefendingPokemon.getBoostedStat(Stats::HP))*100);
+            auto new_damages = theDefendingPokemon.getDamage(it->first, it->second);
+            for( auto it2 = new_damages.begin(); it2 < new_damages.end(); it2++ ) buffer.push_back(*it2 + theUintVector[j]);
         }
 
         theUintVector = buffer;
-        it++;
     }
+
+    //INFRA TURN MODIFIERS
+    if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
+
+    it++;
+    recursiveDamageCalculation(theDefendingPokemon, theUintVector, theVector, it);
 }
 
 std::vector<unsigned int> Pokemon::getDamageInt(const Turn& theTurn) const {
@@ -447,7 +457,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
 
     Pokemon defender = *this;
 
-        //calculating if we could use the faster loop
+    //calculating if we could use the faster loop
     Turn::Type previous = theTurn.begin()->getType();
     bool simplified = true;
     for( auto it = theTurn.begin(); it < theTurn.end(); it++ ) {
