@@ -201,9 +201,13 @@ float Pokemon::calculateTypeModifier(const Move& theMove) const {
 float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const {
     float modifier = 1;
 
-    if( getAbility() == Ability::Shadow_Shield && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
-    if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theMove) >= 2 ) modifier = modifier * 0.75;
-    if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theMove) < 2 ) modifier = modifier * 0;
+    //these effects are ignored by solgaleo & lunala peculiar moves
+    if( theMove.getMoveIndex() != Moves::Moongeist_Beam && theMove.getMoveIndex() != Moves::Sunsteel_Strike && theMove.getMoveIndex() != Moves::Menacing_Moonraze_Maelstrom && theMove.getMoveIndex() != Moves::Searing_Sunraze_Smash ) {
+        if( getAbility() == Ability::Shadow_Shield && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
+        if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theMove) >= 2 ) modifier = modifier * 0.75;
+        if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theMove) < 2 ) modifier = modifier * 0;
+    }
+
     if( theAttacker.getItem() == Items::Life_Orb ) modifier = modifier * 1.3;
 
     return modifier;
