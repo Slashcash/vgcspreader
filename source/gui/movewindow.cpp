@@ -585,6 +585,7 @@ void MoveWindow::activateAtk2(int state) {
         atk2_pokemon_movecategory_combobox->setEnabled(true);
         atk2_pokemon_movebp_spinbox->setEnabled(true);
         atk2_pokemon_crit_checkbox->setEnabled(true);
+        atk2_pokemon_z_checkbox->setEnabled(true);
         atk2_pokemon_weather_sun->setEnabled(true);
         atk2_pokemon_weather_rain->setEnabled(true);
         atk2_pokemon_weather_none->setEnabled(true);
@@ -608,6 +609,7 @@ void MoveWindow::activateAtk2(int state) {
         atk2_pokemon_movecategory_combobox->setEnabled(false);
         atk2_pokemon_movebp_spinbox->setEnabled(false);
         atk2_pokemon_crit_checkbox->setEnabled(false);
+        atk2_pokemon_z_checkbox->setEnabled(false);
         atk2_pokemon_weather_sun->setEnabled(false);
         atk2_pokemon_weather_rain->setEnabled(false);
         atk2_pokemon_weather_none->setEnabled(false);
