@@ -40,6 +40,7 @@ class MoveWindow : public QDialog {
         QLabel* atk1_pokemon_nature_label;
         QComboBox* atk1_pokemon_item_combobox;
         QLabel* atk1_pokemon_item_label;
+
         QSpinBox* atk1_pokemon_attack_iv_spinbox;
         QLabel* atk1_pokemon_attack_iv_label;
         QSpinBox* atk1_pokemon_spattack_iv_spinbox;
@@ -52,6 +53,7 @@ class MoveWindow : public QDialog {
         QSpinBox* atk1_pokemon_spattack_ev_spinbox;
         QLabel* atk1_pokemon_spattack_modifier_label;
         QSpinBox* atk1_pokemon_spattack_modifier_spinbox;
+
         QComboBox* atk1_pokemon_moves_combobox;
         QLabel* atk1_pokemon_moves_label;
         QComboBox* atk1_pokemon_movetype_combobox;
@@ -61,9 +63,16 @@ class MoveWindow : public QDialog {
         QLabel* atk1_pokemon_crit_label;
         QCheckBox* atk1_pokemon_z_checkbox;
         QLabel* atk1_pokemon_z_label;
+
         QRadioButton* atk1_pokemon_weather_none;
         QRadioButton* atk1_pokemon_weather_sun;
         QRadioButton* atk1_pokemon_weather_rain;
+
+        QRadioButton* atk1_pokemon_terrain_none;
+        QRadioButton* atk1_pokemon_terrain_psychic;
+        QRadioButton* atk1_pokemon_terrain_electric;
+        QRadioButton* atk1_pokemon_terrain_misty;
+        QRadioButton* atk1_pokemon_terrain_grassy;
 
         //ATTACCKING POKEMON NO1 GROUPBOX
         QGridLayout* atk2_pokemon_layout;

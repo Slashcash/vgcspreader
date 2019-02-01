@@ -193,7 +193,12 @@ float Pokemon::calculateBurnModifier(const Pokemon& theAttacker, const Move& the
     else return 1;
 }
 
-float Pokemon::calculateTypeModifier(const Move& theMove) const {
+float Pokemon::calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const {
+    //accounting for levitate ability
+    if( theAttacker.getAbility() != Ability::Turboblaze && theAttacker.getAbility() != Ability::Teravolt) {
+        if( getAbility() == Ability::Levitate && theMove.getMoveType() == Type::Ground ) return 0;
+    }
+
     if( getTypes()[0] == getTypes()[1] ) return type_matrix[theMove.getMoveType()][getTypes()[0]];
     else return type_matrix[theMove.getMoveType()][getTypes()[0]] * type_matrix[theMove.getMoveType()][getTypes()[1]];
 }
@@ -201,14 +206,17 @@ float Pokemon::calculateTypeModifier(const Move& theMove) const {
 float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const {
     float modifier = 1;
 
+    //accounting for the reducing berry
+    if( getItem().isReducingBerry() && getItem().getReducingBerryType() == theMove.getMoveType() && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 0.5;
+
     if( getAbility() == Ability::Shadow_Shield && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
-    else if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theMove) >= 2 ) modifier = modifier * 0.75;
+    else if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 0.75;
 
     //these effects are ignored by solgaleo & lunala peculiar moves and zekrom e reshiram abilities
     if( theMove.getMoveIndex() != Moves::Moongeist_Beam && theMove.getMoveIndex() != Moves::Sunsteel_Strike && theMove.getMoveIndex() != Moves::Menacing_Moonraze_Maelstrom && theMove.getMoveIndex() != Moves::Searing_Sunraze_Smash && theAttacker.getAbility() != Ability::Turboblaze && theAttacker.getAbility() != Ability::Teravolt) {
-        if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theMove) < 2 ) modifier = modifier * 0;
+        if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theAttacker, theMove) < 2 ) modifier = modifier * 0;
         else if( getAbility() == Ability::Multiscale ) modifier = modifier * 0.5;
-        else if( (getAbility() == Ability::Filter || getAbility() == Ability::Solid_Rock) && calculateTypeModifier(theMove) > 2  ) modifier = modifier * 0.75;
+        else if( (getAbility() == Ability::Filter || getAbility() == Ability::Solid_Rock) && calculateTypeModifier(theAttacker, theMove) > 2  ) modifier = modifier * 0.75;
     }
 
     if( theAttacker.getItem() == Items::Life_Orb ) modifier = modifier * 1.3;
@@ -314,7 +322,7 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
     theMove.setModifier().setTargetModifier(calculateTargetModifier(theMove)); //TARGET
     theMove.setModifier().setCritModifier(calculateCritModifier(theMove)); //CRIT
     theMove.setModifier().setBurnModifier(calculateBurnModifier(theAttacker, theMove)); //BURN
-    theMove.setModifier().setTypeModifier(calculateTypeModifier(theMove)); //TYPE
+    theMove.setModifier().setTypeModifier(calculateTypeModifier(theAttacker, theMove)); //TYPE
     theMove.setModifier().setOtherModifier(calculateOtherModifier(theAttacker, theMove)); //OTHER
 
     std::vector<unsigned int> buffer;
@@ -375,6 +383,7 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
 
     //INFRA TURN MODIFIERS
     if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
+    if( theDefendingPokemon.getItem().isReducingBerry() && theDefendingPokemon.getItem().getReducingBerryType() == buffer_it->second.getMoveType() && calculateTypeModifier(buffer_it->first, buffer_it->second) >= 2 ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none if a reducing berry is consumed
 
     it++;
     recursiveDamageCalculation(theDefendingPokemon, theUintVector, theVector, it);

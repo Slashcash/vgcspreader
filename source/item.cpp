@@ -14,4 +14,6 @@ Item::Item(const unsigned int theIndex) {
 void Item::setIndex(const unsigned int theIndex) {
     index = theIndex;
     is_removable = Pokemon::db.isItemRemovable(index);
+    is_reducing_berry = Pokemon::db.isItemReducingBerry(index);
+    reducing_berry_type = (Type)Pokemon::db.getReducingBerryType(index);
 }

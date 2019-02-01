@@ -165,3 +165,23 @@ bool PokemonDB::isItemRemovable(const unsigned int theItemIndex) const {
 
     else return 0;
 }
+
+bool PokemonDB::isItemReducingBerry(const unsigned int theItemIndex) const {
+    if( loaded ) {
+        unsigned int offset = ITEM_OFFSET * theItemIndex + 1;
+
+        return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
+}
+
+uint8_t PokemonDB::getReducingBerryType(const unsigned int theItemIndex) const {
+    if( loaded ) {
+        unsigned int offset = ITEM_OFFSET * theItemIndex + 2;
+
+        return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
+}

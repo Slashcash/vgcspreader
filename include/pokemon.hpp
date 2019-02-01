@@ -49,7 +49,7 @@ class Pokemon {
         float calculateCritModifier(const Move& theMove) const;
         float calculateBurnModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const;
-        float calculateTypeModifier(const Move& theMove) const;
+        float calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const;
 
         uint16_t calculateAttackInMove(const Pokemon& theAttacker, const Move& theMove) const;
         uint16_t calculateDefenseInMove(const Move& theMove) const;
