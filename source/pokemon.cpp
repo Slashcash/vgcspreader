@@ -58,6 +58,10 @@ Pokemon::Pokemon(const unsigned int thePokedexNumber, const Stats& theStats) {
     status = Status::NO_STATUS;
 
     calculateTotal();
+
+    //evaluate if it is grounded
+    if( types[0] == Type::Flying || types[1] == Type::Flying || getAbility() == Ability::Levitate ) grounded = false;
+    else grounded = true;
 }
 
 uint8_t Pokemon::calculateEVSNextStat(Pokemon thePokemon, const Stats::Stat& theStat, const unsigned int theStartingEVS) const {
@@ -169,6 +173,18 @@ float Pokemon::calculateWeatherModifier(const Move& theMove) const {
     else return 1;
 }
 
+float Pokemon::calculateTerrainModifier(const Pokemon& theAttacker, const Move& theMove) const {
+    if( theAttacker.isGrounded() ) {
+        if( theMove.getTerrain() == Move::Terrain::GRASSY && theMove.getMoveType() == Type::Grass ) return 1.5;
+        else if( theMove.getTerrain() == Move::Terrain::PSYCHIC && theMove.getMoveType() == Type::Psychic ) return 1.5;
+        else if( theMove.getTerrain() == Move::Terrain::ELECTRIC && theMove.getMoveType() == Type::Electric ) return 1.5;
+        else if( theMove.getTerrain() == Move::Terrain::MISTY && theMove.getMoveType() == Type::Dragon ) return 0.5;
+        else return 1;
+    }
+
+    else return 1;
+}
+
 float Pokemon::calculateStabModifier(const Pokemon& theAttacker, const Move& theMove) const {
     float stab_modifier;
     if( theAttacker.getAbility() == Ability::Adaptability ) stab_modifier = 2;
@@ -194,11 +210,6 @@ float Pokemon::calculateBurnModifier(const Pokemon& theAttacker, const Move& the
 }
 
 float Pokemon::calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const {
-    //accounting for levitate ability
-    if( theAttacker.getAbility() != Ability::Turboblaze && theAttacker.getAbility() != Ability::Teravolt) {
-        if( getAbility() == Ability::Levitate && theMove.getMoveType() == Type::Ground ) return 0;
-    }
-
     if( getTypes()[0] == getTypes()[1] ) return type_matrix[theMove.getMoveType()][getTypes()[0]];
     else return type_matrix[theMove.getMoveType()][getTypes()[0]] * type_matrix[theMove.getMoveType()][getTypes()[1]];
 }
@@ -217,6 +228,7 @@ float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& th
         if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theAttacker, theMove) < 2 ) modifier = modifier * 0;
         else if( getAbility() == Ability::Multiscale ) modifier = modifier * 0.5;
         else if( (getAbility() == Ability::Filter || getAbility() == Ability::Solid_Rock) && calculateTypeModifier(theAttacker, theMove) > 2  ) modifier = modifier * 0.75;
+        else if( getAbility() == Ability::Levitate && theMove.getMoveType() == Type::Ground ) modifier = modifier * 0;
     }
 
     if( theAttacker.getItem() == Items::Life_Orb ) modifier = modifier * 1.3;
@@ -318,6 +330,7 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
 
     //calculating move modifiers
     theMove.setModifier().setWeatherModifier(calculateWeatherModifier(theMove)); //WEATHER
+    theMove.setModifier().setTerrainModifier(calculateTerrainModifier(theAttacker, theMove)); //TERRAIN
     theMove.setModifier().setStabModifier(calculateStabModifier(theAttacker, theMove)); //STAB
     theMove.setModifier().setTargetModifier(calculateTargetModifier(theMove)); //TARGET
     theMove.setModifier().setCritModifier(calculateCritModifier(theMove)); //CRIT
@@ -356,19 +369,28 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
         theUintVector = theDefendingPokemon.getDamage(buffer_it->first, buffer_it->second);
     }
 
-    else if( it == theVector.end() ) { return; }
+    else if( it == theVector.end() ) {
+        //if the pokemon is not dead and some effects are in place we modify the damages
+        for( auto it_last = theUintVector.begin(); it_last < theUintVector.end(); it_last++ ) {
+            if( *it_last < theDefendingPokemon.getBoostedStat(Stats::HP) ) {
+
+                //RESTORING FOR GRASSY TERRAIN
+                for( auto it_temp = theVector.begin(); it_temp < theVector.end(); it_temp++ ) {
+                    if( it_temp->second.getTerrain() == Move::Terrain::GRASSY && theDefendingPokemon.isGrounded() ) {
+                        *it_last = *it_last - (theDefendingPokemon.getBoostedStat(Stats::HP) / 16);
+                        break; //grassy terrain just restores one time
+                    }
+                }
+
+                //SOON SOME MORE
+            }
+        }
+
+        return;
+    }
 
     else {
         std::vector<unsigned int> buffer;
-        //std::vector<unsigned int> damages = theDefendingPokemon.getDamage(it->first, it->second);
-
-        /*for(unsigned int i = 0; i < damages.size(); i++) {
-            unsigned int value = damages[i];
-            for(unsigned int j = 0; j < theUintVector.size(); j++) {
-                buffer.push_back(value + theUintVector[j]);
-            }
-        }*/
-
         for(unsigned int j = 0; j < theUintVector.size(); j++) {
             int new_hp = theDefendingPokemon.getCurrentHP() - theUintVector[j];
             if( new_hp < 0 ) new_hp = 0;

@@ -10,6 +10,7 @@ class Modifier {
         enum Mod {
             TARGET,
             WEATHER,
+            TERRAIN,
             BADGE,
             CRITICAL,
             RANDOM,
@@ -24,6 +25,7 @@ class Modifier {
 
         void setRandomModifier(const float theModifier) { modifiers[RANDOM] = theModifier; }
         void setWeatherModifier(const float theModifier) { modifiers[WEATHER] = theModifier; }
+        void setTerrainModifier(const float theModifier) { modifiers[TERRAIN] = theModifier; }
         void setStabModifier(const float theModifier) { modifiers[STAB] = theModifier; }
         void setTargetModifier(const float theModifier) { modifiers[TARGET] = theModifier; }
         void setCritModifier(const float theModifier) { modifiers[CRITICAL] = theModifier; }
@@ -33,6 +35,7 @@ class Modifier {
 
         float getRandomModifier() const { return modifiers[RANDOM]; }
         float getWeatherModifier() const { return modifiers[WEATHER]; }
+        float getTerrainModifier() const { return modifiers[TERRAIN]; }
         float getStabModifier() const { return modifiers[STAB]; }
         float getTargetModifier() const { return modifiers[TARGET]; }
         float getCritModifier() const { return modifiers[CRITICAL]; }

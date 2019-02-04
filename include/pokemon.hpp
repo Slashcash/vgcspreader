@@ -40,10 +40,12 @@ class Pokemon {
         float current_hp_percentage;
         std::array<Type, 2> types;
         Status status;
+        bool grounded;
 
         void calculateTotal();
         std::vector<unsigned int> getDamage(const Pokemon& theAttacker, Move theMove) const;
         float calculateWeatherModifier(const Move& theMove) const;
+        float calculateTerrainModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateStabModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateTargetModifier(const Move& theMove) const;
         float calculateCritModifier(const Move& theMove) const;
@@ -79,6 +81,7 @@ class Pokemon {
         void setAbility(const Ability theAbility) { ability = theAbility; }
         void setItem(const Item theItem) { item = theItem; calculateTotal(); }
         void setType(const unsigned int theIndex, const Type& theType) { types[theIndex] = theType; }
+        void setGrounded(const bool theValue) { grounded = theValue; }
 
         unsigned int getPokedexNumber() const { return pokedex_number; }
         uint8_t getLevel() const { return stats.getLevel(); }
@@ -96,7 +99,7 @@ class Pokemon {
         Ability getAbility() const { return ability; }
         int16_t getModifier(Stats::Stat theStat) const { return stats.getModifier(theStat); }
         Item getItem() const { return item; }
-
+        bool isGrounded() const { return grounded; }
 
         std::vector<unsigned int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;
