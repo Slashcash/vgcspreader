@@ -64,16 +64,6 @@ class MoveWindow : public QDialog {
         QCheckBox* atk1_pokemon_z_checkbox;
         QLabel* atk1_pokemon_z_label;
 
-        QRadioButton* atk1_pokemon_weather_none;
-        QRadioButton* atk1_pokemon_weather_sun;
-        QRadioButton* atk1_pokemon_weather_rain;
-
-        QRadioButton* atk1_pokemon_terrain_none;
-        QRadioButton* atk1_pokemon_terrain_psychic;
-        QRadioButton* atk1_pokemon_terrain_electric;
-        QRadioButton* atk1_pokemon_terrain_misty;
-        QRadioButton* atk1_pokemon_terrain_grassy;
-
         //ATTACCKING POKEMON NO2 GROUPBOX
         QGridLayout* atk2_pokemon_layout;
         QGroupBox* atk2_pokemon_groupbox;
@@ -114,21 +104,26 @@ class MoveWindow : public QDialog {
         QCheckBox* atk2_pokemon_z_checkbox;
         QLabel* atk2_pokemon_z_label;
 
-        QRadioButton* atk2_pokemon_weather_none;
-        QRadioButton* atk2_pokemon_weather_sun;
-        QRadioButton* atk2_pokemon_weather_rain;
-        QRadioButton* atk2_pokemon_terrain_none;
-        QRadioButton* atk2_pokemon_terrain_psychic;
-        QRadioButton* atk2_pokemon_terrain_electric;
-        QRadioButton* atk2_pokemon_terrain_misty;
-        QRadioButton* atk2_pokemon_terrain_grassy;
-
         //DEFENDING GROUPBOX
         QGroupBox* defending_pokemon_groupbox;
         QSpinBox* defending_pokemon_def_modifier_spinbox;
         QSpinBox* defending_pokemon_spdef_modifier_spinbox;
         QSpinBox* defending_pokemon_hp_modifier_spinbox;
         QSpinBox* defending_pokemon_hits_modifier_spinbox;
+
+        //WEATHER
+        QGroupBox* atk_pokemon_weather_groupbox;
+        QRadioButton* atk_pokemon_weather_none;
+        QRadioButton* atk_pokemon_weather_sun;
+        QRadioButton* atk_pokemon_weather_rain;
+
+        //TERRAIN
+        QGroupBox* atk_pokemon_terrain_groupbox;
+        QRadioButton* atk_pokemon_terrain_none;
+        QRadioButton* atk_pokemon_terrain_psychic;
+        QRadioButton* atk_pokemon_terrain_electric;
+        QRadioButton* atk_pokemon_terrain_misty;
+        QRadioButton* atk_pokemon_terrain_grassy;
 
         bool edit_mode;
 

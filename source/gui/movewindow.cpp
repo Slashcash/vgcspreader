@@ -24,6 +24,8 @@ MoveWindow::MoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) 
     main_layout->addWidget(atk1_pokemon_groupbox);
     main_layout->addWidget(atk2_pokemon_groupbox);
     main_layout->addWidget(defending_pokemon_groupbox);
+    main_layout->addWidget(atk_pokemon_weather_groupbox);
+    main_layout->addWidget(atk_pokemon_terrain_groupbox);
 
     bottom_button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     main_layout->addWidget(bottom_button_box, Qt::AlignRight);
@@ -230,57 +232,7 @@ void MoveWindow::createAtk1GroupBox() {
     atk1_pokemon_z_label->setText(tr("Z"));
     move_modifiers_layout->addWidget(atk1_pokemon_z_label, Qt::AlignLeft);
 
-    //WEATHER
-    QHBoxLayout* atk1_weather_layout = new QHBoxLayout;
-    QLabel* atk1_weather_label = new QLabel(tr("Weather:"));
-    atk1_weather_layout->addWidget(atk1_weather_label);
 
-    QButtonGroup* atk1_weather_button_group = new QButtonGroup;
-    //none
-    atk1_pokemon_weather_none = new QRadioButton(tr("None"));
-    atk1_weather_button_group->addButton(atk1_pokemon_weather_none);
-    atk1_weather_layout->addWidget(atk1_pokemon_weather_none);
-    atk1_pokemon_weather_none->setChecked(true);
-    //sun
-    atk1_pokemon_weather_sun = new QRadioButton(tr("Sun"));
-    atk1_weather_button_group->addButton(atk1_pokemon_weather_sun);
-    atk1_weather_layout->addWidget(atk1_pokemon_weather_sun);
-    //rain
-    atk1_pokemon_weather_rain = new QRadioButton(tr("Rain"));
-    atk1_weather_button_group->addButton(atk1_pokemon_weather_rain);
-    atk1_weather_layout->addWidget(atk1_pokemon_weather_rain);
-
-    atk1_pokemon_layout->addLayout(atk1_weather_layout, 7, 1, 1, 2);
-
-    //TERRAIN
-    QHBoxLayout* atk1_terrain_layout = new QHBoxLayout;
-    QLabel* atk1_terrain_label = new QLabel(tr("Terrain:"));
-    atk1_terrain_layout->addWidget(atk1_terrain_label);
-
-    QButtonGroup* atk1_terrain_button_group = new QButtonGroup;
-    //none
-    atk1_pokemon_terrain_none = new QRadioButton(tr("None"));
-    atk1_terrain_button_group->addButton(atk1_pokemon_terrain_none);
-    atk1_terrain_layout->addWidget(atk1_pokemon_terrain_none);
-    atk1_pokemon_terrain_none->setChecked(true);
-    //psychic
-    atk1_pokemon_terrain_psychic = new QRadioButton(tr("Psychic"));
-    atk1_terrain_button_group->addButton(atk1_pokemon_terrain_psychic);
-    atk1_terrain_layout->addWidget(atk1_pokemon_terrain_psychic);
-    //misty
-    atk1_pokemon_terrain_misty = new QRadioButton(tr("Misty"));
-    atk1_terrain_button_group->addButton(atk1_pokemon_terrain_misty);
-    atk1_terrain_layout->addWidget(atk1_pokemon_terrain_misty);
-    //electric
-    atk1_pokemon_terrain_electric = new QRadioButton(tr("Electric"));
-    atk1_terrain_button_group->addButton(atk1_pokemon_terrain_electric);
-    atk1_terrain_layout->addWidget(atk1_pokemon_terrain_electric);
-    //grassy
-    atk1_pokemon_terrain_grassy = new QRadioButton(tr("Grassy"));
-    atk1_terrain_button_group->addButton(atk1_pokemon_terrain_grassy);
-    atk1_terrain_layout->addWidget(atk1_pokemon_terrain_grassy);
-
-    atk1_pokemon_layout->addLayout(atk1_terrain_layout, 8, 1, 1, 3);
 
     //SIGNALS
     connect(atk1_pokemon_moves_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove1(int)));
@@ -484,58 +436,6 @@ void MoveWindow::createAtk2GroupBox() {
 
     atk2_pokemon_layout->addLayout(move_modifiers_layout, 6, 5);
 
-    //WEATHER
-    QHBoxLayout* atk2_weather_layout = new QHBoxLayout;
-    QLabel* atk2_weather_label = new QLabel(tr("Weather:"));
-    atk2_weather_layout->addWidget(atk2_weather_label);
-
-    QButtonGroup* atk2_weather_button_group = new QButtonGroup;
-    //none
-    atk2_pokemon_weather_none = new QRadioButton(tr("None"));
-    atk2_weather_button_group->addButton(atk2_pokemon_weather_none);
-    atk2_weather_layout->addWidget(atk2_pokemon_weather_none);
-    atk2_pokemon_weather_none->setChecked(true);
-    //sun
-    atk2_pokemon_weather_sun = new QRadioButton(tr("Sun"));
-    atk2_weather_button_group->addButton(atk2_pokemon_weather_sun);
-    atk2_weather_layout->addWidget(atk2_pokemon_weather_sun);
-    //rain
-    atk2_pokemon_weather_rain = new QRadioButton(tr("Rain"));
-    atk2_weather_button_group->addButton(atk2_pokemon_weather_rain);
-    atk2_weather_layout->addWidget(atk2_pokemon_weather_rain);
-
-    atk2_pokemon_layout->addLayout(atk2_weather_layout, 7, 1, 1, 2);
-
-    //TERRAIN
-    QHBoxLayout* atk2_terrain_layout = new QHBoxLayout;
-    QLabel* atk2_terrain_label = new QLabel(tr("Terrain:"));
-    atk2_terrain_layout->addWidget(atk2_terrain_label);
-
-    QButtonGroup* atk2_terrain_button_group = new QButtonGroup;
-    //none
-    atk2_pokemon_terrain_none = new QRadioButton(tr("None"));
-    atk2_terrain_button_group->addButton(atk2_pokemon_terrain_none);
-    atk2_terrain_layout->addWidget(atk2_pokemon_terrain_none);
-    atk2_pokemon_terrain_none->setChecked(true);
-    //psychic
-    atk2_pokemon_terrain_psychic = new QRadioButton(tr("Psychic"));
-    atk2_terrain_button_group->addButton(atk2_pokemon_terrain_psychic);
-    atk2_terrain_layout->addWidget(atk2_pokemon_terrain_psychic);
-    //misty
-    atk2_pokemon_terrain_misty = new QRadioButton(tr("Misty"));
-    atk2_terrain_button_group->addButton(atk2_pokemon_terrain_misty);
-    atk2_terrain_layout->addWidget(atk2_pokemon_terrain_misty);
-    //electric
-    atk2_pokemon_terrain_electric = new QRadioButton(tr("Electric"));
-    atk2_terrain_button_group->addButton(atk2_pokemon_terrain_electric);
-    atk2_terrain_layout->addWidget(atk2_pokemon_terrain_electric);
-    //grassy
-    atk2_pokemon_terrain_grassy = new QRadioButton(tr("Grassy"));
-    atk2_terrain_button_group->addButton(atk2_pokemon_terrain_grassy);
-    atk2_terrain_layout->addWidget(atk2_pokemon_terrain_grassy);
-
-    atk2_pokemon_layout->addLayout(atk2_terrain_layout, 8, 1, 1, 3);
-
     //SIGNALS
     connect(atk2_pokemon_moves_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove2(int)));
     connect(atk2_pokemon_species_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSpecies2(int)));
@@ -581,6 +481,55 @@ void MoveWindow::createDefendingGroupBox() {
     defending_pokemon_hits_modifier_spinbox->setRange(2, 5);
     defending_pokemon_hits_modifier_spinbox->setSuffix("HKO");
     defending_pokemon_layout->addWidget(defending_pokemon_hits_modifier_spinbox, Qt::AlignLeft);
+
+    //WEATHER
+    atk_pokemon_weather_groupbox = new QGroupBox("Weather:");
+    QHBoxLayout* atk_weather_layout = new QHBoxLayout;
+    atk_pokemon_weather_groupbox->setLayout(atk_weather_layout);
+
+    QButtonGroup* atk_weather_button_group = new QButtonGroup;
+    //none
+    atk_pokemon_weather_none = new QRadioButton(tr("None"));
+    atk_weather_button_group->addButton(atk_pokemon_weather_none);
+    atk_weather_layout->addWidget(atk_pokemon_weather_none);
+    atk_pokemon_weather_none->setChecked(true);
+    //sun
+    atk_pokemon_weather_sun = new QRadioButton(tr("Sun"));
+    atk_weather_button_group->addButton(atk_pokemon_weather_sun);
+    atk_weather_layout->addWidget(atk_pokemon_weather_sun);
+    //rain
+    atk_pokemon_weather_rain = new QRadioButton(tr("Rain"));
+    atk_weather_button_group->addButton(atk_pokemon_weather_rain);
+    atk_weather_layout->addWidget(atk_pokemon_weather_rain);
+
+    //TERRAIN
+    QHBoxLayout* atk_terrain_layout = new QHBoxLayout;
+    atk_pokemon_terrain_groupbox = new QGroupBox(tr("Terrain:"));
+    atk_pokemon_terrain_groupbox->setLayout(atk_terrain_layout);
+
+    QButtonGroup* atk_terrain_button_group = new QButtonGroup;
+    //none
+    atk_pokemon_terrain_none = new QRadioButton(tr("None"));
+    atk_terrain_button_group->addButton(atk_pokemon_terrain_none);
+    atk_terrain_layout->addWidget(atk_pokemon_terrain_none);
+    atk_pokemon_terrain_none->setChecked(true);
+
+    //psychic
+    atk_pokemon_terrain_psychic = new QRadioButton(tr("Psychic"));
+    atk_terrain_button_group->addButton(atk_pokemon_terrain_psychic);
+    atk_terrain_layout->addWidget(atk_pokemon_terrain_psychic);
+    //misty
+    atk_pokemon_terrain_misty = new QRadioButton(tr("Misty"));
+    atk_terrain_button_group->addButton(atk_pokemon_terrain_misty);
+    atk_terrain_layout->addWidget(atk_pokemon_terrain_misty);
+    //electric
+    atk_pokemon_terrain_electric = new QRadioButton(tr("Electric"));
+    atk_terrain_button_group->addButton(atk_pokemon_terrain_electric);
+    atk_terrain_layout->addWidget(atk_pokemon_terrain_electric);
+    //grassy
+    atk_pokemon_terrain_grassy = new QRadioButton(tr("Grassy"));
+    atk_terrain_button_group->addButton(atk_pokemon_terrain_grassy);
+    atk_terrain_layout->addWidget(atk_pokemon_terrain_grassy);
 }
 
 void MoveWindow::setMove1(int index) {
@@ -646,15 +595,7 @@ void MoveWindow::activateAtk2(int state) {
         atk2_pokemon_movebp_spinbox->setEnabled(true);
         atk2_pokemon_crit_checkbox->setEnabled(true);
         atk2_pokemon_z_checkbox->setEnabled(true);
-        atk2_pokemon_weather_sun->setEnabled(true);
-        atk2_pokemon_weather_rain->setEnabled(true);
-        atk2_pokemon_weather_none->setEnabled(true);
-        atk2_pokemon_terrain_none->setEnabled(true);
-        atk2_pokemon_terrain_misty->setEnabled(true);
-        atk2_pokemon_terrain_psychic->setEnabled(true);
-        atk2_pokemon_terrain_grassy->setEnabled(true);
-        atk2_pokemon_terrain_electric->setEnabled(true);
-    }
+}
 
     else if( state == Qt::Unchecked ) {
         atk2_pokemon_species_combobox->setEnabled(false);
@@ -675,14 +616,6 @@ void MoveWindow::activateAtk2(int state) {
         atk2_pokemon_movebp_spinbox->setEnabled(false);
         atk2_pokemon_crit_checkbox->setEnabled(false);
         atk2_pokemon_z_checkbox->setEnabled(false);
-        atk2_pokemon_weather_sun->setEnabled(false);
-        atk2_pokemon_weather_rain->setEnabled(false);
-        atk2_pokemon_weather_none->setEnabled(false);
-        atk2_pokemon_terrain_none->setEnabled(false);
-        atk2_pokemon_terrain_misty->setEnabled(false);
-        atk2_pokemon_terrain_psychic->setEnabled(false);
-        atk2_pokemon_terrain_grassy->setEnabled(false);
-        atk2_pokemon_terrain_electric->setEnabled(false);
     }
 }
 
@@ -712,15 +645,15 @@ void MoveWindow::solveMove(void) {
     if( atk1_pokemon_z_checkbox->checkState() == Qt::Checked ) attacking1_move.setZ(true);
     else if( atk1_pokemon_z_checkbox->checkState() == Qt::Unchecked ) attacking1_move.setZ(false);
 
-    if( atk1_pokemon_weather_none->isChecked() ) attacking1_move.setWeather(Move::Weather::WEATHER_NONE);
-    else if(  atk1_pokemon_weather_sun->isChecked() ) attacking1_move.setWeather(Move::Weather::SUN);
-    else if(  atk1_pokemon_weather_rain->isChecked() ) attacking1_move.setWeather(Move::Weather::RAIN);
+    if( atk_pokemon_weather_none->isChecked() ) attacking1_move.setWeather(Move::Weather::WEATHER_NONE);
+    else if(  atk_pokemon_weather_sun->isChecked() ) attacking1_move.setWeather(Move::Weather::SUN);
+    else if(  atk_pokemon_weather_rain->isChecked() ) attacking1_move.setWeather(Move::Weather::RAIN);
 
-    if( atk1_pokemon_terrain_none->isChecked() ) attacking1_move.setTerrain(Move::Terrain::TERRAIN_NONE);
-    else if( atk1_pokemon_terrain_misty->isChecked() ) attacking1_move.setTerrain(Move::Terrain::MISTY);
-    else if( atk1_pokemon_terrain_grassy->isChecked() ) attacking1_move.setTerrain(Move::Terrain::GRASSY);
-    else if( atk1_pokemon_terrain_electric->isChecked() ) attacking1_move.setTerrain(Move::Terrain::ELECTRIC);
-    else if( atk1_pokemon_terrain_psychic->isChecked() ) attacking1_move.setTerrain(Move::Terrain::PSYCHIC);
+    if( atk_pokemon_terrain_none->isChecked() ) attacking1_move.setTerrain(Move::Terrain::TERRAIN_NONE);
+    else if( atk_pokemon_terrain_misty->isChecked() ) attacking1_move.setTerrain(Move::Terrain::MISTY);
+    else if( atk_pokemon_terrain_grassy->isChecked() ) attacking1_move.setTerrain(Move::Terrain::GRASSY);
+    else if( atk_pokemon_terrain_electric->isChecked() ) attacking1_move.setTerrain(Move::Terrain::ELECTRIC);
+    else if( atk_pokemon_terrain_psychic->isChecked() ) attacking1_move.setTerrain(Move::Terrain::PSYCHIC);
 
     Pokemon attacking2(atk2_pokemon_species_combobox->currentIndex()+1);
 
@@ -747,15 +680,15 @@ void MoveWindow::solveMove(void) {
     if( atk2_pokemon_z_checkbox->checkState() == Qt::Checked ) attacking2_move.setZ(true);
     else if( atk2_pokemon_z_checkbox->checkState() == Qt::Unchecked ) attacking2_move.setZ(false);
 
-    if( atk2_pokemon_weather_none->isChecked() ) attacking2_move.setWeather(Move::Weather::WEATHER_NONE);
-    else if(  atk2_pokemon_weather_sun->isChecked() ) attacking2_move.setWeather(Move::Weather::SUN);
-    else if(  atk2_pokemon_weather_rain->isChecked() ) attacking2_move.setWeather(Move::Weather::RAIN);
+    if( atk_pokemon_weather_none->isChecked() ) attacking2_move.setWeather(Move::Weather::WEATHER_NONE);
+    else if(  atk_pokemon_weather_sun->isChecked() ) attacking2_move.setWeather(Move::Weather::SUN);
+    else if(  atk_pokemon_weather_rain->isChecked() ) attacking2_move.setWeather(Move::Weather::RAIN);
 
-    if( atk2_pokemon_terrain_none->isChecked() ) attacking2_move.setTerrain(Move::Terrain::TERRAIN_NONE);
-    else if( atk2_pokemon_terrain_misty->isChecked() ) attacking2_move.setTerrain(Move::Terrain::MISTY);
-    else if( atk2_pokemon_terrain_grassy->isChecked() ) attacking2_move.setTerrain(Move::Terrain::GRASSY);
-    else if( atk2_pokemon_terrain_electric->isChecked() ) attacking2_move.setTerrain(Move::Terrain::ELECTRIC);
-    else if( atk2_pokemon_terrain_psychic->isChecked() ) attacking2_move.setTerrain(Move::Terrain::PSYCHIC);
+    if( atk_pokemon_terrain_none->isChecked() ) attacking2_move.setTerrain(Move::Terrain::TERRAIN_NONE);
+    else if( atk_pokemon_terrain_misty->isChecked() ) attacking2_move.setTerrain(Move::Terrain::MISTY);
+    else if( atk_pokemon_terrain_grassy->isChecked() ) attacking2_move.setTerrain(Move::Terrain::GRASSY);
+    else if( atk_pokemon_terrain_electric->isChecked() ) attacking2_move.setTerrain(Move::Terrain::ELECTRIC);
+    else if( atk_pokemon_terrain_psychic->isChecked() ) attacking2_move.setTerrain(Move::Terrain::PSYCHIC);
 
     Turn turn;
     turn.addMove(attacking1, attacking1_move);
@@ -783,9 +716,9 @@ void MoveWindow::setAsBlank() {
     atk1_pokemon_crit_checkbox->setChecked(false);
     atk1_pokemon_z_checkbox->setChecked(false);
 
-    atk1_pokemon_weather_none->setChecked(true);
+    atk_pokemon_weather_none->setChecked(true);
 
-    atk1_pokemon_terrain_none->setChecked(true);
+    atk_pokemon_terrain_none->setChecked(true);
 
     atk2_pokemon_activated->setChecked(true);
     atk2_pokemon_species_combobox->setCurrentIndex(0);
@@ -802,10 +735,6 @@ void MoveWindow::setAsBlank() {
     atk2_pokemon_moves_combobox->setCurrentIndex(0);
     atk2_pokemon_crit_checkbox->setChecked(false);
     atk2_pokemon_z_checkbox->setChecked(false);
-
-    atk2_pokemon_weather_none->setChecked(true);
-
-    atk2_pokemon_terrain_none->setChecked(true);
 
     defending_pokemon_def_modifier_spinbox->setValue(0);
     defending_pokemon_spdef_modifier_spinbox->setValue(0);
@@ -832,15 +761,15 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
     atk1_pokemon_crit_checkbox->setChecked(theTurn.getMoves()[0].second.isCrit());
     atk1_pokemon_z_checkbox->setChecked(theTurn.getMoves()[0].second.isZ());
 
-    if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::WEATHER_NONE ) atk1_pokemon_weather_none->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::SUN ) atk1_pokemon_weather_sun->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::RAIN ) atk1_pokemon_weather_rain->setChecked(true);
+    if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::WEATHER_NONE ) atk_pokemon_weather_none->setChecked(true);
+    else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::SUN ) atk_pokemon_weather_sun->setChecked(true);
+    else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::RAIN ) atk_pokemon_weather_rain->setChecked(true);
 
-    if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::TERRAIN_NONE ) atk1_pokemon_terrain_none->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::GRASSY ) atk1_pokemon_terrain_grassy->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::PSYCHIC ) atk1_pokemon_terrain_psychic->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::MISTY ) atk1_pokemon_terrain_misty->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::ELECTRIC ) atk1_pokemon_terrain_electric->setChecked(true);
+    if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::TERRAIN_NONE ) atk_pokemon_terrain_none->setChecked(true);
+    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::GRASSY ) atk_pokemon_terrain_grassy->setChecked(true);
+    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::PSYCHIC ) atk_pokemon_terrain_psychic->setChecked(true);
+    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::MISTY ) atk_pokemon_terrain_misty->setChecked(true);
+    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::ELECTRIC ) atk_pokemon_terrain_electric->setChecked(true);
 
     if( theTurn.getMoveNum() > 1 ) {
         atk2_pokemon_species_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getPokedexNumber()-1);
@@ -860,16 +789,6 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
         atk2_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[1].second.getBasePower());
         atk2_pokemon_crit_checkbox->setChecked(theTurn.getMoves()[1].second.isCrit());
         atk2_pokemon_z_checkbox->setChecked(theTurn.getMoves()[1].second.isZ());
-
-        if( theTurn.getMoves()[1].second.getWeather() == Move::Weather::WEATHER_NONE ) atk2_pokemon_weather_none->setChecked(true);
-        else if( theTurn.getMoves()[1].second.getWeather() == Move::Weather::SUN ) atk2_pokemon_weather_sun->setChecked(true);
-        else if( theTurn.getMoves()[1].second.getWeather() == Move::Weather::RAIN ) atk2_pokemon_weather_rain->setChecked(true);
-
-        if( theTurn.getMoves()[1].second.getTerrain() == Move::Terrain::TERRAIN_NONE ) atk2_pokemon_terrain_none->setChecked(true);
-        else if( theTurn.getMoves()[1].second.getTerrain() == Move::Terrain::GRASSY ) atk2_pokemon_terrain_grassy->setChecked(true);
-        else if( theTurn.getMoves()[1].second.getTerrain() == Move::Terrain::PSYCHIC ) atk2_pokemon_terrain_psychic->setChecked(true);
-        else if( theTurn.getMoves()[1].second.getTerrain() == Move::Terrain::MISTY ) atk2_pokemon_terrain_misty->setChecked(true);
-        else if( theTurn.getMoves()[1].second.getTerrain() == Move::Terrain::ELECTRIC ) atk2_pokemon_terrain_electric->setChecked(true);
     }
 
     else atk2_pokemon_activated->setChecked(false);
