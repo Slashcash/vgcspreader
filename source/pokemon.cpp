@@ -325,8 +325,9 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
 
     theMove.setBasePower(calculateMoveBasePowerInAttack(theAttacker, theMove));
 
-    unsigned int base_damage = (floor(floor((floor((2*getLevel())/5)+2) * theMove.getBasePower() * attack/defense) / 50) + 2);
+    unsigned int base_damage = floor(floor((floor((2 * getLevel()) / 5 + 2) * theMove.getBasePower() * attack) / defense) / 50 + 2);
     if( base_damage == 0 ) base_damage = 1;
+    if( getEV(Stats::HP) == 92 && getEV(Stats::SPDEF) == 172 ) qDebug() << base_damage;
 
     //calculating move modifiers
     theMove.setModifier().setWeatherModifier(calculateWeatherModifier(theMove)); //WEATHER
@@ -346,7 +347,8 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
         std::array<float, Modifier::MOD_NUM> modifiers = modifier.getModifiers();
 
         unsigned int damage = base_damage;
-        for(unsigned int i = 0; i < modifiers.size(); i++) damage = floor(damage * modifiers[i]);
+        for(unsigned int i = 0; i < modifiers.size(); i++)  damage = pokeRound(damage * modifiers[i]);
+        if( getEV(Stats::HP) == 92 && getEV(Stats::SPDEF) == 172 ) qDebug() << damage;
         buffer.push_back(damage);
     }
 
@@ -515,8 +517,8 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> results;
     unsigned int roll_count = 0;
 
-    while( results.empty() && roll_count < 6) {
-        float tolerance = (5 * roll_count);
+    while( results.empty() && roll_count < 30) {
+        float tolerance = (1 * roll_count);
 
         for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
             //std::cout << floor(float(hp_assigned) / float(MAX_EVS_SINGLE_STAT) * 100) << "\n";

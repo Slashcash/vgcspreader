@@ -5,6 +5,8 @@
 #include <array>
 #include <vector>
 #include <tuple>
+#include <math.h>
+#include <cmath>
 
 #include "stats.hpp"
 #include "modifier.hpp"
@@ -52,6 +54,8 @@ class Pokemon {
         float calculateBurnModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const;
+
+        int pokeRound(const float theValue) const { if( fmod(theValue, 1) > 0.5 ) return ceil(theValue); else return floor(theValue); }
 
         uint16_t calculateAttackInMove(const Pokemon& theAttacker, const Move& theMove) const;
         uint16_t calculateDefenseInMove(const Move& theMove) const;
