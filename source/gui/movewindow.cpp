@@ -796,5 +796,5 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
     defending_pokemon_def_modifier_spinbox->setValue(std::get<1>(theDefenseModifier));
     defending_pokemon_spdef_modifier_spinbox->setValue(std::get<2>(theDefenseModifier));
     defending_pokemon_hp_modifier_spinbox->setValue(std::get<0>(theDefenseModifier));
-    defending_pokemon_hits_modifier_spinbox->setValue(theTurn.getHits());
+    defending_pokemon_hits_modifier_spinbox->setValue(theTurn.getHits()+1);
 }
