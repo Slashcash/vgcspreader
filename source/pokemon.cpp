@@ -327,7 +327,6 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
 
     unsigned int base_damage = floor(floor((floor((2 * getLevel()) / 5 + 2) * theMove.getBasePower() * attack) / defense) / 50 + 2);
     if( base_damage == 0 ) base_damage = 1;
-    if( getEV(Stats::HP) == 92 && getEV(Stats::SPDEF) == 172 ) qDebug() << base_damage;
 
     //calculating move modifiers
     theMove.setModifier().setWeatherModifier(calculateWeatherModifier(theMove)); //WEATHER
@@ -348,7 +347,6 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
 
         unsigned int damage = base_damage;
         for(unsigned int i = 0; i < modifiers.size(); i++)  damage = pokeRound(damage * modifiers[i]);
-        if( getEV(Stats::HP) == 92 && getEV(Stats::SPDEF) == 172 ) qDebug() << damage;
         buffer.push_back(damage);
     }
 
@@ -494,6 +492,7 @@ int Pokemon::outspeedPokemon(const std::vector<Pokemon>& theVector) {
 std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) const {
     const unsigned int MAX_EVS = 510;
     const unsigned int MAX_EVS_SINGLE_STAT = 252;
+    const unsigned int ARRAY_SIZE = MAX_EVS_SINGLE_STAT + 1;
 
     Pokemon defender = *this;
 
@@ -515,17 +514,15 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     defender.setAllEV(0, 0, 0, 0, 0, 0);
 
     std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> results;
-    unsigned int roll_count = 0;
 
-    while( results.empty() && roll_count < 30) {
-        float tolerance = (1 * roll_count);
+    std::vector<float> results_buffer;
+    results_buffer.resize(ARRAY_SIZE*ARRAY_SIZE*ARRAY_SIZE);
 
-        for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
-            //std::cout << floor(float(hp_assigned) / float(MAX_EVS_SINGLE_STAT) * 100) << "\n";
-            defender.setEV(Stats::HP, hp_assigned);
+    for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+        defender.setEV(Stats::HP, hp_assigned);
 
-            for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
-                if( simplified && simplified_type == Move::PHYSICAL && spdef_assigned > 0 ) break;
+        for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
+            if( simplified && simplified_type == Move::PHYSICAL && spdef_assigned > 0 ) break;
                 defender.setEV(Stats::SPDEF, spdef_assigned);
 
                 for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
@@ -537,12 +534,43 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                         defender.setCurrentHPPercentage(std::get<0>(theDefModifiers[it]));
                         defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
                         defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
-                        if( defender.getKOProbability(theTurn[it]) > (0 + tolerance) || (hp_assigned + def_assigned + spdef_assigned > assignable_evs) ) to_add = false;
+                        if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
+                        else if( (results_buffer[hp_assigned + ARRAY_SIZE * (def_assigned + ARRAY_SIZE * spdef_assigned)] = defender.getKOProbability(theTurn[it])) > 0 ) to_add = false;
+                        else to_add = true;
                     }
 
                     if( to_add ) results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
                 }
             }
+        }
+
+    //if no result is found we search some rolls
+    unsigned int roll_count = 0;
+
+    while( results.empty() && roll_count < 20) {
+        float tolerance = (1 * roll_count);
+
+        for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+
+            for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
+                if( simplified && simplified_type == Move::PHYSICAL && spdef_assigned > 0 ) break;
+
+                for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
+                    if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
+
+                    bool to_add = true;
+                    for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
+                        defender.setCurrentHPPercentage(std::get<0>(theDefModifiers[it]));
+                        defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
+                        defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
+                        if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
+                        else if( results_buffer[hp_assigned + ARRAY_SIZE * (def_assigned + ARRAY_SIZE * spdef_assigned)] > (0 + tolerance) ) to_add = false;
+                        else to_add = true;                    }
+
+                    if( to_add ) results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
+                }
+            }
+
         }
 
         roll_count++;
