@@ -497,7 +497,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     const unsigned int MAX_EVS_SINGLE_STAT = 252;
     const unsigned int ARRAY_SIZE = MAX_EVS_SINGLE_STAT + 1;
 
-    const unsigned int THREAD_NUM = /*std::thread::hardware_concurrency() - 1*/7;
+    const unsigned int THREAD_NUM = std::thread::hardware_concurrency() - 1;
     std::vector<std::thread*> threads;
 
     Pokemon defender = *this;
@@ -556,10 +556,15 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     threads.clear();
 
     //if no result is found we search some rolls
-    unsigned int roll_count = 0;
+    unsigned int roll_count = 1;
+    const unsigned int MAX_ROLL = 10;
+    const unsigned int ROLL_OFFSET = 1;
+    std::vector<float> tolerances;
+    tolerances.resize(theTurn.size(), 0);
 
-    while( results.empty() && roll_count < 20) {
-        float tolerance = (1 * roll_count);
+    while( results.empty() && roll_count < MAX_ROLL * theTurn.size()) {
+        unsigned int tolerance_index = roll_count % theTurn.size();
+        *(tolerances.end() - tolerance_index - 1) += ROLL_OFFSET;
 
         for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
 
@@ -575,7 +580,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                         defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
                         defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
                         if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
-                        else if( results_buffer[it][hp_assigned +  def_assigned * ARRAY_SIZE + spdef_assigned * ARRAY_SIZE * ARRAY_SIZE] > (0 + tolerance) ) to_add = false;
+                        else if( results_buffer[it][hp_assigned +  def_assigned * ARRAY_SIZE + spdef_assigned * ARRAY_SIZE * ARRAY_SIZE] > (0 + tolerances[it]) ) to_add = false;
                     }
 
                     if( to_add ) results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
