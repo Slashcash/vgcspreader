@@ -8,7 +8,6 @@
 #include <QTextStream>
 #include <QSpacerItem>
 #include <QHeaderView>
-#include <QDebug>
 
 #include "pokemon.hpp"
 

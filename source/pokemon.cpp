@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include <thread>
 
 #include "pokemon.hpp"
 #include "turn.hpp"
@@ -8,6 +9,8 @@
 #include <QDebug>
 
 PokemonDB Pokemon::db;
+std::mutex Pokemon::buffer_mutex;
+std::mutex Pokemon::result_mutex;
 
 /*TYPE CHART INITIALIZATION*/
 const float Pokemon::type_matrix[18][18] = {
@@ -489,10 +492,13 @@ int Pokemon::outspeedPokemon(const std::vector<Pokemon>& theVector) {
     return -1;
 }
 
-std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) const {
+std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) {
     const unsigned int MAX_EVS = 510;
     const unsigned int MAX_EVS_SINGLE_STAT = 252;
     const unsigned int ARRAY_SIZE = MAX_EVS_SINGLE_STAT + 1;
+
+    const unsigned int THREAD_NUM = /*std::thread::hardware_concurrency() - 1*/7;
+    std::vector<std::thread*> threads;
 
     Pokemon defender = *this;
 
@@ -515,8 +521,9 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
 
     std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> results;
 
-    std::vector<float> results_buffer;
-    results_buffer.resize(ARRAY_SIZE*ARRAY_SIZE*ARRAY_SIZE);
+    std::vector<std::vector<float>> results_buffer;
+    results_buffer.resize(theTurn.size());
+    for(auto it = results_buffer.begin(); it < results_buffer.end(); it++) it->resize(ARRAY_SIZE*ARRAY_SIZE*ARRAY_SIZE);
 
     for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
         defender.setEV(Stats::HP, hp_assigned);
@@ -529,20 +536,24 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                     if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
                     defender.setEV(Stats::DEF, def_assigned);
 
-                    bool to_add = true;
-                    for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
-                        defender.setCurrentHPPercentage(std::get<0>(theDefModifiers[it]));
-                        defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
-                        defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
-                        if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
-                        else if( (results_buffer[hp_assigned + ARRAY_SIZE * (def_assigned + ARRAY_SIZE * spdef_assigned)] = defender.getKOProbability(theTurn[it])) > 0 ) to_add = false;
-                        else to_add = true;
-                    }
+                    //if we are on a single-core architecture launching it in a separate thread just creates an useless overhead
+                    if( THREAD_NUM < 2 ) resistMoveLoopThread(defender, theTurn, results, theDefModifiers, results_buffer, assignable_evs);
 
-                    if( to_add ) results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
+                    else {
+                        threads.push_back(new std::thread(&Pokemon::resistMoveLoopThread, this, defender, std::cref(theTurn), std::ref(results), std::cref(theDefModifiers), std::ref(results_buffer), assignable_evs));
+                        //if we spawned too much thread
+                        if( threads.size() >= THREAD_NUM ) {
+                            for( auto it = threads.begin(); it < threads.end(); it++ ) { (*it)->join(); delete *it; }
+                            threads.clear();
+                        }
+                    }
                 }
             }
         }
+
+    //just in case some thread hasn't finished yet
+    for( auto it = threads.begin(); it < threads.end(); it++ ) { (*it)->join(); delete *it; }
+    threads.clear();
 
     //if no result is found we search some rolls
     unsigned int roll_count = 0;
@@ -564,8 +575,8 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                         defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
                         defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
                         if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
-                        else if( results_buffer[hp_assigned + ARRAY_SIZE * (def_assigned + ARRAY_SIZE * spdef_assigned)] > (0 + tolerance) ) to_add = false;
-                        else to_add = true;                    }
+                        else if( results_buffer[it][hp_assigned +  def_assigned * ARRAY_SIZE + spdef_assigned * ARRAY_SIZE * ARRAY_SIZE] > (0 + tolerance) ) to_add = false;
+                    }
 
                     if( to_add ) results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
                 }
@@ -577,4 +588,32 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     }
 
     return results;
+}
+
+void Pokemon::resistMoveLoopThread(Pokemon theDefender, const std::vector<Turn>& theTurn, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>& theResult, const std::vector<defense_modifier>& theDefModifiers, std::vector<std::vector<float>>& theResultBuffer, const unsigned int theAssignableEVS) {
+    const unsigned int ARRAY_SIZE = 253; //this should be passed as an argument by the main thread but ehi...am i lazy or not?
+
+    for(unsigned int it = 0; it < theTurn.size(); it++ ) {
+        theDefender.setCurrentHPPercentage(std::get<0>(theDefModifiers[it]));
+        theDefender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
+        theDefender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
+        float ko_prob;
+        if( theDefender.getEV(Stats::HP) + theDefender.getEV(Stats::DEF) + theDefender.getEV(Stats::SPDEF) > theAssignableEVS ) return;
+        else if( (ko_prob = theDefender.getKOProbability(theTurn[it])) > 0 ) {
+            buffer_mutex.lock();
+            theResultBuffer[it][theDefender.getEV(Stats::HP) + theDefender.getEV(Stats::DEF) * ARRAY_SIZE + theDefender.getEV(Stats::SPDEF) * ARRAY_SIZE * ARRAY_SIZE] = ko_prob;
+            buffer_mutex.unlock();
+            return;
+        }
+
+        else {
+            buffer_mutex.lock();
+            theResultBuffer[it][theDefender.getEV(Stats::HP) + theDefender.getEV(Stats::DEF) * ARRAY_SIZE + theDefender.getEV(Stats::SPDEF) * ARRAY_SIZE * ARRAY_SIZE] = ko_prob;
+            buffer_mutex.unlock();
+        }
+    }
+
+    result_mutex.lock();
+    theResult.push_back(std::make_tuple(theDefender.getEV(Stats::HP), theDefender.getEV(Stats::DEF), theDefender.getEV(Stats::SPDEF)));
+    result_mutex.unlock();
 }

@@ -7,6 +7,7 @@
 #include <tuple>
 #include <math.h>
 #include <cmath>
+#include <mutex>
 
 #include "stats.hpp"
 #include "modifier.hpp"
@@ -43,6 +44,8 @@ class Pokemon {
         std::array<Type, 2> types;
         Status status;
         bool grounded;
+        static std::mutex buffer_mutex;
+        static std::mutex result_mutex;
 
         void calculateTotal();
         std::vector<unsigned int> getDamage(const Pokemon& theAttacker, Move theMove) const;
@@ -63,7 +66,8 @@ class Pokemon {
 
         void recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<unsigned int>& theUintVector, std::vector<std::pair<Pokemon, Move>>& theVector, std::vector<std::pair<Pokemon, Move>>::iterator& it) const;
         uint8_t calculateEVSNextStat(Pokemon thePokemon, const Stats::Stat& theStat, const unsigned int theStartingEVS) const;
-        std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) const;
+        std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers);
+        void resistMoveLoopThread(Pokemon theDefender, const std::vector<Turn>& theTurn, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>& theResult, const std::vector<defense_modifier>& theDefModifiers, std::vector<std::vector<float>>& theResultBuffer, const unsigned int theAssignableEVS); //IS THIS A MONSTER? YES IT IS, FORGIVE ME
 
     public:
         static PokemonDB db;
