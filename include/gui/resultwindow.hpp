@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QGroupBox>
 #include <QLabel>
+#include <QTextEdit>
 
 #include "pokemon.hpp"
 #include "turn.hpp"
@@ -14,6 +15,7 @@ class ResultWindow : public QDialog {
         QLabel* hp_evs;
         QLabel* def_evs;
         QLabel* spdef_evs;
+        QTextEdit* text_edit;
 
     public:
         ResultWindow(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);

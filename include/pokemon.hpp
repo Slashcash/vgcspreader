@@ -58,8 +58,7 @@ class Pokemon {
         float calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const;
 
-        int pokeRound(const float theValue) const { if( fmod(theValue, 1) > 0.5 ) return ceil(theValue); else return floor(theValue); }
-
+        int pokeRound(const float theValue) const;
         uint16_t calculateAttackInMove(const Pokemon& theAttacker, const Move& theMove) const;
         uint16_t calculateDefenseInMove(const Move& theMove) const;
         unsigned int calculateMoveBasePowerInAttack(const Pokemon& theAttacker, const Move& theMove) const;

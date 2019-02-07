@@ -342,14 +342,18 @@ std::vector<unsigned int> Pokemon::getDamage(const Pokemon& theAttacker, Move th
     theMove.setModifier().setOtherModifier(calculateOtherModifier(theAttacker, theMove)); //OTHER
 
     std::vector<unsigned int> buffer;
-    for(float mod = 0.85; mod <= 1; mod = mod + 0.01 ) {
+    for(int mod = 15; mod >= 0; mod-- ) {
         Modifier modifier = theMove.getModifier();
-        if( mod > 0.99 ) modifier.setRandomModifier(1); //THIS IS STUPID BUT I CAN'T FIGURE OUT WHY IT DOESN'T WORK WITHOUT THIS
-        else modifier.setRandomModifier(mod);
+        modifier.setRandomModifier(std::floor((100-mod)/100));
         std::array<float, Modifier::MOD_NUM> modifiers = modifier.getModifiers();
 
         unsigned int damage = base_damage;
-        for(unsigned int i = 0; i < modifiers.size(); i++)  damage = pokeRound(damage * modifiers[i]);
+        for(unsigned int i = 0; i < modifiers.size(); i++) {
+            const unsigned int RANDOM_MODIFIER_NUM = 5; //THIS PROBABLY SHOULDN'T BE HERE, IF NUMBER OF MODIFIER CHANGES THIS SHOULD CHANGE TOO, I'M SO LAZY
+            if( i == RANDOM_MODIFIER_NUM ) damage = std::floor(damage * (100-mod) / 100);
+            else damage = pokeRound(damage * modifiers[i]);
+        }
+
         buffer.push_back(damage);
     }
 
@@ -621,4 +625,9 @@ void Pokemon::resistMoveLoopThread(Pokemon theDefender, const std::vector<Turn>&
     result_mutex.lock();
     theResult.push_back(std::make_tuple(theDefender.getEV(Stats::HP), theDefender.getEV(Stats::DEF), theDefender.getEV(Stats::SPDEF)));
     result_mutex.unlock();
+}
+
+int Pokemon::pokeRound(const float theValue) const {
+    if( fmod(theValue, 1) > 0.5 ) return ceil(theValue);
+    else return floor(theValue);
 }
