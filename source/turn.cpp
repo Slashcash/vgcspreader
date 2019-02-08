@@ -37,3 +37,14 @@ void Turn::addMove(const Pokemon& thePokemon, const Move& theMove) {
         for(auto it = moves.begin(); it < moves.end(); it++)
             it->second.setDarkAura(true);
 }
+
+std::vector<std::pair<Pokemon, Move>> Turn::getMovesEffective() const {
+    std::vector<std::pair<Pokemon, Move>> buffer;
+
+    for(unsigned int i = 0; i < hits; i++)
+        for( auto it = moves.begin(); it < moves.end(); it++ )
+            buffer.push_back(*it);
+
+    return buffer;
+
+}

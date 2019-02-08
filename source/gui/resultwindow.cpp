@@ -180,10 +180,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
 
             //RESULT
             roll_result = roll_result + "-- ";
-            if( theRoll[std::distance(theTurns.begin(), it)] == 0 ) roll_result = roll_result + "guaranteed ";
-            else roll_result = roll_result + QString::number(100-theRoll[std::distance(theTurns.begin(), it)]) + "% chanche to ";
-            roll_result = roll_result + QString::number(it->getHits()+1) + "HKO";
-
+            roll_result = roll_result + QString::number(100-theRoll[std::distance(theTurns.begin(), it)], 'f', 1) + "% chanche of resisting " + QString::number(it->getHits()) + " moves";
 
             final_result = first_result + second_result + defender_result + modifier_result + roll_result + "\n\n";
 

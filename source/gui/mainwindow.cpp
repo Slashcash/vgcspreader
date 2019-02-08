@@ -450,9 +450,4 @@ void MainWindow::calculate() {
     result_window->setModal(true);
     result_window->setResult(selected_pokemon, turns, result, rolls);
     result_window->show();
-
-    selected_pokemon.setEV(Stats::HP, 76);
-    selected_pokemon.setEV(Stats::SPDEF, 188);
-    auto test = selected_pokemon.getDamageInt(turns[0]);
-    for( auto it = test.begin(); it < test.end(); it++ ) qDebug() << *it;
 }

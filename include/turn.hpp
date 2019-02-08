@@ -17,6 +17,8 @@ class Turn {
             SPECIAL
         };
 
+        std::vector<std::pair<Pokemon, Move>> getMovesEffective() const;
+
         friend class Pokemon;
         std::vector<std::pair<Pokemon, Move>> moves;
         unsigned int hits;
@@ -33,6 +35,7 @@ class Turn {
         unsigned int getHits() const { return hits; }
         unsigned int getMoveNum() const { return moves.size(); }
         std::vector<std::pair<Pokemon, Move>> getMoves() const { return moves; }
+        ;
 };
 
 #endif // _TURN_HPP_
