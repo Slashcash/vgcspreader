@@ -30,7 +30,7 @@ ResultWindow::ResultWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent,
     layout()->setSizeConstraint( QLayout::SetFixedSize );
 }
 
-void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vector<Turn>& theTurns, const std::tuple<int, int, int>& theResult, const std::vector<float>& theRoll) {
+void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const std::tuple<int, int, int>& theResult, const std::vector<std::vector<float>>& theDamagePerc, const std::vector<float>& theRoll) {
     if( std::get<0>(theResult) == -1 || std::get<1>(theResult) == -1 || std::get<2>(theResult) == -1  ) {
         def_evs->setVisible(false);
         spdef_evs->setVisible(false);
@@ -50,7 +50,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         def_evs->setText(tr("Defense EVS: ")+QString::number(std::get<1>(theResult)));
         spdef_evs->setText(tr("Sp. Defense EVS: ")+QString::number(std::get<2>(theResult)));
 
-        for( auto it = theTurns.begin(); it < theTurns.end(); it++ ) {
+        for( auto it = 0; it < theTurns.size(); it++ ) {
             QString final_result;
 
             QString first_result;
@@ -58,98 +58,107 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             QString defender_result;
             QString modifier_result;
             QString roll_result;
+            QString damage_result;
 
             //FIRST POKEMON
 
             //atk1 evs
             QString atk1_evs;
-            if( it->getMoves()[0].second.getMoveCategory() == Move::Category::SPECIAL ) {
-                if( it->getMoves()[0].first.getModifier(Stats::SPATK) != 0 ) {
-                    if( it->getMoves()[0].first.getModifier(Stats::SPATK) > 0 ) atk1_evs = atk1_evs + "+";
-                    atk1_evs = atk1_evs + QString::number(it->getMoves()[0].first.getModifier(Stats::SPATK)) + " ";
+            if( theTurns[it].getMoves()[0].second.getMoveCategory() == Move::Category::SPECIAL ) {
+                if( theTurns[it].getMoves()[0].first.getModifier(Stats::SPATK) != 0 ) {
+                    if( theTurns[it].getMoves()[0].first.getModifier(Stats::SPATK) > 0 ) atk1_evs = atk1_evs + "+";
+                    atk1_evs = atk1_evs + QString::number(theTurns[it].getMoves()[0].first.getModifier(Stats::SPATK)) + " ";
                 }
 
-                atk1_evs = atk1_evs + QString::number(it->getMoves()[0].first.getEV(Stats::SPATK));
-                if( it->getMoves()[0].first.getNature() == Stats::MODEST || it->getMoves()[0].first.getNature() == Stats::QUIET|| it->getMoves()[0].first.getNature() == Stats::MILD || it->getMoves()[0].first.getNature() == Stats::RASH ) atk1_evs = atk1_evs + "+ SpA ";
-                else if( it->getMoves()[0].first.getNature() == Stats::ADAMANT || it->getMoves()[0].first.getNature() == Stats::IMPISH || it->getMoves()[0].first.getNature() == Stats::JOLLY || it->getMoves()[0].first.getNature() == Stats::CAREFUL ) atk1_evs = atk1_evs + "- SpA ";
+                atk1_evs = atk1_evs + QString::number(theTurns[it].getMoves()[0].first.getEV(Stats::SPATK));
+                if( theTurns[it].getMoves()[0].first.getNature() == Stats::MODEST || theTurns[it].getMoves()[0].first.getNature() == Stats::QUIET|| theTurns[it].getMoves()[0].first.getNature() == Stats::MILD || theTurns[it].getMoves()[0].first.getNature() == Stats::RASH ) atk1_evs = atk1_evs + "+ SpA ";
+                else if( theTurns[it].getMoves()[0].first.getNature() == Stats::ADAMANT || theTurns[it].getMoves()[0].first.getNature() == Stats::IMPISH || theTurns[it].getMoves()[0].first.getNature() == Stats::JOLLY || theTurns[it].getMoves()[0].first.getNature() == Stats::CAREFUL ) atk1_evs = atk1_evs + "- SpA ";
                 else atk1_evs = atk1_evs + " SpA ";
             }
 
             else {
-                if( it->getMoves()[0].first.getModifier(Stats::ATK) != 0 ) {
-                    if( it->getMoves()[0].first.getModifier(Stats::ATK) > 0 ) atk1_evs = atk1_evs + "+";
-                    atk1_evs = atk1_evs + QString::number(it->getMoves()[0].first.getModifier(Stats::ATK)) + " ";
+                if( theTurns[it].getMoves()[0].first.getModifier(Stats::ATK) != 0 ) {
+                    if( theTurns[it].getMoves()[0].first.getModifier(Stats::ATK) > 0 ) atk1_evs = atk1_evs + "+";
+                    atk1_evs = atk1_evs + QString::number(theTurns[it].getMoves()[0].first.getModifier(Stats::ATK)) + " ";
                 }
 
-                atk1_evs = atk1_evs + QString::number(it->getMoves()[0].first.getEV(Stats::ATK));
-                if( it->getMoves()[0].first.getNature() == Stats::LONELY || it->getMoves()[0].first.getNature() == Stats::BRAVE || it->getMoves()[0].first.getNature() == Stats::ADAMANT || it->getMoves()[0].first.getNature() == Stats::NAUGHTY ) atk1_evs = atk1_evs + "+ Atk ";
-                else if( it->getMoves()[0].first.getNature() == Stats::BOLD || it->getMoves()[0].first.getNature() == Stats::TIMID || it->getMoves()[0].first.getNature() == Stats::MODEST || it->getMoves()[0].first.getNature() == Stats::CALM ) atk1_evs = atk1_evs + "- Atk ";
+                atk1_evs = atk1_evs + QString::number(theTurns[it].getMoves()[0].first.getEV(Stats::ATK));
+                if( theTurns[it].getMoves()[0].first.getNature() == Stats::LONELY || theTurns[it].getMoves()[0].first.getNature() == Stats::BRAVE || theTurns[it].getMoves()[0].first.getNature() == Stats::ADAMANT || theTurns[it].getMoves()[0].first.getNature() == Stats::NAUGHTY ) atk1_evs = atk1_evs + "+ Atk ";
+                else if( theTurns[it].getMoves()[0].first.getNature() == Stats::BOLD || theTurns[it].getMoves()[0].first.getNature() == Stats::TIMID || theTurns[it].getMoves()[0].first.getNature() == Stats::MODEST || theTurns[it].getMoves()[0].first.getNature() == Stats::CALM ) atk1_evs = atk1_evs + "- Atk ";
                 else atk1_evs = atk1_evs + " Atk ";
             }
 
             //atk1_item
             QString atk1_item;
-            if( it->getMoves()[0].first.getItem().getIndex() != Items::None ) atk1_item = atk1_item + ((MainWindow*)parentWidget())->getItemsNames()[it->getMoves()[0].first.getItem().getIndex()] + " ";
+            if( theTurns[it].getMoves()[0].first.getItem().getIndex() != Items::None ) atk1_item = atk1_item + ((MainWindow*)parentWidget())->getItemsNames()[theTurns[it].getMoves()[0].first.getItem().getIndex()] + " ";
 
             //atk1_ability
-            QString atk1_ability = ((MainWindow*)parentWidget())->getAbilitiesNames()[it->getMoves()[0].first.getAbility()] + " ";
+            QString atk1_ability = ((MainWindow*)parentWidget())->getAbilitiesNames()[theTurns[it].getMoves()[0].first.getAbility()] + " ";
 
             //atk1_pokemon
-            QString atk1_pokemon = ((MainWindow*)parentWidget())->getSpeciesNames()[it->getMoves()[0].first.getPokedexNumber()-1] + " ";
+            QString atk1_pokemon = ((MainWindow*)parentWidget())->getSpeciesNames()[theTurns[it].getMoves()[0].first.getPokedexNumber()-1] + " ";
 
             //atk1_move
             QString atk1_move;
-            if( it->getMoves()[0].second.isZ() ) atk1_move = atk1_move + "Z-";
-            atk1_move = atk1_move + ((MainWindow*)parentWidget())->getMovesNames()[it->getMoves()[0].second.getMoveIndex()] + " ";
+            if( theTurns[it].getMoves()[0].second.isZ() ) atk1_move = atk1_move + "Z-";
+            atk1_move = atk1_move + ((MainWindow*)parentWidget())->getMovesNames()[theTurns[it].getMoves()[0].second.getMoveIndex()] + " ";
 
-            first_result = atk1_evs + atk1_item + atk1_ability + atk1_pokemon + atk1_move;
+            //atk1 crit
+            QString atk1_crit;
+            if( theTurns[it].getMoves()[0].second.isCrit() ) atk1_crit = atk1_crit + "on a critical hit ";
 
-            if( it->getMoveNum() > 1 ) {
+            first_result = atk1_evs + atk1_item + atk1_ability + atk1_pokemon + atk1_move + atk1_crit;
+
+            if( theTurns[it].getMoveNum() > 1 ) {
                 //SECOND POKEMON
-                QString plus_sign = "+ ";
+                QString plus_sign = "[+] ";
 
                 //atk2_evs
                 QString atk2_evs;
-                if( it->getMoves()[1].second.getMoveCategory() == Move::Category::SPECIAL ) {
-                    if( it->getMoves()[1].first.getModifier(Stats::SPATK) != 0 ) {
-                        if( it->getMoves()[1].first.getModifier(Stats::SPATK) > 0 ) atk2_evs = atk2_evs + "+";
-                        atk2_evs = atk2_evs + QString::number(it->getMoves()[1].first.getModifier(Stats::SPATK)) + " ";
+                if( theTurns[it].getMoves()[1].second.getMoveCategory() == Move::Category::SPECIAL ) {
+                    if( theTurns[it].getMoves()[1].first.getModifier(Stats::SPATK) != 0 ) {
+                        if( theTurns[it].getMoves()[1].first.getModifier(Stats::SPATK) > 0 ) atk2_evs = atk2_evs + "+";
+                        atk2_evs = atk2_evs + QString::number(theTurns[it].getMoves()[1].first.getModifier(Stats::SPATK)) + " ";
                     }
 
-                    atk2_evs = atk2_evs + QString::number(it->getMoves()[1].first.getEV(Stats::SPATK));
-                    if( it->getMoves()[1].first.getNature() == Stats::MODEST || it->getMoves()[1].first.getNature() == Stats::QUIET|| it->getMoves()[1].first.getNature() == Stats::MILD || it->getMoves()[1].first.getNature() == Stats::RASH ) atk2_evs = atk2_evs + "+ SpA ";
-                    else if( it->getMoves()[1].first.getNature() == Stats::ADAMANT || it->getMoves()[1].first.getNature() == Stats::IMPISH || it->getMoves()[1].first.getNature() == Stats::JOLLY || it->getMoves()[1].first.getNature() == Stats::CAREFUL ) atk2_evs = atk2_evs + "- SpA ";
+                    atk2_evs = atk2_evs + QString::number(theTurns[it].getMoves()[1].first.getEV(Stats::SPATK));
+                    if( theTurns[it].getMoves()[1].first.getNature() == Stats::MODEST || theTurns[it].getMoves()[1].first.getNature() == Stats::QUIET|| theTurns[it].getMoves()[1].first.getNature() == Stats::MILD || theTurns[it].getMoves()[1].first.getNature() == Stats::RASH ) atk2_evs = atk2_evs + "+ SpA ";
+                    else if( theTurns[it].getMoves()[1].first.getNature() == Stats::ADAMANT || theTurns[it].getMoves()[1].first.getNature() == Stats::IMPISH || theTurns[it].getMoves()[1].first.getNature() == Stats::JOLLY || theTurns[it].getMoves()[1].first.getNature() == Stats::CAREFUL ) atk2_evs = atk2_evs + "- SpA ";
                     else atk2_evs = atk2_evs + " SpA ";
                 }
 
                 else {
-                    if( it->getMoves()[1].first.getModifier(Stats::ATK) != 0 ) {
-                        if( it->getMoves()[1].first.getModifier(Stats::ATK) > 0 ) atk2_evs = atk2_evs + "+";
-                        atk2_evs = atk2_evs + QString::number(it->getMoves()[1].first.getModifier(Stats::ATK)) + " ";
+                    if( theTurns[it].getMoves()[1].first.getModifier(Stats::ATK) != 0 ) {
+                        if( theTurns[it].getMoves()[1].first.getModifier(Stats::ATK) > 0 ) atk2_evs = atk2_evs + "+";
+                        atk2_evs = atk2_evs + QString::number(theTurns[it].getMoves()[1].first.getModifier(Stats::ATK)) + " ";
                     }
 
-                    atk2_evs = atk2_evs + QString::number(it->getMoves()[1].first.getEV(Stats::ATK));
-                    if( it->getMoves()[1].first.getNature() == Stats::LONELY || it->getMoves()[1].first.getNature() == Stats::BRAVE || it->getMoves()[1].first.getNature() == Stats::ADAMANT || it->getMoves()[1].first.getNature() == Stats::NAUGHTY ) atk2_evs = atk2_evs + "+ Atk ";
-                    else if( it->getMoves()[1].first.getNature() == Stats::BOLD || it->getMoves()[1].first.getNature() == Stats::TIMID || it->getMoves()[1].first.getNature() == Stats::MODEST || it->getMoves()[1].first.getNature() == Stats::CALM ) atk2_evs = atk2_evs + "- Atk ";
+                    atk2_evs = atk2_evs + QString::number(theTurns[it].getMoves()[1].first.getEV(Stats::ATK));
+                    if( theTurns[it].getMoves()[1].first.getNature() == Stats::LONELY || theTurns[it].getMoves()[1].first.getNature() == Stats::BRAVE || theTurns[it].getMoves()[1].first.getNature() == Stats::ADAMANT || theTurns[it].getMoves()[1].first.getNature() == Stats::NAUGHTY ) atk2_evs = atk2_evs + "+ Atk ";
+                    else if( theTurns[it].getMoves()[1].first.getNature() == Stats::BOLD || theTurns[it].getMoves()[1].first.getNature() == Stats::TIMID || theTurns[it].getMoves()[1].first.getNature() == Stats::MODEST || theTurns[it].getMoves()[1].first.getNature() == Stats::CALM ) atk2_evs = atk2_evs + "- Atk ";
                     else atk2_evs = atk2_evs + " Atk ";
                 }
 
                 //atk2_item
                 QString atk2_item;
-                if( it->getMoves()[1].first.getItem().getIndex() != Items::None ) atk2_item = atk2_item + ((MainWindow*)parentWidget())->getItemsNames()[it->getMoves()[1].first.getItem().getIndex()] + " ";
+                if( theTurns[it].getMoves()[1].first.getItem().getIndex() != Items::None ) atk2_item = atk2_item + ((MainWindow*)parentWidget())->getItemsNames()[theTurns[it].getMoves()[1].first.getItem().getIndex()] + " ";
 
                 //atk2_ability
-                QString atk2_ability = ((MainWindow*)parentWidget())->getAbilitiesNames()[it->getMoves()[1].first.getAbility()] + " ";
+                QString atk2_ability = ((MainWindow*)parentWidget())->getAbilitiesNames()[theTurns[it].getMoves()[1].first.getAbility()] + " ";
 
                 //atk2_pokemon
-                QString atk2_pokemon = ((MainWindow*)parentWidget())->getSpeciesNames()[it->getMoves()[1].first.getPokedexNumber()-1] + " ";
+                QString atk2_pokemon = ((MainWindow*)parentWidget())->getSpeciesNames()[theTurns[it].getMoves()[1].first.getPokedexNumber()-1] + " ";
 
                 //atk2_move
                 QString atk2_move;
-                if( it->getMoves()[1].second.isZ() ) atk2_move = atk2_move + "Z-";
-                atk2_move = atk2_move + ((MainWindow*)parentWidget())->getMovesNames()[it->getMoves()[1].second.getMoveIndex()] + " ";
+                if( theTurns[it].getMoves()[1].second.isZ() ) atk2_move = atk2_move + "Z-";
+                atk2_move = atk2_move + ((MainWindow*)parentWidget())->getMovesNames()[theTurns[it].getMoves()[1].second.getMoveIndex()] + " ";
 
-                second_result = plus_sign + atk2_evs + atk2_item + atk2_ability + atk2_pokemon + atk2_move;
+                //atk2 crit
+                QString atk2_crit;
+                if( theTurns[it].getMoves()[1].second.isCrit() ) atk2_crit = atk2_crit + "on a critical hit ";
+
+                second_result = plus_sign + atk2_evs + atk2_item + atk2_ability + atk2_pokemon + atk2_move + atk2_crit;
             }
 
             //DEFENDING POKEMON
@@ -159,10 +168,30 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             QString def_hp_evs = QString::number(std::get<0>(theResult)) + " HP / ";
 
             //def
-            QString def_def_evs = QString::number(std::get<1>(theResult)) + " Def / ";
+            QString def_def_evs;
+            if( std::get<1>(theDefModifier[it]) != 0 ) {
+                if( std::get<1>(theDefModifier[it]) > 0 ) def_def_evs = def_def_evs + "+";
+                def_def_evs = def_def_evs + QString::number(std::get<1>(theDefModifier[it])) + " ";
+            }
+
+            def_def_evs = def_def_evs + QString::number(std::get<1>(theResult));
+
+            if( theDefendingPokemon.getNature() == Stats::BOLD || theDefendingPokemon.getNature() == Stats::RELAXED || theDefendingPokemon.getNature() == Stats::IMPISH || theDefendingPokemon.getNature() == Stats::LAX ) def_def_evs = def_def_evs + "+ Def / ";
+            else if( theDefendingPokemon.getNature() == Stats::HASTY || theDefendingPokemon.getNature() == Stats::MILD || theDefendingPokemon.getNature() == Stats::LONELY || theDefendingPokemon.getNature() == Stats::GENTLE ) def_def_evs = def_def_evs + "- Def / ";
+            else def_def_evs = def_def_evs + " Def / ";
 
             //spdef
-            QString def_spdef_evs = QString::number(std::get<2>(theResult)) + " SpD ";
+            QString def_spdef_evs;
+            if( std::get<2>(theDefModifier[it]) != 0 ) {
+                if( std::get<2>(theDefModifier[it]) > 0 ) def_spdef_evs = def_spdef_evs + "+";
+                def_spdef_evs = def_spdef_evs + QString::number(std::get<2>(theDefModifier[it])) + " ";
+            }
+
+            def_spdef_evs = def_spdef_evs + QString::number(std::get<2>(theResult));
+
+            if( theDefendingPokemon.getNature() == Stats::CALM || theDefendingPokemon.getNature() == Stats::GENTLE || theDefendingPokemon.getNature() == Stats::SASSY || theDefendingPokemon.getNature() == Stats::CAREFUL ) def_spdef_evs = def_spdef_evs + "+ SpD ";
+            else if( theDefendingPokemon.getNature() == Stats::NAUGHTY || theDefendingPokemon.getNature() == Stats::LAX || theDefendingPokemon.getNature() == Stats::NAIVE || theDefendingPokemon.getNature() == Stats::RASH ) def_spdef_evs = def_spdef_evs + "- SpD ";
+            else def_spdef_evs = def_spdef_evs + " SpD ";
 
             //item
             QString def_item;
@@ -177,12 +206,75 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             defender_result = vs_string + def_hp_evs + def_def_evs + def_spdef_evs + def_item + def_ability + def_species;
 
             //MODIFIERS
+            //rain
+            bool in_rain = false;
+            bool rain_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getWeather() == Move::Weather::RAIN ) in_rain = true;
+                if( it2->second.getMoveType() == Type::Fire || it2->second.getMoveType() == Type::Water ) rain_affected_move = true;
+            }
+
+            if( in_rain && rain_affected_move ) modifier_result = modifier_result + "in Rain ";
+
+            //sun
+            bool in_sun = false;
+            bool sun_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getWeather() == Move::Weather::SUN ) in_sun = true;
+                if( it2->second.getMoveType() == Type::Fire || it2->second.getMoveType() == Type::Water ) sun_affected_move = true;
+            }
+
+            if( in_sun && sun_affected_move ) modifier_result = modifier_result + "in Sun ";
+
+            //electric
+            bool in_electric = false;
+            bool electric_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getTerrain() == Move::Terrain::ELECTRIC ) in_electric = true;
+                if( it2->second.getMoveType() == Type::Electric && it2->first.isGrounded() ) electric_affected_move = true;
+            }
+
+            if( in_electric && electric_affected_move ) modifier_result = modifier_result + "in Electric Terrain ";
+
+            //psychic
+            bool in_psychic = false;
+            bool psychic_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getTerrain() == Move::Terrain::PSYCHIC ) in_psychic = true;
+                if( it2->second.getMoveType() == Type::Psychic && it2->first.isGrounded() ) psychic_affected_move = true;
+            }
+
+            if( in_psychic && psychic_affected_move ) modifier_result = modifier_result + "in Psychic Terrain ";
+
+            //grassy
+            bool in_grassy = false;
+            bool grassy_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getTerrain() == Move::Terrain::GRASSY ) in_grassy = true;
+                if( it2->second.getMoveType() == Type::Grass && it2->first.isGrounded() ) grassy_affected_move = true;
+            }
+
+            if( in_grassy && grassy_affected_move ) modifier_result = modifier_result + "in Grassy Terrain ";
+
+            //misty
+            bool in_misty = false;
+            bool misty_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getTerrain() == Move::Terrain::MISTY ) in_misty = true;
+                if( it2->second.getMoveType() == Type::Dragon && it2->first.isGrounded() ) misty_affected_move = true;
+            }
+
+            if( in_misty && misty_affected_move ) modifier_result = modifier_result + "in Misty Terrain ";
+
 
             //RESULT
             roll_result = roll_result + "-- ";
-            roll_result = roll_result + QString::number(100-theRoll[std::distance(theTurns.begin(), it)], 'f', 1) + "% chanche of resisting " + QString::number(it->getHits()) + " moves";
+            roll_result = roll_result + QString::number(100-theRoll[it], 'f', 1) + "% chanche of resisting " + QString::number(theTurns[it].getHits()) + " moves ";
 
-            final_result = first_result + second_result + defender_result + modifier_result + roll_result + "\n\n";
+            //DAMAGE
+            damage_result = damage_result + "(" + QString::number(*(theDamagePerc[it].begin()), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%)";
+
+            final_result = first_result + second_result + defender_result + modifier_result + roll_result + damage_result + "\n\n";
 
             text_edit->setText(text_edit->toPlainText() + final_result);
         }

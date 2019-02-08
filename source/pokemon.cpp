@@ -378,7 +378,7 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
 
     else if( it == theVector.end() ) {
         //if the pokemon is not dead and some effects are in place we modify the damages
-        for( auto it_last = theUintVector.begin(); it_last < theUintVector.end(); it_last++ ) {
+        /*for( auto it_last = theUintVector.begin(); it_last < theUintVector.end(); it_last++ ) {
             if( *it_last < theDefendingPokemon.getBoostedStat(Stats::HP) ) {
 
                 //RESTORING FOR GRASSY TERRAIN
@@ -391,7 +391,7 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
 
                 //SOON SOME MORE
             }
-        }
+        }*/
 
         return;
     }
@@ -469,7 +469,12 @@ std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, 
     buffer.setEV(Stats::DEF, std::get<1>(final_pair));
     buffer.setEV(Stats::SPDEF, std::get<2>(final_pair));
 
-    for( auto it = theTurn.begin(); it < theTurn.end(); it++ ) theKoProbability.push_back(buffer.getKOProbability(*it));
+    for( auto it = 0; it < theTurn.size(); it++ ) {
+        buffer.setModifier(Stats::HP, std::get<0>(theDefModifiers[it]));
+        buffer.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
+        buffer.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
+        theKoProbability.push_back(buffer.getKOProbability(theTurn[it]));
+    }
 
     return final_pair;
 }
