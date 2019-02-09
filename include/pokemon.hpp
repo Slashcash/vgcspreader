@@ -48,7 +48,7 @@ class Pokemon {
         static std::mutex result_mutex;
 
         void calculateTotal();
-        std::vector<unsigned int> getDamage(const Pokemon& theAttacker, Move theMove) const;
+        std::vector<int> getDamage(const Pokemon& theAttacker, Move theMove) const;
         float calculateWeatherModifier(const Move& theMove) const;
         float calculateTerrainModifier(const Pokemon& theAttacker, const Move& theMove) const;
         float calculateStabModifier(const Pokemon& theAttacker, const Move& theMove) const;
@@ -63,7 +63,7 @@ class Pokemon {
         uint16_t calculateDefenseInMove(const Move& theMove) const;
         unsigned int calculateMoveBasePowerInAttack(const Pokemon& theAttacker, const Move& theMove) const;
 
-        void recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<unsigned int>& theUintVector, std::vector<std::pair<Pokemon, Move>>& theVector, std::vector<std::pair<Pokemon, Move>>::iterator& it) const;
+        void recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<int>& theIntVector, std::vector<std::pair<Pokemon, Move>>& theVector, const unsigned int theHitNumber, std::vector<std::pair<Pokemon, Move>>::iterator& it) const;
         uint8_t calculateEVSNextStat(Pokemon thePokemon, const Stats::Stat& theStat, const unsigned int theStartingEVS) const;
         std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers);
         void resistMoveLoopThread(Pokemon theDefender, const std::vector<Turn>& theTurn, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>& theResult, const std::vector<defense_modifier>& theDefModifiers, std::vector<std::vector<float>>& theResultBuffer, const unsigned int theAssignableEVS); //IS THIS A MONSTER? YES IT IS, FORGIVE ME
@@ -108,7 +108,7 @@ class Pokemon {
         Item getItem() const { return item; }
         bool isGrounded() const { return grounded; }
 
-        std::vector<unsigned int> getDamageInt(const Turn& theTurn) const;
+        std::vector<int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;
         float getKOProbability(const Turn& theTurn) const;
         std::tuple<int, int, int> resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, std::vector<float>& theKoProbability);

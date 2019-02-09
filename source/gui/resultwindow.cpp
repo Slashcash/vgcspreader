@@ -272,9 +272,19 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             roll_result = roll_result + QString::number(100-theRoll[it], 'f', 1) + "% chanche of resisting " + QString::number(theTurns[it].getHits()) + " moves ";
 
             //DAMAGE
-            damage_result = damage_result + "(" + QString::number(*(theDamagePerc[it].begin()), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%)";
+            damage_result = damage_result + "(" + QString::number(*(theDamagePerc[it].begin()), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%) ";
 
-            final_result = first_result + second_result + defender_result + modifier_result + roll_result + damage_result + "\n\n";
+            //RESTORER
+            //grassy terrain restore
+            QString restore_result;
+            bool grassy_terrain_recover = false;
+            auto turn_moves = theTurns[it].getMoves();
+            for( auto it_turn = turn_moves.begin(); it_turn < turn_moves.end(); it_turn++ )
+                if( it_turn->second.getTerrain() == theDefendingPokemon.isGrounded() ) grassy_terrain_recover = true;
+
+            if( grassy_terrain_recover ) restore_result = restore_result + "after Grassy Terrain recover ";
+
+            final_result = first_result + second_result + defender_result + modifier_result + roll_result + damage_result + restore_result + "\n\n";
 
             text_edit->setText(text_edit->toPlainText() + final_result);
         }
