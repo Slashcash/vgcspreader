@@ -221,7 +221,7 @@ float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& th
     float modifier = 1;
 
     //accounting for the reducing berry
-    if( getItem().isReducingBerry() && getItem().getReducingBerryType() == theMove.getMoveType() && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 0.5;
+    if( (getItem().isReducingBerry() && getItem().getReducingBerryType() == theMove.getMoveType() && calculateTypeModifier(theAttacker, theMove) >= 2) || ( getItem().isReducingBerry() && getItem().getReducingBerryType() == Type::Normal && theMove.getMoveType() == Type::Normal ) ) modifier = modifier * 0.5;
 
     if( getAbility() == Ability::Shadow_Shield && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
     else if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 0.75;
