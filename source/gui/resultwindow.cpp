@@ -280,7 +280,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             bool grassy_terrain_recover = false;
             auto turn_moves = theTurns[it].getMoves();
             for( auto it_turn = turn_moves.begin(); it_turn < turn_moves.end(); it_turn++ )
-                if( it_turn->second.getTerrain() == theDefendingPokemon.isGrounded() ) grassy_terrain_recover = true;
+                if( it_turn->second.getTerrain() == Move::Terrain::GRASSY && theDefendingPokemon.isGrounded() ) grassy_terrain_recover = true;
 
             if( grassy_terrain_recover ) restore_result = restore_result + "after Grassy Terrain recover ";
 

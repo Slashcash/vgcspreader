@@ -78,6 +78,7 @@ void MainWindow::setDefendingPokemonSpecies(int index) {
 
 void MainWindow::eraseMove(bool checked) {
     turns.erase(turns.begin() + moves_view->currentRow());
+    modifiers.erase(modifiers.begin() + moves_view->currentRow());
 
     moves_view->removeRow(moves_view->currentRow());
 
