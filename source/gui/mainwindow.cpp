@@ -454,15 +454,17 @@ void MainWindow::calculate() {
     selected_pokemon.setEV(Stats::SPDEF, std::get<2>(result));
 
     std::vector<std::vector<float>> damages;
+    std::vector<std::vector<int>> int_damages;
 
     for( auto it = 0; it < turns.size(); it++ ) {
         selected_pokemon.setModifier(Stats::HP, std::get<0>(modifiers[it]));
         selected_pokemon.setModifier(Stats::DEF, std::get<1>(modifiers[it]));
         selected_pokemon.setModifier(Stats::SPDEF, std::get<2>(modifiers[it]));
         damages.push_back(selected_pokemon.getDamagePercentage(turns[it]));
+        int_damages.push_back(selected_pokemon.getDamageInt(turns[it]));
     }
 
     result_window->setModal(true);
-    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, rolls);
+    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, int_damages, rolls);
     result_window->show();
 }
