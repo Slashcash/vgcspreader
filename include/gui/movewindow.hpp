@@ -25,6 +25,8 @@ class MoveWindow : public QDialog {
         void solveMove(void);
 
     private:
+        QGroupBox* atk1_groupbox;
+
         //ATTACCKING POKEMON NO1 GROUPBOX
         QGridLayout* atk1_pokemon_layout;
         QGroupBox* atk1_pokemon_groupbox;

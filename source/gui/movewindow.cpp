@@ -4,7 +4,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QButtonGroup>
-#include <QDebug>
+#include <QFormLayout>
+#include <QLineEdit>
 
 #include <tuple>
 
@@ -21,8 +22,8 @@ MoveWindow::MoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) 
     createAtk1GroupBox();
     createAtk2GroupBox();
     createDefendingGroupBox();
-    main_layout->addWidget(atk1_pokemon_groupbox);
-    main_layout->addWidget(atk2_pokemon_groupbox);
+    main_layout->addWidget(atk1_groupbox);
+    //main_layout->addWidget(atk2_pokemon_groupbox);
     main_layout->addWidget(defending_pokemon_groupbox);
     main_layout->addWidget(atk_pokemon_weather_groupbox);
     main_layout->addWidget(atk_pokemon_terrain_groupbox);
@@ -41,10 +42,163 @@ MoveWindow::MoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) 
 }
 
 void MoveWindow::createAtk1GroupBox() {
-    atk1_pokemon_groupbox = new QGroupBox(tr("Attacking Pokemon 1:"));
-    atk1_pokemon_layout = new QGridLayout;
+    //the main horizontal layout for this window
+    QHBoxLayout* atk1_layout = new QHBoxLayout;
 
-    //ATK1 SPECIES
+    //the groupbox in which we encapsulate this window
+    atk1_groupbox = new QGroupBox(tr("Attacking Pokemon 1:"));
+    atk1_groupbox->setLayout(atk1_layout);
+
+    //---SPECIES & TYPES---//
+
+    //---species---//
+    //the main layout for this entire section
+    QVBoxLayout* species_types_layout = new QVBoxLayout;
+    species_types_layout->setSpacing(1);
+    species_types_layout->setAlignment(Qt::AlignVCenter);
+
+    //the layout just for the species
+    QHBoxLayout* species_layout = new QHBoxLayout;
+    species_types_layout->addLayout(species_layout);
+
+    //the combobox for all the species
+    QComboBox* species = new QComboBox;
+    species->setObjectName("atk1_species_combobox");
+
+    //loading it with all the species name
+    auto species_buffer = ((MainWindow*)parentWidget())->getSpeciesNames();
+    for( auto it = species_buffer.begin(); it < species_buffer.end(); it++ ) species->addItem(*it);
+
+    //some resizing
+    int species_width = species->minimumSizeHint().width();
+    species->setMaximumWidth(species_width);
+    //adding it to the layout
+    species_layout->addWidget(species);
+
+    //---types---//
+    //the layout for the types
+    QHBoxLayout* types_layout = new QHBoxLayout;
+
+    //the comboboxes for the types
+    QComboBox* types1 = new QComboBox;
+    QComboBox* types2 = new QComboBox;
+    types1->setObjectName("atk1_type1_combobox");
+    types2->setObjectName("atk1_type2_combobox");
+
+    //loading it with all the types names
+    auto types_buffer = ((MainWindow*)parentWidget())->getTypesNames();
+    for( auto it = types_buffer.begin(); it < types_buffer.end(); it++ ) { types1->addItem(*it); types2->addItem(*it); }
+
+    //resizing them
+    int types_width = species->minimumSizeHint().width();
+    types1->setMaximumWidth(types_width);
+    types2->setMaximumWidth(types_width);
+
+    //adding them to the layout
+    types_layout->addWidget(types1);
+    types_layout->addWidget(types2);
+    species_types_layout->addLayout(types_layout);
+
+    //adding everything to the window
+    atk1_layout->addLayout(species_types_layout);
+
+    //and then some spacing
+    atk1_layout->insertSpacing(1, 35);
+
+    //---MAIN FORM---//
+    QVBoxLayout* main_form_layout = new QVBoxLayout;
+
+    //---information section---///
+    QFormLayout* form_layout = new QFormLayout;
+    main_form_layout->addLayout(form_layout);
+
+    //NATURE
+    //the combobox for the nature
+    QComboBox* natures = new QComboBox;
+    natures->setObjectName("atk1_nature_combobox");
+
+    //populating it
+    auto natures_buffer = ((MainWindow*)parentWidget())->getNaturesNames();
+    for( auto it = natures_buffer.begin(); it < natures_buffer.end(); it++ ) natures->addItem(*it);
+
+    form_layout->addRow(tr("Nature:"), natures);
+
+    //ABILITY
+    //the combobox for the ability
+    QComboBox* abilities = new QComboBox;
+    natures->setObjectName("atk1_abilities_combobox");
+
+    //populating it
+    auto abilities_buffer = ((MainWindow*)parentWidget())->getAbilitiesNames();
+    for( auto it = abilities_buffer.begin(); it < abilities_buffer.end(); it++ ) abilities->addItem(*it);
+
+    form_layout->addRow(tr("Ability:"), abilities);
+
+    //ITEM
+    //the combobox for the item
+    QComboBox* items = new QComboBox;
+    natures->setObjectName("atk1_items_combobox");
+
+    //populating it
+    auto items_buffer = ((MainWindow*)parentWidget())->getItemsNames();
+    for( auto it = items_buffer.begin(); it < items_buffer.end(); it++ ) items->addItem(*it);
+
+    form_layout->addRow(tr("Item:"), items);
+
+    //some spacing
+    main_form_layout->insertSpacing(1, 10);
+
+    //---modifiers---//
+    QHBoxLayout* modifiers_layout = new QHBoxLayout;
+    modifiers_layout->setAlignment(Qt::AlignLeft);
+    modifiers_layout->setSpacing(10);
+
+    //iv
+    QLabel* iv_label = new QLabel(tr("Atk IV:"));
+    iv_label->setObjectName("atk1_iv_label");
+    modifiers_layout->addWidget(iv_label);
+
+    QSpinBox* iv = new QSpinBox;
+    iv->setObjectName("atk1_iv_spinbox");
+    iv->setRange(0, 31);
+    modifiers_layout->addWidget(iv);
+
+    //ev
+    QLabel* ev_label = new QLabel(tr("Atk EV:"));
+    ev_label->setObjectName("atk1_ev_label");
+    modifiers_layout->addWidget(ev_label);
+
+    QSpinBox* ev = new QSpinBox;
+    ev->setRange(0, 252);
+    ev->setObjectName("atk1_ev_spinbox");
+    modifiers_layout->addWidget(ev);
+
+    //modifier
+    QLabel* modifier_label = new QLabel(tr("Atk Modifier:"));
+    modifier_label->setObjectName("atk1_modifier_label");
+    modifiers_layout->addWidget(modifier_label);
+
+    QSpinBox* modifier = new QSpinBox;
+    modifier->setObjectName("atk1_modifier_spinbox");
+    modifier->setRange(-6, 6);
+    modifiers_layout->addWidget(modifier);
+
+    main_form_layout->addLayout(modifiers_layout);
+
+    //---moves---//
+    QHBoxLayout* move_layout = new QHBoxLayout;
+
+    //label
+    QLabel* move_name_label = new QLabel(tr("Move:"));
+    move_layout->addWidget(move_name_label);
+
+
+    main_form_layout->addLayout(move_layout);
+
+    //adding everything to the layout
+    atk1_layout->addLayout(main_form_layout);
+
+    /*//ATK1 SPECIES
     atk1_pokemon_species_label = new QLabel;
     atk1_pokemon_species_label->setText(tr("Species"));
     atk1_pokemon_layout->addWidget(atk1_pokemon_species_label, 0, 0,  Qt::AlignRight);
@@ -236,7 +390,7 @@ void MoveWindow::createAtk1GroupBox() {
 
     //SIGNALS
     connect(atk1_pokemon_moves_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove1(int)));
-    connect(atk1_pokemon_species_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSpecies1(int)));
+    connect(atk1_pokemon_species_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSpecies1(int)));*/
 }
 
 void MoveWindow::createAtk2GroupBox() {
@@ -701,7 +855,7 @@ void MoveWindow::solveMove(void) {
 }
 
 void MoveWindow::setAsBlank() {
-    atk1_pokemon_species_combobox->setCurrentIndex(0);
+    /*atk1_pokemon_species_combobox->setCurrentIndex(0);
     atk1_pokemon_nature_combobox->setCurrentIndex(0);
     atk1_pokemon_item_combobox->setCurrentIndex(0);
 
@@ -739,7 +893,7 @@ void MoveWindow::setAsBlank() {
     defending_pokemon_def_modifier_spinbox->setValue(0);
     defending_pokemon_spdef_modifier_spinbox->setValue(0);
     defending_pokemon_hp_modifier_spinbox->setValue(100);
-    defending_pokemon_hits_modifier_spinbox->setValue(2);
+    defending_pokemon_hits_modifier_spinbox->setValue(2);*/
 }
 
 void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {

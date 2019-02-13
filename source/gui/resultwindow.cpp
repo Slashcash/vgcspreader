@@ -50,7 +50,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         def_evs->setText(tr("Defense EVS: ")+QString::number(std::get<1>(theResult)));
         spdef_evs->setText(tr("Sp. Defense EVS: ")+QString::number(std::get<2>(theResult)));
 
-        for( auto it = 0; it < theTurns.size(); it++ ) {
+        for( unsigned int it = 0; it < theTurns.size(); it++ ) {
             QString final_result;
 
             QString first_result;
