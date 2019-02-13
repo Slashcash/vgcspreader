@@ -8,7 +8,7 @@ Simply: choose the Pokémon you want to calculate the defensive spread for by co
 
 You can now move on to define whichever attacks you want to survive. In VGCSpreader attacks are not just attacks, you can define a **turn** you need to survive and you can do so by clicking the add button.
 
-**EXAMPLE:**I want an AV Yveltal that can survive a turn in which the opponents throws off a Water Spout with a Kyogre and an Hurricane with a Tornadus. I have to click **Add**, then adding the specified move with the correct parameters. 
+**EXAMPLE:** I want an AV Yveltal that can survive a turn in which the opponents throws off a Water Spout with a Kyogre and an Hurricane with a Tornadus. I have to click **Add**, then adding the specified move with the correct parameters. 
 
 Be aware that:
 1) You can add as many turn as you want, VGCSpreader will calculate the spread that will make the defending pokemon survive all the turns.
@@ -26,11 +26,11 @@ VGCSpreader will take care of finding a distribution that will guarantee the sur
 
 **EXAMPLE:** While there is no valid spread for a Careful Incineroar to survive a Fake out and a +2 Xerneas Moonblast in the same turn 100% of the time VGCSpreader can find a spread that guarantees surviving in most of the cases.
 
-**EXAMPLE 2:** Let's say you want a Careful Tsareena with 244 evs already assigned in speed that can take a Water Spout from Kyogre as a 3HKO and can survive a Water Spout from Kyogre + an Ice Beam from Ludicolo. Both of the benchmark can only be hit with a roll, but there is a distribution that guarantees a better roll on Water Spout and another one that guarantees a better roll on Water Spout + Ice Beam. VGCSpreader will output the evs distribution that guarantees better roll for attack you inserted **first**. In this case the evs distribution provided will guarantee a better chance to survive Water Spout with a 3HKO but inverting the insertion order will guarantee a better survivability on Water Spout + Ice Beam.
+**EXAMPLE 2:** Let's say you want a Careful Tsareena with 244 evs already assigned in speed that can take a Water Spout from Kyogre as a 3HKO and can survive a Water Spout from Kyogre + an Ice Beam from Ludicolo. Both of the benchmarks can only be hit with a roll, but there is a distribution that guarantees a better roll on Water Spout and another one that guarantees a better roll on Water Spout + Ice Beam. VGCSpreader will output the evs distribution that guarantees better roll for attack you inserted **first**. In this case the evs distribution provided will guarantee a better chance to survive Water Spout with a 3HKO but inverting the insertion order will guarantee a better survivability on Water Spout + Ice Beam.
 Long story short: attacks you need to survive have to be inserted in order of importance.
 
-##Item, Moves and abilities supported
-As this is still in a testing phase only a limited amount of item, moves and abilities are supported with a correct damage calculation
+##Item, Moves and abilities supported 
+As this is still in a testing phase only a limited amount of item, moves and abilities are supported with a correct damage calculation:
 
 **ABILITIES**  
 Blaze  
@@ -50,7 +50,7 @@ Turboblaze
 Teravolt  
 Levitate  
 
-Other than abilities that do not affect damage caclculation like Intimidate.
+Abilities that do not affect damage caclculation like Intimidate are normally supported.
 
 **ITEM**  
 Life Orb  
@@ -59,7 +59,7 @@ Choice Band
 Choice Specs  
 All the damage reduction berries (es: Payapa Berry)  
 
-Other than items which do not affect damage calculation like Eject Button.
+Items which do not affect damage calculation like Eject Button are normally supported.
 
 All the damaging moves are supported, moves with secondary effects are generally not supported with the exception of:
 
