@@ -40,21 +40,42 @@ Pokemon::Pokemon(const unsigned int thePokedexNumber, const Stats& theStats) {
 
     pokedex_number = thePokedexNumber;
 
-    base[Stats::HP] = db.getPokemonStat(thePokedexNumber, Stats::HP);
-    base[Stats::ATK] = db.getPokemonStat(thePokedexNumber, Stats::ATK);
-    base[Stats::DEF] = db.getPokemonStat(thePokedexNumber, Stats::DEF);
-    base[Stats::SPATK] = db.getPokemonStat(thePokedexNumber, Stats::SPATK);
-    base[Stats::SPDEF] = db.getPokemonStat(thePokedexNumber, Stats::SPDEF);
-    base[Stats::SPE] = db.getPokemonStat(thePokedexNumber, Stats::SPE);
+    formes_number = db.getPokemonFormesNumber(thePokedexNumber);
+    form = 0;
 
-    types[0] = (Type)db.getPokemonType(thePokedexNumber)[0];
-    types[1] = (Type)db.getPokemonType(thePokedexNumber)[1];
+    for(unsigned int i = 0; i < formes_number; i++) {
+        std::array<uint8_t, 6> buffer;
 
-    possible_abilities[0] = (Ability)db.getPokemonAbilities(thePokedexNumber)[0];
-    possible_abilities[1] = (Ability)db.getPokemonAbilities(thePokedexNumber)[1];
-    possible_abilities[2] = (Ability)db.getPokemonAbilities(thePokedexNumber)[2];
+        buffer[Stats::HP] = db.getPokemonStat(thePokedexNumber, i, Stats::HP);
+        buffer[Stats::ATK] = db.getPokemonStat(thePokedexNumber, i, Stats::ATK);
+        buffer[Stats::DEF] = db.getPokemonStat(thePokedexNumber, i, Stats::DEF);
+        buffer[Stats::SPATK] = db.getPokemonStat(thePokedexNumber, i, Stats::SPATK);
+        buffer[Stats::SPDEF] = db.getPokemonStat(thePokedexNumber, i, Stats::SPDEF);
+        buffer[Stats::SPE] = db.getPokemonStat(thePokedexNumber, i, Stats::SPE);
 
-    ability = possible_abilities[0];
+        base.push_back(buffer);
+    }
+
+    for(unsigned int i = 0; i < formes_number; i++) {
+        std::array<Type, 2> buffer;
+
+        buffer[0] = (Type)db.getPokemonType(thePokedexNumber, i)[0];
+        buffer[1] = (Type)db.getPokemonType(thePokedexNumber, i)[1];
+
+        types.push_back(buffer);
+    }
+
+    for(unsigned int i = 0; i < formes_number; i++) {
+        std::array<Ability, 3> buffer;
+
+        buffer[0] = (Ability)db.getPokemonAbilities(thePokedexNumber, i)[0];
+        buffer[1] = (Ability)db.getPokemonAbilities(thePokedexNumber, i)[1];
+        buffer[2] = (Ability)db.getPokemonAbilities(thePokedexNumber, i)[2];
+
+        possible_abilities.push_back(buffer);
+    }
+
+    ability = possible_abilities[form][0];
 
     stats = theStats;
 
@@ -63,7 +84,7 @@ Pokemon::Pokemon(const unsigned int thePokedexNumber, const Stats& theStats) {
     calculateTotal();
 
     //evaluate if it is grounded
-    if( types[0] == Type::Flying || types[1] == Type::Flying || getAbility() == Ability::Levitate ) grounded = false;
+    if( types[form][0] == Type::Flying || types[form][1] == Type::Flying || getAbility() == Ability::Levitate ) grounded = false;
     else grounded = true;
 }
 
@@ -81,7 +102,7 @@ uint8_t Pokemon::calculateEVSNextStat(Pokemon thePokemon, const Stats::Stat& the
 
 void Pokemon::calculateTotal() {
     //calculate hp
-    total[Stats::HP] = ((2 * base[Stats::HP] + stats.getIV(Stats::HP) + stats.getEV(Stats::HP)/4) * stats.getLevel())/100 + stats.getLevel() + 10;
+    total[Stats::HP] = ((2 * base[form][Stats::HP] + stats.getIV(Stats::HP) + stats.getEV(Stats::HP)/4) * stats.getLevel())/100 + stats.getLevel() + 10;
     boosted[Stats::HP] = total[Stats::HP];
 
     float nature_multiplier = 1;
@@ -97,7 +118,7 @@ void Pokemon::calculateTotal() {
     else if( stats.getNature() == Stats::BOLD || stats.getNature() == Stats::TIMID || stats.getNature() == Stats::MODEST || stats.getNature() == Stats::CALM ) nature_multiplier = 0.9;
     else nature_multiplier = 1;
 
-    total[Stats::ATK] = (((((2 * base[Stats::ATK] + stats.getIV(Stats::ATK) + stats.getEV(Stats::ATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
+    total[Stats::ATK] = (((((2 * base[form][Stats::ATK] + stats.getIV(Stats::ATK) + stats.getEV(Stats::ATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     if( getItem() == Items::Choice_Band ) total[Stats::ATK] = total[Stats::ATK] * 1.5;
     boosted[Stats::ATK] = total[Stats::ATK] * atk_modifier_multiplier;
 
@@ -112,7 +133,7 @@ void Pokemon::calculateTotal() {
     else if( stats.getNature() == Stats::HASTY || stats.getNature() == Stats::MILD || stats.getNature() == Stats::LONELY || stats.getNature() == Stats::GENTLE ) nature_multiplier = 0.9;
     else nature_multiplier = 1;
 
-    total[Stats::DEF] = (((((2 * base[Stats::DEF] + stats.getIV(Stats::DEF) + stats.getEV(Stats::DEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
+    total[Stats::DEF] = (((((2 * base[form][Stats::DEF] + stats.getIV(Stats::DEF) + stats.getEV(Stats::DEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     boosted[Stats::DEF] = total[Stats::DEF] * def_modifier_multiplier;
 
     //calculate spatk
@@ -126,7 +147,7 @@ void Pokemon::calculateTotal() {
     else if( stats.getNature() == Stats::ADAMANT || stats.getNature() == Stats::IMPISH || stats.getNature() == Stats::JOLLY || stats.getNature() == Stats::CAREFUL ) nature_multiplier = 0.9;
     else nature_multiplier = 1;
 
-    total[Stats::SPATK] = (((((2 * base[Stats::SPATK] + stats.getIV(Stats::SPATK) + stats.getEV(Stats::SPATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
+    total[Stats::SPATK] = (((((2 * base[form][Stats::SPATK] + stats.getIV(Stats::SPATK) + stats.getEV(Stats::SPATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     if( getItem() == Items::Choice_Specs ) total[Stats::SPATK] = total[Stats::SPATK] * 1.5;
     boosted[Stats::SPATK] = total[Stats::SPATK] * spatk_modifier_multiplier;
 
@@ -141,7 +162,7 @@ void Pokemon::calculateTotal() {
     else if( stats.getNature() == Stats::NAUGHTY || stats.getNature() == Stats::LAX || stats.getNature() == Stats::NAIVE || stats.getNature() == Stats::RASH ) nature_multiplier = 0.9;
     else nature_multiplier = 1;
 
-    total[Stats::SPDEF] = (((((2 * base[Stats::SPDEF] + stats.getIV(Stats::SPDEF) + stats.getEV(Stats::SPDEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
+    total[Stats::SPDEF] = (((((2 * base[form][Stats::SPDEF] + stats.getIV(Stats::SPDEF) + stats.getEV(Stats::SPDEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     if( getItem() == Items::Assault_Vest ) total[Stats::SPDEF] = total[Stats::SPDEF] * 1.5;
     boosted[Stats::SPDEF] = total[Stats::SPDEF] * spdef_modifier_multiplier;
 
@@ -156,7 +177,7 @@ void Pokemon::calculateTotal() {
     else if( stats.getNature() == Stats::BRAVE || stats.getNature() == Stats::RELAXED || stats.getNature() == Stats::QUIET || stats.getNature() == Stats::SASSY ) nature_multiplier = 0.9;
     else nature_multiplier = 1;
 
-    total[Stats::SPE] = (((((2 * base[Stats::SPE] + stats.getIV(Stats::SPE) + stats.getEV(Stats::SPE)/4) * stats.getLevel())/100)+5) * nature_multiplier);
+    total[Stats::SPE] = (((((2 * base[form][Stats::SPE] + stats.getIV(Stats::SPE) + stats.getEV(Stats::SPE)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     boosted[Stats::SPE] = total[Stats::SPE] * spe_modifier_multiplier;
 }
 
@@ -193,7 +214,7 @@ float Pokemon::calculateStabModifier(const Pokemon& theAttacker, const Move& the
     if( theAttacker.getAbility() == Ability::Adaptability ) stab_modifier = 2;
     else stab_modifier = 1.5;
 
-    if( (theAttacker.getTypes()[0] == theMove.getMoveType()) || (theAttacker.getTypes()[1] == theMove.getMoveType())) return stab_modifier;
+    if( (theAttacker.getTypes()[form][0] == theMove.getMoveType()) || (theAttacker.getTypes()[form][1] == theMove.getMoveType())) return stab_modifier;
     else return 1;
 }
 
@@ -213,8 +234,8 @@ float Pokemon::calculateBurnModifier(const Pokemon& theAttacker, const Move& the
 }
 
 float Pokemon::calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const {
-    if( getTypes()[0] == getTypes()[1] ) return type_matrix[theMove.getMoveType()][getTypes()[0]];
-    else return type_matrix[theMove.getMoveType()][getTypes()[0]] * type_matrix[theMove.getMoveType()][getTypes()[1]];
+    if( getTypes()[form][0] == getTypes()[form][1] ) return type_matrix[theMove.getMoveType()][getTypes()[form][0]];
+    else return type_matrix[theMove.getMoveType()][getTypes()[form][0]] * type_matrix[theMove.getMoveType()][getTypes()[form][1]];
 }
 
 float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const {

@@ -272,9 +272,9 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             roll_result = roll_result + QString::number(100-theRoll[it], 'f', 1) + "% chance of resisting " + QString::number(theTurns[it].getHits()) + " moves ";
 
             //DAMAGE
-            damage_result = damage_result + "(" + QString::number(*theDamagePerc[it].begin(), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%)\n(";
-            for(auto it_temp = theDamageInt[it].begin(); it_temp < theDamageInt[it].end()-1; it_temp++) damage_result = damage_result + QString::number(*it_temp) + ", ";
-            damage_result = damage_result + QString::number(theDamageInt[it].back()) + ") ";
+            damage_result = damage_result + "(" + QString::number(*theDamagePerc[it].begin(), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%)" /*+ "\n("*/;
+            //for(auto it_temp = theDamageInt[it].begin(); it_temp < theDamageInt[it].end()-1; it_temp++) damage_result = damage_result + QString::number(*it_temp) + ", ";
+            //damage_result = damage_result + QString::number(theDamageInt[it].back()) + ") ";
 
             //RESTORER
             //grassy terrain restore
