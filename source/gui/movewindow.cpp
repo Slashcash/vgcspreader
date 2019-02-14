@@ -187,11 +187,32 @@ void MoveWindow::createAtk1GroupBox() {
 
     //---moves---//
     QHBoxLayout* move_layout = new QHBoxLayout;
+    move_layout->setAlignment(Qt::AlignLeft);
 
     //label
     QLabel* move_name_label = new QLabel(tr("Move:"));
     move_layout->addWidget(move_name_label);
 
+    //name
+    //the combobox for the move
+    QComboBox* moves = new QComboBox;
+    moves->setObjectName("atk1_moves_combobox");
+
+    //populating it
+    auto moves_buffer = ((MainWindow*)parentWidget())->getMovesNames();
+    for( auto it = moves_buffer.begin(); it < moves_buffer.end(); it++ ) moves->addItem(*it);
+
+    move_layout->addWidget(moves);
+
+    //target
+    QComboBox* target = new QComboBox;
+    target->setObjectName("atk1_target_combobox");
+
+    //populating it
+    target->addItem(tr("Single Target"));
+    target->addItem(tr("Double Target"));
+
+    move_layout->addWidget(target);
 
     main_form_layout->addLayout(move_layout);
 
