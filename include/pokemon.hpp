@@ -34,16 +34,18 @@ class Pokemon {
 
         unsigned int pokedex_number;
         Stats stats;
-        std::array<uint8_t, 6> base;
+        std::vector<std::array<uint8_t, 6>> base;
         std::array<uint16_t, 6> total;
         std::array<uint16_t, 6> boosted;
-        std::array<Ability, 3> possible_abilities;
+        std::vector<std::array<Ability, 3>> possible_abilities;
         Ability ability;
         Item item;
         float current_hp_percentage;
-        std::array<Type, 2> types;
+        std::vector<std::array<Type, 2>> types;
         Status status;
         bool grounded;
+        unsigned int formes_number;
+        unsigned int form;
         static std::mutex buffer_mutex;
         static std::mutex result_mutex;
 
@@ -84,29 +86,32 @@ class Pokemon {
         void setModifier(const Stats::Stat theStat, const int16_t theValue) { stats.setModifier(theStat, theValue); calculateTotal(); }
         void setStatus(const Status theStatus) { status = theStatus; }
         void setCurrentHPPercentage(const float theHPPercentage) { if( theHPPercentage <= 100 ) current_hp_percentage = theHPPercentage; else current_hp_percentage = 100;  }
-        void setPossibleAbilities(const std::array<Ability, 3> thePossibleAbilities) { possible_abilities = thePossibleAbilities; }
+        void setPossibleAbilities(const std::vector<std::array<Ability, 3>> thePossibleAbilities) { possible_abilities = thePossibleAbilities; }
         void setAbility(const Ability theAbility) { ability = theAbility; }
         void setItem(const Item theItem) { item = theItem; calculateTotal(); }
-        void setType(const unsigned int theIndex, const Type& theType) { types[theIndex] = theType; }
+        void setType(const unsigned int theIndex, const Type& theType) { types[form][theIndex] = theType; }
         void setGrounded(const bool theValue) { grounded = theValue; }
+        void setForm(const unsigned int theForm) { if( theForm < formes_number ) { form = theForm; calculateTotal(); ability = possible_abilities[form][0]; } }
 
         unsigned int getPokedexNumber() const { return pokedex_number; }
         uint8_t getLevel() const { return stats.getLevel(); }
         uint8_t getIV(const Stats::Stat& theStat) const { return stats.getIV(theStat); }
         uint8_t getEV(const Stats::Stat& theStat) const { return stats.getEV(theStat); }
-        uint8_t getBaseStat(const Stats::Stat& theStat) const { return base[theStat]; }
+        uint8_t getBaseStat(const Stats::Stat& theStat) const { return base[form][theStat]; }
         uint16_t getStat(const Stats::Stat& theStat) const { return total[theStat]; }
         uint16_t getBoostedStat(const Stats::Stat& theStat) const { return boosted[theStat]; }
         Stats::Nature getNature() const { return stats.getNature(); }
         Status getStatus() const { return status; }
-        std::array<Type, 2> getTypes() const { return types; }
+        std::vector<std::array<Type, 2>> getTypes() const { return types; }
         float getCurrentHPPercentage() const { return current_hp_percentage; }
         uint16_t getCurrentHP() const { return ( boosted[Stats::HP] * current_hp_percentage ) / 100; }
-        std::array<Ability, 3> getPossibleAbilities() const { return possible_abilities; }
+        std::vector<std::array<Ability, 3>> getPossibleAbilities() const { return possible_abilities; }
         Ability getAbility() const { return ability; }
         int16_t getModifier(Stats::Stat theStat) const { return stats.getModifier(theStat); }
         Item getItem() const { return item; }
         bool isGrounded() const { return grounded; }
+        unsigned int getForm() const { return form; }
+        unsigned int getFormesNumber() const { return formes_number; }
 
         std::vector<int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;

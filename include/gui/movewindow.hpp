@@ -57,6 +57,7 @@ class MoveWindow : public QDialog {
         QSpinBox* atk1_pokemon_spattack_modifier_spinbox;
 
         QComboBox* atk1_pokemon_moves_combobox;
+        QComboBox* atk1_pokemon_target_combobox;
         QLabel* atk1_pokemon_moves_label;
         QComboBox* atk1_pokemon_movetype_combobox;
         QComboBox* atk1_pokemon_movecategory_combobox;
@@ -97,6 +98,7 @@ class MoveWindow : public QDialog {
         QSpinBox* atk2_pokemon_spattack_modifier_spinbox;
 
         QComboBox* atk2_pokemon_moves_combobox;
+        QComboBox* atk2_pokemon_target_combobox;
         QLabel* atk2_pokemon_moves_label;
         QComboBox* atk2_pokemon_movetype_combobox;
         QComboBox* atk2_pokemon_movecategory_combobox;

@@ -40,7 +40,7 @@ bool PokemonDB::load() {
     else return true;
 }
 
-uint16_t PokemonDB::getPokemonStat(const unsigned int thePokedexNumber, const Stats::Stat& theStat) const {
+uint16_t PokemonDB::getPokemonStat(const unsigned int thePokedexNumber, const unsigned int theForm, const Stats::Stat& theStat) const {
     if( loaded ) {
         unsigned int stat_offset;
         if( theStat == Stats::HP ) stat_offset = 0;
@@ -51,7 +51,19 @@ uint16_t PokemonDB::getPokemonStat(const unsigned int thePokedexNumber, const St
         else if( theStat == Stats::SPDEF ) stat_offset = 5;
         else stat_offset = 0;
 
-        unsigned int pokedex_offset = POKEMON_OFFSET * thePokedexNumber;
+        unsigned int pokedex_offset;
+        if( theForm == 0) pokedex_offset = POKEMON_OFFSET * thePokedexNumber;
+        else {
+            unsigned int FORM_INDEX_OFFSET = POKEMON_OFFSET * thePokedexNumber + 28;
+
+            uint8_t part1 = db_binary_species.str().at(FORM_INDEX_OFFSET);
+            uint8_t part2 = db_binary_species.str().at(FORM_INDEX_OFFSET+1);
+
+            unsigned int form_index = 256U * part2 + part1; //because it is saved in two separate bytes
+
+            pokedex_offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET);
+
+        }
 
         unsigned int final_offset = pokedex_offset + stat_offset;
 
@@ -61,9 +73,20 @@ uint16_t PokemonDB::getPokemonStat(const unsigned int thePokedexNumber, const St
     else return 0;
 }
 
-std::array<uint8_t, 2> PokemonDB::getPokemonType(const unsigned int thePokedexNumber) const {
+std::array<uint8_t, 2> PokemonDB::getPokemonType(const unsigned int thePokedexNumber, const unsigned int theForm) const {
     if( loaded ) {
-        unsigned int offset = (POKEMON_OFFSET * thePokedexNumber) + 6;
+        unsigned int offset;
+        if( theForm == 0) offset = (POKEMON_OFFSET * thePokedexNumber) + 6;
+        else {
+            unsigned int FORM_INDEX_OFFSET = POKEMON_OFFSET * thePokedexNumber + 28;
+
+            uint8_t part1 = db_binary_species.str().at(FORM_INDEX_OFFSET);
+            uint8_t part2 = db_binary_species.str().at(FORM_INDEX_OFFSET+1);
+
+            unsigned int form_index = 256U * part2 + part1; //because it is saved in two separate bytes
+
+            offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET + 6);
+        }
 
         std::array<uint8_t, 2> buffer;
         buffer[0] = db_binary_species.str().at(offset);
@@ -141,9 +164,20 @@ uint8_t PokemonDB::isMoveSpread(const unsigned int theMoveIndex) const {
     else return 0;
 }
 
-std::array<uint16_t, 3> PokemonDB::getPokemonAbilities(const unsigned int thePokedexNumber) const {
+std::array<uint16_t, 3> PokemonDB::getPokemonAbilities(const unsigned int thePokedexNumber, const unsigned int theForm) const {
     if( loaded ) {
-        unsigned int offset = (POKEMON_OFFSET * thePokedexNumber) + 24;
+        unsigned int offset;
+        if( theForm == 0) offset = (POKEMON_OFFSET * thePokedexNumber) + 24;
+        else {
+            unsigned int FORM_INDEX_OFFSET = POKEMON_OFFSET * thePokedexNumber + 28;
+
+            uint8_t part1 = db_binary_species.str().at(FORM_INDEX_OFFSET);
+            uint8_t part2 = db_binary_species.str().at(FORM_INDEX_OFFSET+1);
+
+            unsigned int form_index = 256U * part2 + part1; //because it is saved in two separate bytes
+
+            offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET + 24);
+        }
 
         std::array<uint16_t, 3> buffer;
         buffer[0] = (uint8_t)db_binary_species.str().at(offset); //THIS CAST IS SO STUPID
@@ -181,6 +215,16 @@ uint8_t PokemonDB::getReducingBerryType(const unsigned int theItemIndex) const {
         unsigned int offset = ITEM_OFFSET * theItemIndex + 2;
 
         return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
+}
+
+unsigned int PokemonDB::getPokemonFormesNumber(const unsigned int thePokedexNumber) const {
+    if( loaded ) {
+        unsigned int offset = (POKEMON_OFFSET * thePokedexNumber) + 32;
+
+        return db_binary_species.str().at(offset);
     }
 
     else return 0;

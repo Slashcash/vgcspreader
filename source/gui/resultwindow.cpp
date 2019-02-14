@@ -30,7 +30,7 @@ ResultWindow::ResultWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent,
     layout()->setSizeConstraint( QLayout::SetFixedSize );
 }
 
-void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const std::tuple<int, int, int>& theResult, const std::vector<std::vector<float>>& theDamagePerc, const std::vector<float>& theRoll) {
+void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const std::tuple<int, int, int>& theResult, const std::vector<std::vector<float>>& theDamagePerc, const std::vector<std::vector<int>>& theDamageInt, const std::vector<float>& theRoll) {
     if( std::get<0>(theResult) == -1 || std::get<1>(theResult) == -1 || std::get<2>(theResult) == -1  ) {
         def_evs->setVisible(false);
         spdef_evs->setVisible(false);
@@ -269,10 +269,12 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
 
             //RESULT
             roll_result = roll_result + "-- ";
-            roll_result = roll_result + QString::number(100-theRoll[it], 'f', 1) + "% chanche of resisting " + QString::number(theTurns[it].getHits()) + " moves ";
+            roll_result = roll_result + QString::number(100-theRoll[it], 'f', 1) + "% chance of resisting " + QString::number(theTurns[it].getHits()) + " moves ";
 
             //DAMAGE
-            damage_result = damage_result + "(" + QString::number(*(theDamagePerc[it].begin()), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%) ";
+            damage_result = damage_result + "(" + QString::number(*theDamagePerc[it].begin(), 'f', 1) + "% - " + QString::number(theDamagePerc[it].back(), 'f', 1) + "%)" /*+ "\n("*/;
+            //for(auto it_temp = theDamageInt[it].begin(); it_temp < theDamageInt[it].end()-1; it_temp++) damage_result = damage_result + QString::number(*it_temp) + ", ";
+            //damage_result = damage_result + QString::number(theDamageInt[it].back()) + ") ";
 
             //RESTORER
             //grassy terrain restore
@@ -280,7 +282,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
             bool grassy_terrain_recover = false;
             auto turn_moves = theTurns[it].getMoves();
             for( auto it_turn = turn_moves.begin(); it_turn < turn_moves.end(); it_turn++ )
-                if( it_turn->second.getTerrain() == theDefendingPokemon.isGrounded() ) grassy_terrain_recover = true;
+                if( it_turn->second.getTerrain() == Move::Terrain::GRASSY && theDefendingPokemon.isGrounded() ) grassy_terrain_recover = true;
 
             if( grassy_terrain_recover ) restore_result = restore_result + "after Grassy Terrain recover ";
 

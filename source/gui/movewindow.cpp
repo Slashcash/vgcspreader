@@ -219,7 +219,7 @@ void MoveWindow::createAtk1GroupBox() {
     auto atk1_type1_buffer = ((MainWindow*)parentWidget())->getTypesNames();
     for( auto it = atk1_type1_buffer.begin(); it < atk1_type1_buffer.end(); it++ ) atk1_pokemon_type1_combobox->addItem(*it);
     atk1_pokemon_layout->addWidget(atk1_pokemon_type1_combobox, 1, 1);
-    atk1_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[0]);
+    atk1_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][0]);
 
     //ATK1 TYPE2
     atk1_pokemon_type2_label = new QLabel;
@@ -229,7 +229,7 @@ void MoveWindow::createAtk1GroupBox() {
     atk1_pokemon_type2_combobox = new QComboBox;
     for( auto it = atk1_type1_buffer.begin(); it < atk1_type1_buffer.end(); it++ ) atk1_pokemon_type2_combobox->addItem(*it);
     atk1_pokemon_layout->addWidget(atk1_pokemon_type2_combobox, 2, 1);
-    atk1_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[1]);
+    atk1_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][1]);
 
     if( selected_pokemon.getTypes()[0] == selected_pokemon.getTypes()[1] ) { atk1_pokemon_type2_label->setVisible(false); atk1_pokemon_type2_combobox->setVisible(false); }
 
@@ -254,7 +254,7 @@ void MoveWindow::createAtk1GroupBox() {
     for( auto it = atk1_abilities_buffer.begin(); it < atk1_abilities_buffer.end(); it++ ) atk1_pokemon_ability_combobox->addItem(*it);
     atk1_pokemon_layout->addWidget(atk1_pokemon_ability_combobox, 4, 1);
 
-    atk1_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0]);
+    atk1_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[selected_pokemon.getForm()][0]);
 
     //ATK1 ITEM
     atk1_pokemon_item_label = new QLabel;
@@ -342,12 +342,20 @@ void MoveWindow::createAtk1GroupBox() {
 
     atk1_pokemon_layout->addWidget(atk1_pokemon_moves_combobox, 6, 1);
 
+    //MOVE TARGET
+    atk1_pokemon_target_combobox = new QComboBox;
+
+    atk1_pokemon_target_combobox->addItem(tr("Single Target"));
+    atk1_pokemon_target_combobox->addItem(tr("Double Target"));
+
+    atk1_pokemon_layout->addWidget(atk1_pokemon_target_combobox, 6, 2);
+
     //MOVE TYPE
     Move selected_move((Moves)atk1_pokemon_moves_combobox->currentIndex());
 
     atk1_pokemon_movetype_combobox = new QComboBox();
     for( auto it = atk1_type1_buffer.begin(); it < atk1_type1_buffer.end(); it++ ) atk1_pokemon_movetype_combobox->addItem(*it);
-    atk1_pokemon_layout->addWidget(atk1_pokemon_movetype_combobox, 6, 2);
+    atk1_pokemon_layout->addWidget(atk1_pokemon_movetype_combobox, 6, 3);
 
     atk1_pokemon_movetype_combobox->setCurrentIndex(selected_move.getMoveType());
 
@@ -355,14 +363,14 @@ void MoveWindow::createAtk1GroupBox() {
     atk1_pokemon_movecategory_combobox = new QComboBox();
     atk1_pokemon_movecategory_combobox->addItem(tr("Physical"));
     atk1_pokemon_movecategory_combobox->addItem(tr("Special"));
-    atk1_pokemon_layout->addWidget(atk1_pokemon_movecategory_combobox, 6, 3);
+    atk1_pokemon_layout->addWidget(atk1_pokemon_movecategory_combobox, 6, 4);
 
     atk1_pokemon_movecategory_combobox->setCurrentIndex(selected_move.getMoveCategory());
     //MOVE BP
     atk1_pokemon_movebp_spinbox = new QSpinBox;
     atk1_pokemon_movebp_spinbox->setRange(1, 999);
     atk1_pokemon_movebp_spinbox->setValue(selected_move.getBasePower());
-    atk1_pokemon_layout->addWidget(atk1_pokemon_movebp_spinbox, 6, 4);
+    atk1_pokemon_layout->addWidget(atk1_pokemon_movebp_spinbox, 6, 5);
 
 
     //MOVE MODIFIERS
@@ -376,7 +384,7 @@ void MoveWindow::createAtk1GroupBox() {
     atk1_pokemon_crit_label->setText(tr("Crit"));
     move_modifiers_layout->addWidget(atk1_pokemon_crit_label, Qt::AlignLeft);
 
-    atk1_pokemon_layout->addLayout(move_modifiers_layout, 6, 5);
+    atk1_pokemon_layout->addLayout(move_modifiers_layout, 6, 6);
 
     //Z
     atk1_pokemon_z_checkbox = new QCheckBox;
@@ -423,7 +431,7 @@ void MoveWindow::createAtk2GroupBox() {
     auto atk2_type1_buffer = ((MainWindow*)parentWidget())->getTypesNames();
     for( auto it = atk2_type1_buffer.begin(); it < atk2_type1_buffer.end(); it++ ) atk2_pokemon_type1_combobox->addItem(*it);
     atk2_pokemon_layout->addWidget(atk2_pokemon_type1_combobox, 1, 1);
-    atk2_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[0]);
+    atk2_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][0]);
 
     //ATK2 TYPE2
     atk2_pokemon_type2_label = new QLabel;
@@ -433,7 +441,7 @@ void MoveWindow::createAtk2GroupBox() {
     atk2_pokemon_type2_combobox = new QComboBox;
     for( auto it = atk2_type1_buffer.begin(); it < atk2_type1_buffer.end(); it++ ) atk2_pokemon_type2_combobox->addItem(*it);
     atk2_pokemon_layout->addWidget(atk2_pokemon_type2_combobox, 2, 1);
-    atk2_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[1]);
+    atk2_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][1]);
 
     if( selected_pokemon.getTypes()[0] == selected_pokemon.getTypes()[1] ) { atk2_pokemon_type2_label->setVisible(false); atk2_pokemon_type2_combobox->setVisible(false); }
 
@@ -458,7 +466,7 @@ void MoveWindow::createAtk2GroupBox() {
     for( auto it = atk2_abilities_buffer.begin(); it < atk2_abilities_buffer.end(); it++ ) atk2_pokemon_ability_combobox->addItem(*it);
     atk2_pokemon_layout->addWidget(atk2_pokemon_ability_combobox, 4, 1);
 
-    atk2_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0]);
+    atk2_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[selected_pokemon.getForm()][0]);
 
     //ATK1 ITEM
     atk2_pokemon_item_label = new QLabel;
@@ -546,12 +554,20 @@ void MoveWindow::createAtk2GroupBox() {
 
     atk2_pokemon_layout->addWidget(atk2_pokemon_moves_combobox, 6, 1);
 
+    //MOVE TARGET
+    atk2_pokemon_target_combobox = new QComboBox;
+
+    atk2_pokemon_target_combobox->addItem(tr("Single Target"));
+    atk2_pokemon_target_combobox->addItem(tr("Double Target"));
+
+    atk2_pokemon_layout->addWidget(atk2_pokemon_target_combobox, 6, 2);
+
     //MOVE TYPE
     Move selected_move((Moves)atk2_pokemon_moves_combobox->currentIndex());
 
     atk2_pokemon_movetype_combobox = new QComboBox();
     for( auto it = atk2_type1_buffer.begin(); it < atk2_type1_buffer.end(); it++ ) atk2_pokemon_movetype_combobox->addItem(*it);
-    atk2_pokemon_layout->addWidget(atk2_pokemon_movetype_combobox, 6, 2);
+    atk2_pokemon_layout->addWidget(atk2_pokemon_movetype_combobox, 6, 3);
 
     atk2_pokemon_movetype_combobox->setCurrentIndex(selected_move.getMoveType());
 
@@ -559,14 +575,14 @@ void MoveWindow::createAtk2GroupBox() {
     atk2_pokemon_movecategory_combobox = new QComboBox();
     atk2_pokemon_movecategory_combobox->addItem(tr("Physical"));
     atk2_pokemon_movecategory_combobox->addItem(tr("Special"));
-    atk2_pokemon_layout->addWidget(atk2_pokemon_movecategory_combobox, 6, 3);
+    atk2_pokemon_layout->addWidget(atk2_pokemon_movecategory_combobox, 6, 4);
 
     atk2_pokemon_movecategory_combobox->setCurrentIndex(selected_move.getMoveCategory());
     //MOVE BP
     atk2_pokemon_movebp_spinbox = new QSpinBox;
     atk2_pokemon_movebp_spinbox->setRange(1, 999);
     atk2_pokemon_movebp_spinbox->setValue(selected_move.getBasePower());
-    atk2_pokemon_layout->addWidget(atk2_pokemon_movebp_spinbox, 6, 4);
+    atk2_pokemon_layout->addWidget(atk2_pokemon_movebp_spinbox, 6, 5);
 
 
     //MOVE MODIFIERS
@@ -588,7 +604,7 @@ void MoveWindow::createAtk2GroupBox() {
     atk2_pokemon_z_label->setText(tr("Z"));
     move_modifiers_layout->addWidget(atk2_pokemon_z_label, Qt::AlignLeft);
 
-    atk2_pokemon_layout->addLayout(move_modifiers_layout, 6, 5);
+    atk2_pokemon_layout->addLayout(move_modifiers_layout, 6, 6);
 
     //SIGNALS
     connect(atk2_pokemon_moves_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove2(int)));
@@ -690,6 +706,8 @@ void MoveWindow::setMove1(int index) {
     Move selected_move((Moves)index);
 
     atk1_pokemon_movetype_combobox->setCurrentIndex(selected_move.getMoveType());
+    if( selected_move.isSpread() ) { atk1_pokemon_target_combobox->setCurrentIndex(Move::Target::DOUBLE); atk1_pokemon_target_combobox->setVisible(true); }
+    else { atk1_pokemon_target_combobox->setCurrentIndex(Move::Target::SINGLE); atk1_pokemon_target_combobox->setVisible(false); }
     atk1_pokemon_movecategory_combobox->setCurrentIndex(selected_move.getMoveCategory());
     atk1_pokemon_movebp_spinbox->setValue(selected_move.getBasePower());
     if( selected_move.isSignatureZ() ) atk1_pokemon_z_checkbox->setEnabled(false);
@@ -699,9 +717,9 @@ void MoveWindow::setMove1(int index) {
 void MoveWindow::setSpecies1(int index) {
     Pokemon selected_pokemon(index+1);
 
-    atk1_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[0]);
-    atk1_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[1]);
-    atk1_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0]);
+    atk1_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][0]);
+    atk1_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][1]);
+    atk1_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[selected_pokemon.getForm()][0]);
 
     if( selected_pokemon.getTypes()[0] == selected_pokemon.getTypes()[1] ) { atk1_pokemon_type2_label->setVisible(false); atk1_pokemon_type2_combobox->setVisible(false); }
     else { atk1_pokemon_type2_label->setVisible(true); atk1_pokemon_type2_combobox->setVisible(true); }
@@ -711,6 +729,8 @@ void MoveWindow::setMove2(int index) {
     Move selected_move((Moves)index);
 
     atk2_pokemon_movetype_combobox->setCurrentIndex(selected_move.getMoveType());
+    if( selected_move.isSpread() ) { atk2_pokemon_target_combobox->setCurrentIndex(Move::Target::DOUBLE); atk2_pokemon_target_combobox->setVisible(true); }
+    else { atk2_pokemon_target_combobox->setCurrentIndex(Move::Target::SINGLE); atk2_pokemon_target_combobox->setVisible(false); }
     atk2_pokemon_movecategory_combobox->setCurrentIndex(selected_move.getMoveCategory());
     atk2_pokemon_movebp_spinbox->setValue(selected_move.getBasePower());
 
@@ -721,9 +741,9 @@ void MoveWindow::setMove2(int index) {
 void MoveWindow::setSpecies2(int index) {
     Pokemon selected_pokemon(index+1);
 
-    atk2_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[0]);
-    atk2_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[1]);
-    atk2_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0]);
+    atk2_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][0]);
+    atk2_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][1]);
+    atk2_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[selected_pokemon.getForm()][0]);
 
     if( selected_pokemon.getTypes()[0] == selected_pokemon.getTypes()[1] ) { atk2_pokemon_type2_label->setVisible(false); atk2_pokemon_type2_combobox->setVisible(false); }
     else { atk2_pokemon_type2_label->setVisible(true); atk2_pokemon_type2_combobox->setVisible(true); }
@@ -745,6 +765,7 @@ void MoveWindow::activateAtk2(int state) {
         atk2_pokemon_spattack_modifier_spinbox->setEnabled(true);
         atk2_pokemon_moves_combobox->setEnabled(true);
         atk2_pokemon_movetype_combobox->setEnabled(true);
+        atk2_pokemon_target_combobox->setEnabled(true);
         atk2_pokemon_movecategory_combobox->setEnabled(true);
         atk2_pokemon_movebp_spinbox->setEnabled(true);
         atk2_pokemon_crit_checkbox->setEnabled(true);
@@ -765,6 +786,7 @@ void MoveWindow::activateAtk2(int state) {
         atk2_pokemon_spattack_ev_spinbox->setEnabled(false);
         atk2_pokemon_spattack_modifier_spinbox->setEnabled(false);
         atk2_pokemon_moves_combobox->setEnabled(false);
+        atk2_pokemon_target_combobox->setEnabled(false);
         atk2_pokemon_movetype_combobox->setEnabled(false);
         atk2_pokemon_movecategory_combobox->setEnabled(false);
         atk2_pokemon_movebp_spinbox->setEnabled(false);
@@ -790,6 +812,8 @@ void MoveWindow::solveMove(void) {
     attacking1.setItem(Item(atk1_pokemon_item_combobox->currentIndex()));
 
     Move attacking1_move((Moves)atk1_pokemon_moves_combobox->currentIndex());
+    if( atk1_pokemon_target_combobox->currentIndex() == Move::Target::SINGLE ) attacking1_move.setTarget(Move::Target::SINGLE);
+    else attacking1_move.setTarget(Move::Target::DOUBLE);
     attacking1_move.setMoveType((Type)atk1_pokemon_movetype_combobox->currentIndex());
     attacking1_move.setMoveCategory((Move::Category)atk1_pokemon_movecategory_combobox->currentIndex());
     attacking1_move.setBasePower(atk1_pokemon_movebp_spinbox->value());
@@ -825,6 +849,8 @@ void MoveWindow::solveMove(void) {
     attacking2.setItem(Item(atk2_pokemon_item_combobox->currentIndex()));
 
     Move attacking2_move((Moves)atk2_pokemon_moves_combobox->currentIndex());
+    if( atk2_pokemon_target_combobox->currentIndex() == Move::Target::SINGLE ) attacking2_move.setTarget(Move::Target::SINGLE);
+    else attacking2_move.setTarget(Move::Target::DOUBLE);
     attacking2_move.setMoveType((Type)atk2_pokemon_movetype_combobox->currentIndex());
     attacking2_move.setMoveCategory((Move::Category)atk2_pokemon_movecategory_combobox->currentIndex());
     attacking2_move.setBasePower(atk2_pokemon_movebp_spinbox->value());
@@ -867,6 +893,7 @@ void MoveWindow::setAsBlank() {
     atk1_pokemon_spattack_modifier_spinbox->setValue(0);
 
     atk1_pokemon_moves_combobox->setCurrentIndex(0);
+    atk1_pokemon_target_combobox->setVisible(false); //THIS SHOULDN'T BE HERE
     atk1_pokemon_crit_checkbox->setChecked(false);
     atk1_pokemon_z_checkbox->setChecked(false);
 
@@ -887,6 +914,7 @@ void MoveWindow::setAsBlank() {
     atk2_pokemon_spattack_modifier_spinbox->setValue(0);
 
     atk2_pokemon_moves_combobox->setCurrentIndex(0);
+    atk2_pokemon_target_combobox->setVisible(false); //THIS SHOULDN'T BE HERE
     atk2_pokemon_crit_checkbox->setChecked(false);
     atk2_pokemon_z_checkbox->setChecked(false);
 
@@ -909,6 +937,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
     atk1_pokemon_spattack_modifier_spinbox->setValue(theTurn.getMoves()[0].first.getModifier(Stats::SPATK));
 
     atk1_pokemon_moves_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveIndex());
+    atk1_pokemon_target_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getTarget());
     atk1_pokemon_movetype_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveType());
     atk1_pokemon_movecategory_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveCategory());
     atk1_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[0].second.getBasePower());
@@ -938,6 +967,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
         atk2_pokemon_spattack_modifier_spinbox->setValue(theTurn.getMoves()[1].first.getModifier(Stats::SPATK));
 
         atk2_pokemon_moves_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveIndex());
+        atk2_pokemon_target_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getTarget());
         atk2_pokemon_movetype_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveType());
         atk2_pokemon_movecategory_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveCategory());
         atk2_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[1].second.getBasePower());

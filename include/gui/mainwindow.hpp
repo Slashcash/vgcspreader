@@ -41,6 +41,8 @@ class MainWindow : public QDialog {
         QGroupBox* defending_pokemon_groupbox;
         QComboBox* defending_pokemon_species_combobox;
         QLabel* defending_pokemon_species_label;
+        QComboBox* defending_pokemon_form_combobox;
+        QLabel* defending_pokemon_form_label;
         QComboBox* defending_pokemon_type1_combobox;
         QLabel* defending_pokemon_type1_label;
         QComboBox* defending_pokemon_type2_combobox;
