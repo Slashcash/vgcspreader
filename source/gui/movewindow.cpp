@@ -216,6 +216,16 @@ void MoveWindow::createAtk1GroupBox() {
 
     main_form_layout->addLayout(move_layout);
 
+    //type
+    QComboBox* move_types = new QComboBox;
+    move_types->setObjectName("atk1_movetypes_combobox");
+
+    //populating it
+    auto movetypes_buffer = ((MainWindow*)parentWidget())->getTypesNames();
+    for( auto it = movetypes_buffer.begin(); it < movetypes_buffer.end(); it++ ) move_types->addItem(*it);
+
+    move_layout->addWidget(move_types);
+
     //adding everything to the layout
     atk1_layout->addLayout(main_form_layout);
 
