@@ -9,5 +9,6 @@
         <file>db/species.txt</file>
         <file>db/types.txt</file>
         <file>db/personal_items.bin</file>
+        <file>db/forms.txt</file>
     </qresource>
 </RCC>

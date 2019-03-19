@@ -19,6 +19,8 @@ class MoveWindow : public QDialog {
     private slots:
         void setMove1(int index);
         void setSpecies1(int index);
+        void setForm1(int index);
+        void setForm2(int index);
         void setMove2(int index);
         void setSpecies2(int index);
         void activateAtk2(int state);
@@ -32,6 +34,8 @@ class MoveWindow : public QDialog {
         QGroupBox* atk1_pokemon_groupbox;
         QComboBox* atk1_pokemon_species_combobox;
         QLabel* atk1_pokemon_species_label;
+        QComboBox* atk1_pokemon_form_combobox;
+        QLabel* atk1_pokemon_form_label;
         QComboBox* atk1_pokemon_type1_combobox;
         QLabel* atk1_pokemon_type1_label;
         QComboBox* atk1_pokemon_type2_combobox;
@@ -73,6 +77,8 @@ class MoveWindow : public QDialog {
         QCheckBox* atk2_pokemon_activated;
         QComboBox* atk2_pokemon_species_combobox;
         QLabel* atk2_pokemon_species_label;
+        QComboBox* atk2_pokemon_form_combobox;
+        QLabel* atk2_pokemon_form_label;
         QComboBox* atk2_pokemon_type1_combobox;
         QLabel* atk2_pokemon_type1_label;
         QComboBox* atk2_pokemon_type2_combobox;
@@ -134,6 +140,7 @@ class MoveWindow : public QDialog {
         void createAtk1GroupBox();
         void createAtk2GroupBox();
         void createDefendingGroupBox();
+        QString retrieveFormName(const int species, const int form);
 
     public:
         MoveWindow(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);
