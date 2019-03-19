@@ -22,6 +22,7 @@ class MainWindow : public QDialog {
 
     private slots:
         void setDefendingPokemonSpecies(int index);
+        void setDefendingPokemonForm(int index);
         void setButtonClickable(int row, int column);
         void eraseMove(bool checked);
         void openMoveWindowEdit(bool checked);
@@ -31,10 +32,9 @@ class MainWindow : public QDialog {
         void calculate();
 
     private:
-        //ADD MOVE WINDOW
         MoveWindow* move_window;
         ResultWindow* result_window;
-        //ADD RESULT WINDOW
+
 
         //DEFENDING POKEMON GROUPBOX
         QGridLayout* defending_pokemon_layout;
@@ -82,6 +82,7 @@ class MainWindow : public QDialog {
         std::vector<QString> abilities_names;
         std::vector<QString> items_names;
         std::vector<QString> moves_names;
+        std::vector<QString> forms_names;
 
         std::vector<Turn> turns;
         std::vector<defense_modifier> modifiers;
@@ -89,10 +90,14 @@ class MainWindow : public QDialog {
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();
 
+        //MISC
+        QString retrieveFormName(const int species, const int form);
+
     public:
         MainWindow();
 
         const std::vector<QString>& getSpeciesNames() const { return species_names; }
+        const std::vector<QString>& getFormsNames() const { return forms_names; }
         const std::vector<QString>& getNaturesNames() const { return natures_names; }
         const std::vector<QString>& getAbilitiesNames() const { return abilities_names; }
         const std::vector<QString>& getTypesNames() const { return types_names; }

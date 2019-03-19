@@ -66,13 +66,44 @@ void MainWindow::setButtonClickable(int row, int column) {
 void MainWindow::setDefendingPokemonSpecies(int index) {
     Pokemon selected_pokemon(index + 1);
 
-    defending_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[selected_pokemon.getForm()][0]);
+    //setting ability
+    defending_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0][0]);
 
     //setting correct types
-    defending_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][0]);
-    defending_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][1]);
+    defending_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[0][0]);
+    defending_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[0][1]);
 
-    if( selected_pokemon.getTypes()[0] == selected_pokemon.getTypes()[1] ) { defending_pokemon_type2_combobox->setVisible(false); defending_pokemon_type2_label->setVisible(false); }
+    if( selected_pokemon.getTypes()[0][0] == selected_pokemon.getTypes()[0][1] ) { defending_pokemon_type2_combobox->setVisible(false); defending_pokemon_type2_label->setVisible(false); }
+    else { defending_pokemon_type2_combobox->setVisible(true); defending_pokemon_type2_label->setVisible(true); }
+
+    //setting correct form
+    if( selected_pokemon.getFormesNumber() > 1 ) {
+        defending_pokemon_form_combobox->clear();
+        for(unsigned int i = 0; i < selected_pokemon.getFormesNumber(); i++) defending_pokemon_form_combobox->addItem(retrieveFormName(index+1, i));
+        defending_pokemon_form_combobox->setCurrentIndex(0);
+        defending_pokemon_form_label->setVisible(true);
+        defending_pokemon_form_combobox->setVisible(true);
+    }
+
+    else {
+        defending_pokemon_form_label->setVisible(false);
+        defending_pokemon_form_combobox->setVisible(false);
+        //defending_pokemon_form_combobox->clear();
+        defending_pokemon_form_combobox->setCurrentIndex(0);
+    }
+}
+
+void MainWindow::setDefendingPokemonForm(int index) {
+    Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex() + 1);
+
+    //setting ability
+    defending_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[index][0]);
+
+    //setting correct types
+    defending_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[index][0]);
+    defending_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[index][1]);
+
+    if( selected_pokemon.getTypes()[index][0] == selected_pokemon.getTypes()[index][1] ) { defending_pokemon_type2_combobox->setVisible(false); defending_pokemon_type2_label->setVisible(false); }
     else { defending_pokemon_type2_combobox->setVisible(true); defending_pokemon_type2_label->setVisible(true); }
 }
 
@@ -119,12 +150,24 @@ void MainWindow::createDefendingPokemonGroupBox() {
     Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex() + 1);
 
     //DEFENDING POKEMON FORM
-    /*defending_pokemon_form_label = new QLabel;
+    defending_pokemon_form_label = new QLabel;
     defending_pokemon_form_label->setText(tr("Form:"));
     defending_pokemon_layout->addWidget(defending_pokemon_form_label, 1, 0, Qt::AlignRight);
 
+    //loading forms names
+    QFile forms_input(":/db/forms.txt");
+    forms_input.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    QTextStream in_forms(&forms_input);
+    while (!in_forms.atEnd()) {
+        QString line = in_forms.readLine();
+        forms_names.push_back(line);
+    }
+
     defending_pokemon_form_combobox = new QComboBox;
-    defending_pokemon_layout->addWidget(defending_pokemon_form_combobox, 1, 1);*/
+    defending_pokemon_layout->addWidget(defending_pokemon_form_combobox, 1, 1);
+    defending_pokemon_form_label->setVisible(false);
+    defending_pokemon_form_combobox->setVisible(false);
 
 
     //DEFENDING POKEMON TYPES
@@ -295,6 +338,8 @@ void MainWindow::createDefendingPokemonGroupBox() {
 
     //CONNECTING SIGNALS
     connect(defending_pokemon_species_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonSpecies(int)));
+    connect(defending_pokemon_form_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonForm(int)));
+
 }
 
 void MainWindow::createMovesGroupBox() {
@@ -426,6 +471,7 @@ void MainWindow::addTurn(const Turn& theTurn, const defense_modifier& theModifie
 
 void MainWindow::clear() {
     defending_pokemon_species_combobox->setCurrentIndex(0);
+    defending_pokemon_form_combobox->setCurrentIndex(0);
     defending_pokemon_nature_combobox->setCurrentIndex(0);
     defending_pokemon_item_combobox->setCurrentIndex(0);
     defending_pokemon_hpiv_spinbox->setValue(31);
@@ -442,6 +488,7 @@ void MainWindow::clear() {
 
 void MainWindow::calculate() {
     Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex()+1);
+    selected_pokemon.setForm(defending_pokemon_form_combobox->currentIndex());
     selected_pokemon.setType(0, (Type)defending_pokemon_type1_combobox->currentIndex());
     selected_pokemon.setType(1, (Type)defending_pokemon_type2_combobox->currentIndex());
     selected_pokemon.setNature((Stats::Nature)defending_pokemon_nature_combobox->currentIndex());
@@ -453,6 +500,8 @@ void MainWindow::calculate() {
     selected_pokemon.setEV(Stats::ATK, defending_pokemon_attack_spinbox->value());
     selected_pokemon.setEV(Stats::SPATK, defending_pokemon_spattack_spinbox->value());
     selected_pokemon.setEV(Stats::SPE, defending_pokemon_speed_spinbox->value());
+
+    qDebug() << selected_pokemon.getBoostedStat(Stats::SPDEF);
 
     std::vector<float> rolls;
     auto result = selected_pokemon.resistMove(turns, modifiers, rolls);
@@ -476,4 +525,19 @@ void MainWindow::calculate() {
     result_window->setModal(true);
     result_window->setResult(selected_pokemon, modifiers, turns, result, damages, int_damages, rolls);
     result_window->show();
+}
+
+QString MainWindow::retrieveFormName(const int species, const int form) {
+    //this function is written with the help of Kaphotics here: https://github.com/kwsch/PKHeX/issues/2259
+    if( form == 0 ) return "Base";
+
+    /*const int MAX_SPECIES = 804;
+    int index = MAX_SPECIES;
+    for (int i = 1; i <= MAX_SPECIES; i++) {
+        if (i == species) return forms_names[index + form - 1];
+        Pokemon selected_pokemon(i);
+        index += selected_pokemon.getFormesNumber() - 1;
+    }*/
+
+    else return "Form " + QString::number(form);
 }
