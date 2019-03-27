@@ -10,6 +10,7 @@
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QDialogButtonBox>
+#include <QTabWidget>
 
 #include "turn.hpp"
 
@@ -28,6 +29,10 @@ class MoveWindow : public QDialog {
 
     private:
         QGroupBox* atk1_groupbox;
+        QGroupBox* atk2_groupbox;
+        QGroupBox* defending_groupbox;
+        QHBoxLayout* modifier_layout;
+        QTabWidget* tabs;
 
         //ATTACCKING POKEMON NO1 GROUPBOX
         QGridLayout* atk1_pokemon_layout;

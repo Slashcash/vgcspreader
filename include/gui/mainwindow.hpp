@@ -90,9 +90,6 @@ class MainWindow : public QDialog {
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();
 
-        //MISC
-        QString retrieveFormName(const int species, const int form);
-
     public:
         MainWindow();
 
@@ -104,6 +101,10 @@ class MainWindow : public QDialog {
         const std::vector<QString>& getItemsNames() const { return items_names; }
         const std::vector<QString>& getMovesNames() const { return moves_names; }
         void addTurn(const Turn& theTurn, const defense_modifier& theModifier);
+
+        //MISC
+        QString retrieveFormName(const int species, const int form);
+
 };
 
 #endif // MAINWINDOW_HPP
