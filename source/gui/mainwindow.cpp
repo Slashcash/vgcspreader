@@ -520,8 +520,6 @@ void MainWindow::calculate() {
         int_damages.push_back(selected_pokemon.getDamageInt(turns[it]));
     }
 
-    qDebug() << selected_pokemon.getForm();
-    qDebug() << turns[0].getMoves()[0].first.getTypes()[turns[0].getMoves()[0].first.getForm()][0];
     for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
 
     result_window->setModal(true);

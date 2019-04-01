@@ -692,6 +692,9 @@ void MoveWindow::createDefendingGroupBox() {
     weather_combobox->addItem(tr("None"));
     weather_combobox->addItem(tr("Sun"));
     weather_combobox->addItem(tr("Rain"));
+    weather_combobox->addItem(tr("Harsh Sunshine"));
+    weather_combobox->addItem(tr("Heavy Rain"));
+    weather_combobox->addItem(tr("Strong Winds"));
 
     weather_layout->addWidget(weather_combobox);
 
@@ -954,7 +957,7 @@ void MoveWindow::solveMove(void) {
     attacking1.setForm(atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->currentIndex());
 
     attacking1.setType(0, (Type)atk1_groupbox->findChild<QComboBox*>("atk1_type1_combobox")->currentIndex());
-    attacking1.setType(0, (Type)atk1_groupbox->findChild<QComboBox*>("atk1_type2_combobox")->currentIndex());
+    attacking1.setType(1, (Type)atk1_groupbox->findChild<QComboBox*>("atk1_type2_combobox")->currentIndex());
     attacking1.setNature((Stats::Nature)atk1_groupbox->findChild<QComboBox*>("atk1_nature_combobox")->currentIndex());
     attacking1.setAbility((Ability)atk1_groupbox->findChild<QComboBox*>("atk1_abilities_combobox")->currentIndex());
     attacking1.setItem(Item(atk1_groupbox->findChild<QComboBox*>("atk1_items_combobox")->currentIndex()));
@@ -990,7 +993,7 @@ void MoveWindow::solveMove(void) {
     attacking2.setForm(atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->currentIndex());
 
     attacking2.setType(0, (Type)atk2_groupbox->findChild<QComboBox*>("atk2_type1_combobox")->currentIndex());
-    attacking2.setType(0, (Type)atk2_groupbox->findChild<QComboBox*>("atk2_type2_combobox")->currentIndex());
+    attacking2.setType(1, (Type)atk2_groupbox->findChild<QComboBox*>("atk2_type2_combobox")->currentIndex());
     attacking2.setNature((Stats::Nature)atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->currentIndex());
     attacking2.setAbility((Ability)atk2_groupbox->findChild<QComboBox*>("atk2_abilities_combobox")->currentIndex());
     attacking2.setItem(Item(atk2_groupbox->findChild<QComboBox*>("atk2_items_combobox")->currentIndex()));

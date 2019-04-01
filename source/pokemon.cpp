@@ -198,6 +198,18 @@ float Pokemon::calculateWeatherModifier(const Move& theMove) const {
         else return 1;
     }
 
+    else if( theMove.getWeather() == Move::HARSH_SUNSHINE && getAbility() != Ability::Cloud_Nine && getAbility() != Ability::Air_Lock ) {
+        if( theMove.getMoveType() == Water ) return 0;
+        else if( theMove.getMoveType() == Fire ) return 1.5;
+        else return 1;
+    }
+
+    else if( theMove.getWeather() == Move::HEAVY_RAIN && getAbility() != Ability::Cloud_Nine && getAbility() != Ability::Air_Lock ) {
+        if( theMove.getMoveType() == Water ) return 1.5;
+        else if( theMove.getMoveType() == Fire ) return 0;
+        else return 1;
+    }
+
     else return 1;
 }
 
@@ -238,8 +250,32 @@ float Pokemon::calculateBurnModifier(const Pokemon& theAttacker, const Move& the
 }
 
 float Pokemon::calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const {
-    if( getTypes()[form][0] == getTypes()[form][1] ) return type_matrix[theMove.getMoveType()][getTypes()[form][0]];
-    else return type_matrix[theMove.getMoveType()][getTypes()[form][0]] * type_matrix[theMove.getMoveType()][getTypes()[form][1]];
+    //taking into account the strong winds if enabled
+    if( theMove.getWeather() == Move::STRONG_WINDS && getAbility() != Ability::Cloud_Nine && getAbility() != Ability::Air_Lock ) {
+        //single type
+        if( getTypes()[form][0] == getTypes()[form][1] ) {
+            if( getTypes()[form][0] == Type::Flying && type_matrix[theMove.getMoveType()][Type::Flying] > 1 ) return 1;
+            else return type_matrix[theMove.getMoveType()][getTypes()[form][0]];
+        }
+
+        //dual type
+        else {
+            float part_1;
+            if( getTypes()[form][0] == Type::Flying && type_matrix[theMove.getMoveType()][Type::Flying] > 1 ) part_1 = 1;
+            else part_1 = type_matrix[theMove.getMoveType()][getTypes()[form][0]];
+
+            float part_2;
+            if( getTypes()[form][1] == Type::Flying && type_matrix[theMove.getMoveType()][Type::Flying] > 1 ) part_2 = 1;
+            else part_2 = type_matrix[theMove.getMoveType()][getTypes()[form][1]];
+
+            return part_1 * part_2;
+        }
+    }
+
+    else {
+        if( getTypes()[form][0] == getTypes()[form][1] ) return type_matrix[theMove.getMoveType()][getTypes()[form][0]];
+        else return type_matrix[theMove.getMoveType()][getTypes()[form][0]] * type_matrix[theMove.getMoveType()][getTypes()[form][1]];
+    }
 }
 
 float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& theMove) const {

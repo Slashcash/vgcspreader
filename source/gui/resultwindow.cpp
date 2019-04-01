@@ -226,6 +226,26 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
 
             if( in_sun && sun_affected_move ) modifier_result = modifier_result + "in Sun ";
 
+            //harsh sun
+            bool in_harsh_sun = false;
+            sun_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getWeather() == Move::Weather::HARSH_SUNSHINE ) in_harsh_sun = true;
+                if( it2->second.getMoveType() == Type::Fire || it2->second.getMoveType() == Type::Water ) sun_affected_move = true;
+            }
+
+            if( in_harsh_sun && sun_affected_move ) modifier_result = modifier_result + "in Harsh Sun ";
+
+            //heavy rain
+            bool in_heavy_rain = false;
+            rain_affected_move = false;
+            for( auto it2 = theTurns[it].getMoves().begin(); it2 < theTurns[it].getMoves().end(); it2++ ) {
+                if( it2->second.getWeather() == Move::Weather::HEAVY_RAIN ) in_heavy_rain = true;
+                if( it2->second.getMoveType() == Type::Fire || it2->second.getMoveType() == Type::Water ) rain_affected_move = true;
+            }
+
+            if( in_heavy_rain && rain_affected_move ) modifier_result = modifier_result + "in Heavy Rain ";
+
             //electric
             bool in_electric = false;
             bool electric_affected_move = false;
