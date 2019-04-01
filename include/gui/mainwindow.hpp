@@ -35,10 +35,10 @@ class MainWindow : public QDialog {
         MoveWindow* move_window;
         ResultWindow* result_window;
 
+        QGroupBox* defending_groupbox;
 
         //DEFENDING POKEMON GROUPBOX
         QGridLayout* defending_pokemon_layout;
-        QGroupBox* defending_pokemon_groupbox;
         QComboBox* defending_pokemon_species_combobox;
         QLabel* defending_pokemon_species_label;
         QComboBox* defending_pokemon_form_combobox;
