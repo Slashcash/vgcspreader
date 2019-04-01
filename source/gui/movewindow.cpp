@@ -684,6 +684,7 @@ void MoveWindow::setSpecies2(int index) {
 void MoveWindow::activateAtk2(int state) {
     if( state == Qt::Checked ) {
         atk2_pokemon_species_combobox->setEnabled(true);
+        atk2_pokemon_form_combobox->setEnabled(true);
         atk2_pokemon_type1_combobox->setEnabled(true);
         atk2_pokemon_type2_combobox->setEnabled(true);
         atk2_pokemon_nature_combobox->setEnabled(true);
@@ -706,6 +707,7 @@ void MoveWindow::activateAtk2(int state) {
 
     else if( state == Qt::Unchecked ) {
         atk2_pokemon_species_combobox->setEnabled(false);
+        atk2_pokemon_form_combobox->setEnabled(false);
         atk2_pokemon_type1_combobox->setEnabled(false);
         atk2_pokemon_type2_combobox->setEnabled(false);
         atk2_pokemon_nature_combobox->setEnabled(false);
@@ -836,6 +838,7 @@ void MoveWindow::setAsBlank() {
 
     atk2_pokemon_activated->setChecked(true);
     atk2_pokemon_species_combobox->setCurrentIndex(0);
+    atk2_pokemon_form_combobox->setCurrentIndex(0);
     atk2_pokemon_nature_combobox->setCurrentIndex(0);
     atk2_pokemon_item_combobox->setCurrentIndex(0);
 
