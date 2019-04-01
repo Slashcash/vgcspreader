@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QSpacerItem>
 #include <QHeaderView>
+#include <QFormLayout>
 #include <QDebug>
 
 #include "pokemon.hpp"
@@ -20,7 +21,7 @@ MainWindow::MainWindow() {
     createMovesGroupBox();
 
     QVBoxLayout* main_layout = new QVBoxLayout;
-    main_layout->addWidget(defending_pokemon_groupbox);
+    main_layout->addWidget(defending_groupbox);
     main_layout->addWidget(moves_groupbox);
 
     setLayout(main_layout);
@@ -66,45 +67,67 @@ void MainWindow::setButtonClickable(int row, int column) {
 void MainWindow::setDefendingPokemonSpecies(int index) {
     Pokemon selected_pokemon(index + 1);
 
+    //setting correct sprite
+    QPixmap sprite_pixmap;
+    QString sprite_path = ":/db/sprites/" + QString::number(selected_pokemon.getPokedexNumber()) + ".png";
+    sprite_pixmap.load(sprite_path);
+    const int SPRITE_SCALE_FACTOR = 2;
+    sprite_pixmap = sprite_pixmap.scaled(sprite_pixmap.width() * SPRITE_SCALE_FACTOR, sprite_pixmap.height() * SPRITE_SCALE_FACTOR);
+
+    QLabel* sprite = defending_groupbox->findChild<QLabel*>("defending_sprite");
+    sprite->setPixmap(sprite_pixmap);
+
     //setting ability
-    defending_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0][0]);
+    defending_groupbox->findChild<QComboBox*>("defending_abilities_combobox")->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0][0]);
 
     //setting correct types
-    defending_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[0][0]);
-    defending_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[0][1]);
+    defending_groupbox->findChild<QComboBox*>("defending_type1_combobox")->setCurrentIndex(selected_pokemon.getTypes()[0][0]);
+    defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->setCurrentIndex(selected_pokemon.getTypes()[0][1]);
 
-    if( selected_pokemon.getTypes()[0][0] == selected_pokemon.getTypes()[0][1] ) { defending_pokemon_type2_combobox->setVisible(false); defending_pokemon_type2_label->setVisible(false); }
-    else { defending_pokemon_type2_combobox->setVisible(true); defending_pokemon_type2_label->setVisible(true); }
+    if( selected_pokemon.getTypes()[0][0] == selected_pokemon.getTypes()[0][1] ) defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->setVisible(false);
+    else defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->setVisible(true);
 
     //setting correct form
     if( selected_pokemon.getFormesNumber() > 1 ) {
-        defending_pokemon_form_combobox->clear();
-        for(unsigned int i = 0; i < selected_pokemon.getFormesNumber(); i++) defending_pokemon_form_combobox->addItem(retrieveFormName(index+1, i));
-        defending_pokemon_form_combobox->setCurrentIndex(0);
-        defending_pokemon_form_label->setVisible(true);
-        defending_pokemon_form_combobox->setVisible(true);
+        defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->clear();
+        for(unsigned int i = 0; i < selected_pokemon.getFormesNumber(); i++) defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->addItem(retrieveFormName(index+1, i));
+        defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setCurrentIndex(0);
+        defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setVisible(true);
     }
 
     else {
-        defending_pokemon_form_label->setVisible(false);
-        defending_pokemon_form_combobox->setVisible(false);
-        //defending_pokemon_form_combobox->clear();
-        defending_pokemon_form_combobox->setCurrentIndex(0);
+        defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setVisible(false);
+        defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setCurrentIndex(0);
     }
 }
 
 void MainWindow::setDefendingPokemonForm(int index) {
-    Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex() + 1);
+    Pokemon selected_pokemon(defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->currentIndex() + 1);
+
+    //setting correct sprite
+    QPixmap sprite_pixmap;
+    QString sprite_path;
+    bool load_result;
+
+    if( index == 0 ) sprite_path = ":/db/sprites/" + QString::number(selected_pokemon.getPokedexNumber()) + ".png";
+    else sprite_path = ":/db/sprites/" + QString::number(selected_pokemon.getPokedexNumber()) + "-" + QString::number(index) + ".png";
+
+    sprite_pixmap.load(sprite_path);
+    const int SPRITE_SCALE_FACTOR = 2;
+    sprite_pixmap = sprite_pixmap.scaled(sprite_pixmap.width() * SPRITE_SCALE_FACTOR, sprite_pixmap.height() * SPRITE_SCALE_FACTOR);
+
+    QLabel* sprite = defending_groupbox->findChild<QLabel*>("defending_sprite");
+    sprite->setPixmap(sprite_pixmap);
 
     //setting ability
-    defending_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[index][0]);
+    defending_groupbox->findChild<QComboBox*>("defending_abilities_combobox")->setCurrentIndex(selected_pokemon.getPossibleAbilities()[index][0]);
 
     //setting correct types
-    defending_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[index][0]);
-    defending_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[index][1]);
+    defending_groupbox->findChild<QComboBox*>("defending_type1_combobox")->setCurrentIndex(selected_pokemon.getTypes()[index][0]);
+    defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->setCurrentIndex(selected_pokemon.getTypes()[index][1]);
 
-    if( selected_pokemon.getTypes()[index][0] == selected_pokemon.getTypes()[index][1] ) { defending_pokemon_type2_combobox->setVisible(false); defending_pokemon_type2_label->setVisible(false); }
-    else { defending_pokemon_type2_combobox->setVisible(true); defending_pokemon_type2_label->setVisible(true); }
+    if( selected_pokemon.getTypes()[index][0] == selected_pokemon.getTypes()[index][1] ) defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->setVisible(false);
+    else defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->setVisible(true);
 }
 
 void MainWindow::eraseMove(bool checked) {
@@ -120,16 +143,43 @@ void MainWindow::eraseMove(bool checked) {
 }
 
 void MainWindow::createDefendingPokemonGroupBox() {
-    defending_pokemon_groupbox = new QGroupBox(tr("Defending Pokemon:"));
+    defending_groupbox = new QGroupBox(tr("Defending Pokemon:"));
 
-    defending_pokemon_layout = new QGridLayout;
+    //the main horizontal layout for this window
+    QHBoxLayout* defending_layout = new QHBoxLayout;
 
-    //DEFENDING POKEMON SPECIES
-    defending_pokemon_species_label = new QLabel;
-    defending_pokemon_species_label->setText(tr("Species:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_species_label, 0, 0, Qt::AlignRight);
+    //the groupbox in which we encapsulate this window
+    defending_groupbox->setLayout(defending_layout);
 
-    defending_pokemon_species_combobox = new QComboBox;
+    //---SPECIES & TYPES---//
+
+    //---species---//
+    //the main layout for this entire section
+    QVBoxLayout* species_types_layout = new QVBoxLayout;
+    species_types_layout->setSpacing(1);
+    species_types_layout->setAlignment(Qt::AlignVCenter);
+
+    //---sprite---
+    QHBoxLayout* sprite_layout = new QHBoxLayout;
+
+    QLabel* sprite = new QLabel;
+    sprite->setObjectName("defending_sprite");
+    sprite->setAlignment(Qt::AlignCenter);
+    sprite_layout->addWidget(sprite);
+
+    species_types_layout->addLayout(sprite_layout);
+
+    //some spacing
+    species_types_layout->insertSpacing(1, 10);
+
+    //---species---//
+    //the layout just for the species
+    QHBoxLayout* species_layout = new QHBoxLayout;
+    species_types_layout->addLayout(species_layout);
+
+    //the combobox for all the species
+    QComboBox* species = new QComboBox;
+    species->setObjectName("defending_species_combobox");
 
     //loading species names
     QFile species_input(":/db/species.txt");
@@ -143,43 +193,38 @@ void MainWindow::createDefendingPokemonGroupBox() {
         else is_egg = false;
     }
 
-    for(auto it = species_names.begin(); it < species_names.end(); it++) defending_pokemon_species_combobox->addItem(*it);
+    for(auto it = species_names.begin(); it < species_names.end(); it++) species->addItem(*it);
 
-    defending_pokemon_layout->addWidget(defending_pokemon_species_combobox, 0, 1);
+    //some resizing
+    int species_width = species->minimumSizeHint().width();
+    species->setMaximumWidth(species_width);
+    //adding it to the layout
+    species_layout->addWidget(species);
 
-    Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex() + 1);
+    //---forms---//
+    //the layout just for the forms
+    QHBoxLayout* forms_layout = new QHBoxLayout;
+    species_types_layout->addLayout(forms_layout);
 
-    //DEFENDING POKEMON FORM
-    defending_pokemon_form_label = new QLabel;
-    defending_pokemon_form_label->setText(tr("Form:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_form_label, 1, 0, Qt::AlignRight);
+    //the combobox for all the species
+    QComboBox* forms = new QComboBox;
+    forms->setObjectName("defending_forms_combobox");
 
-    //loading forms names
-    QFile forms_input(":/db/forms.txt");
-    forms_input.open(QIODevice::ReadOnly | QIODevice::Text);
+    //some resizing
+    int forms_width = forms->minimumSizeHint().width();
+    forms->setMaximumWidth(forms_width);
+    //adding it to the layout
+    forms_layout->addWidget(forms);
 
-    QTextStream in_forms(&forms_input);
-    while (!in_forms.atEnd()) {
-        QString line = in_forms.readLine();
-        forms_names.push_back(line);
-    }
+    //---types---//
+    //the layout for the types
+    QHBoxLayout* types_layout = new QHBoxLayout;
 
-    defending_pokemon_form_combobox = new QComboBox;
-    defending_pokemon_layout->addWidget(defending_pokemon_form_combobox, 1, 1);
-    defending_pokemon_form_label->setVisible(false);
-    defending_pokemon_form_combobox->setVisible(false);
-
-
-    //DEFENDING POKEMON TYPES
-    defending_pokemon_type1_label = new QLabel;
-    defending_pokemon_type1_label->setText(tr("Type 1:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_type1_label, 2, 0, Qt::AlignRight);
-    defending_pokemon_type2_label = new QLabel;
-    defending_pokemon_type2_label->setText(tr("Type 2:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_type2_label, 3, 0, Qt::AlignRight);
-
-    defending_pokemon_type1_combobox = new QComboBox;
-    defending_pokemon_type2_combobox = new QComboBox;
+    //the comboboxes for the types
+    QComboBox* types1 = new QComboBox;
+    QComboBox* types2 = new QComboBox;
+    types1->setObjectName("defending_type1_combobox");
+    types2->setObjectName("defending_type2_combobox");
 
     //loading type names
     QFile types_input(":/db/types.txt");
@@ -191,22 +236,35 @@ void MainWindow::createDefendingPokemonGroupBox() {
         types_names.push_back(line);
     }
 
-    for(auto it = types_names.begin(); it < types_names.end(); it++) { defending_pokemon_type1_combobox->addItem(*it); defending_pokemon_type2_combobox->addItem(*it); }
+    for(auto it = types_names.begin(); it < types_names.end(); it++) { types1->addItem(*it); types2->addItem(*it); }
 
-    defending_pokemon_layout->addWidget(defending_pokemon_type1_combobox, 2, 1);
-    defending_pokemon_layout->addWidget(defending_pokemon_type2_combobox, 3, 1);
-    if( selected_pokemon.getTypes()[0] == selected_pokemon.getTypes()[1] ) defending_pokemon_type2_combobox->hide();
+    //resizing them
+    int types_width = species->minimumSizeHint().width();
+    types1->setMaximumWidth(types_width);
+    types2->setMaximumWidth(types_width);
 
-    //setting correct types
-    defending_pokemon_type1_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][0]);
-    defending_pokemon_type2_combobox->setCurrentIndex(selected_pokemon.getTypes()[selected_pokemon.getForm()][1]);
+    //adding them to the layout
+    types_layout->addWidget(types1);
+    types_layout->addWidget(types2);
+    species_types_layout->addLayout(types_layout);
 
-    //DRFRNDING POKEMON NATURE
-    defending_pokemon_nature_label = new QLabel;
-    defending_pokemon_nature_label->setText(tr("Nature:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_nature_label, 4, 0, Qt::AlignRight);
+    //adding everything to the window
+    defending_layout->addLayout(species_types_layout);
 
-    defending_pokemon_nature_combobox = new QComboBox;
+    //and then some spacing
+    defending_layout->insertSpacing(1, 35);
+
+    //---MAIN FORM---//
+    QVBoxLayout* main_form_layout = new QVBoxLayout;
+
+    //---information section---///
+    QFormLayout* form_layout = new QFormLayout;
+    main_form_layout->addLayout(form_layout);
+
+    //NATURE
+    //the combobox for the nature
+    QComboBox* natures = new QComboBox;
+    natures->setObjectName("defending_nature_combobox");
 
     //loading nature names
     QFile natures_input(":/db/natures.txt");
@@ -218,16 +276,14 @@ void MainWindow::createDefendingPokemonGroupBox() {
         natures_names.push_back(line);
     }
 
-    for(auto it = natures_names.begin(); it < natures_names.end(); it++) defending_pokemon_nature_combobox->addItem(*it);
+    for(auto it = natures_names.begin(); it < natures_names.end(); it++) natures->addItem(*it);
 
-    defending_pokemon_layout->addWidget(defending_pokemon_nature_combobox, 4, 1);
+    form_layout->addRow(tr("Nature:"), natures);
 
-    //DEFRNDING POKEMON ABILITY
-    defending_pokemon_ability_label = new QLabel;
-    defending_pokemon_ability_label->setText(tr("Ability:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_ability_label, 5, 0, Qt::AlignRight);
-
-    defending_pokemon_ability_combobox = new QComboBox;
+    //ABILITY
+    //the combobox for the ability
+    QComboBox* abilities = new QComboBox;
+    abilities->setObjectName("defending_abilities_combobox");
 
     //loading abilities names
     QFile abilities_input(":/db/abilities.txt");
@@ -239,19 +295,17 @@ void MainWindow::createDefendingPokemonGroupBox() {
         abilities_names.push_back(line);
     }
 
-    for(auto it = abilities_names.begin(); it < abilities_names.end(); it++) defending_pokemon_ability_combobox->addItem(*it);
+    for(auto it = abilities_names.begin(); it < abilities_names.end(); it++) abilities->addItem(*it);
 
-    //setting the correct ability
-    defending_pokemon_ability_combobox->setCurrentIndex(selected_pokemon.getPossibleAbilities()[selected_pokemon.getForm()][0]);
+    //getting the abilities width (to be used later)
+    int abilities_width = abilities->minimumSizeHint().width();
 
-    defending_pokemon_layout->addWidget(defending_pokemon_ability_combobox, 5, 1);
+    form_layout->addRow(tr("Ability:"), abilities);
 
-    //DEFENDING POKEMON ITEM
-    defending_pokemon_item_label = new QLabel;
-    defending_pokemon_item_label->setText(tr("Item:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_item_label, 6, 0, Qt::AlignRight);
-
-    defending_pokemon_item_combobox = new QComboBox;
+    //ITEM
+    //the combobox for the item
+    QComboBox* items = new QComboBox;
+    items->setObjectName("defending_items_combobox");
 
     //loading item names
     QFile items_input(":/db/items.txt");
@@ -263,82 +317,101 @@ void MainWindow::createDefendingPokemonGroupBox() {
         items_names.push_back(line);
     }
 
-    for(auto it = items_names.begin(); it < items_names.end(); it++) defending_pokemon_item_combobox->addItem(*it);
+    for(auto it = items_names.begin(); it < items_names.end(); it++) items->addItem(*it);
 
-    defending_pokemon_layout->addWidget(defending_pokemon_item_combobox, 6, 1);
+    form_layout->addRow(tr("Item:"), items);
 
-    //spacer
-    QSpacerItem* spacer = new QSpacerItem(8, 0);
+    natures->setMaximumWidth(abilities_width);
+    items->setMaximumWidth(abilities_width);
+    abilities->setMaximumWidth(abilities_width);
 
-    //DEFENDING POKEMON HP IV
-    defending_pokemon_hpiv_label = new QLabel;
-    defending_pokemon_hpiv_label->setText(tr("HP IV:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_hpiv_label, 7, 0, Qt::AlignRight);
+    //some spacing
+    main_form_layout->insertSpacing(1, 10);
 
-    defending_pokemon_hpiv_spinbox = new QSpinBox;
-    defending_pokemon_hpiv_spinbox->setRange(0, 31);
-    defending_pokemon_layout->addWidget(defending_pokemon_hpiv_spinbox, 7, 1);
-    defending_pokemon_hpiv_spinbox->setValue(31);
+    //---modifiers---//
+    QHBoxLayout* modifiers_layout = new QHBoxLayout;
+    modifiers_layout->setAlignment(Qt::AlignLeft);
+    modifiers_layout->setSpacing(10);
 
-    //DEFENDING POKEMON DEF IV
-    defending_pokemon_defiv_label = new QLabel;
-    defending_pokemon_defiv_label->setText(tr("Defense IV:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_defiv_label, 8, 0, Qt::AlignRight);
+    //hp iv
+    QLabel* hpiv_label = new QLabel(tr("HP IV:"));
+    hpiv_label->setObjectName("defending_hpiv_label");
+    modifiers_layout->addWidget(hpiv_label);
 
-    defending_pokemon_defiv_spinbox = new QSpinBox;
-    defending_pokemon_defiv_spinbox->setRange(0, 31);
-    defending_pokemon_layout->addWidget(defending_pokemon_defiv_spinbox, 8, 1);
-    defending_pokemon_defiv_spinbox->setValue(31);
+    QSpinBox* hpiv = new QSpinBox;
+    hpiv->setObjectName("defending_hpiv_spinbox");
+    hpiv->setRange(0, 31);
+    hpiv->setValue(31);
+    modifiers_layout->addWidget(hpiv);
 
-    //DEFENDING POKEMON SPDEF IV
-    defending_pokemon_spdefiv_label = new QLabel;
-    defending_pokemon_spdefiv_label->setText(tr("Sp. Defense IV:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_spdefiv_label, 9, 0, Qt::AlignRight);
+    //def iv
+    QLabel* defiv_label = new QLabel(tr("Def IV:"));
+    defiv_label->setObjectName("defending_defiv_label");
+    modifiers_layout->addWidget(defiv_label);
 
-    defending_pokemon_spdefiv_spinbox = new QSpinBox;
-    defending_pokemon_spdefiv_spinbox->setRange(0, 31);
-    defending_pokemon_layout->addWidget(defending_pokemon_spdefiv_spinbox, 9, 1);
-    defending_pokemon_spdefiv_spinbox->setValue(31);
+    QSpinBox* defiv = new QSpinBox;
+    defiv->setRange(0, 31);
+    defiv->setValue(31);
+    defiv->setObjectName("defending_defiv_spinbox");
+    modifiers_layout->addWidget(defiv);
 
-    //DEFENDING POKEMON ATTACK
-    defending_pokemon_layout->addItem(spacer, 0 , 2);
+    //spdef iv
+    QLabel* defending_spdefiv_label = new QLabel(tr("Sp.Def IV:"));
+    defending_spdefiv_label->setObjectName("defending_spdefiv_label");
+    modifiers_layout->addWidget(defending_spdefiv_label);
 
-    defending_pokemon_attack_label = new QLabel;
-    defending_pokemon_attack_label->setText(tr("Attack EV:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_attack_label, 0, 3, Qt::AlignRight);
+    QSpinBox* spdefiv = new QSpinBox;
+    spdefiv->setObjectName("defending_spdefiv_spinbox");
+    spdefiv->setRange(0, 31);
+    spdefiv->setValue(31);
+    modifiers_layout->addWidget(spdefiv);
 
-    defending_pokemon_attack_spinbox = new QSpinBox;
-    defending_pokemon_attack_spinbox->setRange(0, 252);
-    defending_pokemon_layout->addWidget(defending_pokemon_attack_spinbox, 0, 4);
+    main_form_layout->addLayout(modifiers_layout);
 
-    //DEFENDING POKEMON SPATTACK
-    defending_pokemon_layout->addItem(spacer, 1 , 2);
+    //---assigned evs---//
+    QHBoxLayout* assigned_layout = new QHBoxLayout;
+    assigned_layout->setAlignment(Qt::AlignLeft);
+    assigned_layout->setSpacing(10);
 
-    defending_pokemon_spattack_label = new QLabel;
-    defending_pokemon_spattack_label->setText(tr("Sp. Attack EV:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_spattack_label, 1, 3, Qt::AlignRight);
+    //atk evs
+    QLabel* atkev_label = new QLabel(tr("Atk EV:"));
+    assigned_layout->addWidget(atkev_label);
 
-    defending_pokemon_spattack_spinbox = new QSpinBox;
-    defending_pokemon_spattack_spinbox->setRange(0, 252);
-    defending_pokemon_layout->addWidget(defending_pokemon_spattack_spinbox, 1, 4);
+    QSpinBox* atkev = new QSpinBox;
+    atkev->setObjectName("defending_atkev_spinbox");
+    atkev->setRange(0, 252);
+    assigned_layout->addWidget(atkev);
 
-    //DEFENDING POKEMON SPEED
-    defending_pokemon_layout->addItem(spacer, 2 , 2);
+    //spatk evs
+    QLabel* spatkev_label = new QLabel(tr("Sp. Atk EV:"));
+    assigned_layout->addWidget(spatkev_label);
 
-    defending_pokemon_speed_label = new QLabel;
-    defending_pokemon_speed_label->setText(tr("Speed EV:"));
-    defending_pokemon_layout->addWidget(defending_pokemon_speed_label, 2, 3, Qt::AlignRight);
+    QSpinBox* spatkev = new QSpinBox;
+    spatkev->setRange(0, 252);
+    spatkev->setObjectName("defending_spatkev_spinbox");
+    assigned_layout->addWidget(spatkev);
 
-    defending_pokemon_speed_spinbox = new QSpinBox;
-    defending_pokemon_speed_spinbox->setRange(0, 252);
-    defending_pokemon_layout->addWidget(defending_pokemon_speed_spinbox, 2, 4);
+    //spe ev
+    QLabel* speev_label = new QLabel(tr("Speed EV:"));
+    assigned_layout->addWidget(speev_label);
 
-    //SETTING THE LAYOUT
-    defending_pokemon_groupbox->setLayout(defending_pokemon_layout);
+    QSpinBox* speev = new QSpinBox;
+    speev->setObjectName("defending_speev_spinbox");
+    speev->setRange(0, 252);
+    assigned_layout->addWidget(speev);
+
+    main_form_layout->addLayout(assigned_layout);
+
+    //adding everything to the layout
+    defending_layout->addLayout(main_form_layout);
 
     //CONNECTING SIGNALS
-    connect(defending_pokemon_species_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonSpecies(int)));
-    connect(defending_pokemon_form_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonForm(int)));
+    connect(species, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonSpecies(int)));
+    connect(forms, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonForm(int)));
+
+    //setting index 0
+    species->setCurrentIndex(1); //setting it to 1 because the signal is currentindexCHANGED, i am so stupid lol
+    species->setCurrentIndex(0);
 
 }
 
@@ -470,16 +543,16 @@ void MainWindow::addTurn(const Turn& theTurn, const defense_modifier& theModifie
 }
 
 void MainWindow::clear() {
-    defending_pokemon_species_combobox->setCurrentIndex(0);
-    defending_pokemon_form_combobox->setCurrentIndex(0);
-    defending_pokemon_nature_combobox->setCurrentIndex(0);
-    defending_pokemon_item_combobox->setCurrentIndex(0);
-    defending_pokemon_hpiv_spinbox->setValue(31);
-    defending_pokemon_defiv_spinbox->setValue(31);
-    defending_pokemon_spdefiv_spinbox->setValue(31);
-    defending_pokemon_attack_spinbox->setValue(0);
-    defending_pokemon_spattack_spinbox->setValue(0);
-    defending_pokemon_speed_spinbox->setValue(0);
+    defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->setCurrentIndex(0);
+    defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setCurrentIndex(0);
+    defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->setCurrentIndex(0);
+    defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->setCurrentIndex(0);
+    defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->setValue(31);
+    defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->setValue(31);
+    defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->setValue(31);
+    defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->setValue(0);
+    defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->setValue(0);
+    defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->setValue(0);
 
     moves_view->clear();
     turns.clear();
@@ -487,19 +560,19 @@ void MainWindow::clear() {
 }
 
 void MainWindow::calculate() {
-    Pokemon selected_pokemon(defending_pokemon_species_combobox->currentIndex()+1);
-    selected_pokemon.setForm(defending_pokemon_form_combobox->currentIndex());
-    selected_pokemon.setType(0, (Type)defending_pokemon_type1_combobox->currentIndex());
-    selected_pokemon.setType(1, (Type)defending_pokemon_type2_combobox->currentIndex());
-    selected_pokemon.setNature((Stats::Nature)defending_pokemon_nature_combobox->currentIndex());
-    selected_pokemon.setAbility((Ability)defending_pokemon_ability_combobox->currentIndex());
-    selected_pokemon.setItem(Item(defending_pokemon_item_combobox->currentIndex()));
-    selected_pokemon.setIV(Stats::HP, defending_pokemon_hpiv_spinbox->value());
-    selected_pokemon.setIV(Stats::DEF, defending_pokemon_defiv_spinbox->value());
-    selected_pokemon.setIV(Stats::SPDEF, defending_pokemon_spdefiv_spinbox->value());
-    selected_pokemon.setEV(Stats::ATK, defending_pokemon_attack_spinbox->value());
-    selected_pokemon.setEV(Stats::SPATK, defending_pokemon_spattack_spinbox->value());
-    selected_pokemon.setEV(Stats::SPE, defending_pokemon_speed_spinbox->value());
+    Pokemon selected_pokemon(defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->currentIndex()+1);
+    selected_pokemon.setForm(defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->currentIndex());
+    selected_pokemon.setType(0, (Type)defending_groupbox->findChild<QComboBox*>("defending_type1_combobox")->currentIndex());
+    selected_pokemon.setType(1, (Type)defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->currentIndex());
+    selected_pokemon.setNature((Stats::Nature)defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->currentIndex());
+    selected_pokemon.setAbility((Ability)defending_groupbox->findChild<QComboBox*>("defending_abilities_combobox")->currentIndex());
+    selected_pokemon.setItem(Item(defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->currentIndex()));
+    selected_pokemon.setIV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->value());
+    selected_pokemon.setIV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->value());
+    selected_pokemon.setIV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->value());
+    selected_pokemon.setEV(Stats::ATK, defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->value());
+    selected_pokemon.setEV(Stats::SPATK, defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->value());
+    selected_pokemon.setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->value());
 
     std::vector<float> rolls;
     auto result = selected_pokemon.resistMove(turns, modifiers, rolls);
