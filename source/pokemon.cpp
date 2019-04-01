@@ -179,6 +179,10 @@ void Pokemon::calculateTotal() {
 
     total[Stats::SPE] = (((((2 * base[form][Stats::SPE] + stats.getIV(Stats::SPE) + stats.getEV(Stats::SPE)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     boosted[Stats::SPE] = total[Stats::SPE] * spe_modifier_multiplier;
+
+    //evaluate if it is grounded
+    if( types[form][0] == Type::Flying || types[form][1] == Type::Flying || getAbility() == Ability::Levitate ) grounded = false;
+    else grounded = true;
 }
 
 float Pokemon::calculateWeatherModifier(const Move& theMove) const {

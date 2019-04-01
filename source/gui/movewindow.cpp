@@ -29,7 +29,7 @@ MoveWindow::MoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) 
     createAtk2GroupBox();
     createDefendingGroupBox();
 
-    main_layout->addLayout(modifier_layout);
+    main_layout->addWidget(modifier_groupbox);
     main_layout->insertSpacing(2, 35);
     main_layout->addWidget(defending_groupbox);
 
@@ -65,7 +65,6 @@ void MoveWindow::createAtk1GroupBox() {
 
     //---sprite---
     QHBoxLayout* sprite_layout = new QHBoxLayout;
-    species_types_layout->addLayout(sprite_layout);
 
     QLabel* sprite = new QLabel;
     sprite->setObjectName("atk1_sprite");
@@ -204,6 +203,7 @@ void MoveWindow::createAtk1GroupBox() {
     QSpinBox* iv = new QSpinBox;
     iv->setObjectName("atk1_iv_spinbox");
     iv->setRange(0, 31);
+    iv->setValue(31);
     modifiers_layout->addWidget(iv);
 
     //ev
@@ -359,7 +359,6 @@ void MoveWindow::createAtk2GroupBox() {
 
     //---sprite---
     QHBoxLayout* sprite_layout = new QHBoxLayout;
-    species_types_layout->addLayout(sprite_layout);
 
     QLabel* sprite = new QLabel;
     sprite->setObjectName("atk2_sprite");
@@ -498,6 +497,7 @@ void MoveWindow::createAtk2GroupBox() {
     QSpinBox* iv = new QSpinBox;
     iv->setObjectName("atk2_iv_spinbox");
     iv->setRange(0, 31);
+    iv->setValue(31);
     modifiers_layout->addWidget(iv);
 
     //ev
@@ -672,8 +672,12 @@ void MoveWindow::createDefendingGroupBox() {
     hits_modifier_spinbox->setSuffix("HKO");
     defending_layout->addWidget(hits_modifier_spinbox, Qt::AlignLeft);
 
-    modifier_layout = new QHBoxLayout;
+    modifier_groupbox = new QGroupBox("Modifiers:");
+
+    QHBoxLayout* modifier_layout = new QHBoxLayout;
     modifier_layout->setAlignment(Qt::AlignLeft);
+
+    modifier_groupbox->setLayout(modifier_layout);
 
     //WEATHER
     QHBoxLayout* weather_layout = new QHBoxLayout;
@@ -927,6 +931,7 @@ void MoveWindow::activateAtk2(int state) {
     else value = false;
 
     atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->setEnabled(value);
+    atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->setEnabled(value);
     atk2_groupbox->findChild<QComboBox*>("atk2_type1_combobox")->setEnabled(value);
     atk2_groupbox->findChild<QComboBox*>("atk2_type2_combobox")->setEnabled(value);
     atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->setEnabled(value);
@@ -945,194 +950,187 @@ void MoveWindow::activateAtk2(int state) {
 }
 
 void MoveWindow::solveMove(void) {
-    Pokemon attacking1(atk1_pokemon_species_combobox->currentIndex()+1);
-    attacking1.setForm(atk1_pokemon_form_combobox->currentIndex());
-    attacking1.setIV(Stats::ATK, atk1_pokemon_attack_iv_spinbox->value());
-    attacking1.setIV(Stats::SPATK, atk1_pokemon_spattack_iv_spinbox->value());
-    attacking1.setEV(Stats::ATK, atk1_pokemon_attack_ev_spinbox->value());
-    attacking1.setEV(Stats::SPATK, atk1_pokemon_spattack_ev_spinbox->value());
-    attacking1.setModifier(Stats::ATK, atk1_pokemon_attack_modifier_spinbox->value());
-    attacking1.setModifier(Stats::SPATK, atk1_pokemon_spattack_modifier_spinbox->value());
+    Pokemon attacking1(atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->currentIndex()+1);
+    attacking1.setForm(atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->currentIndex());
 
-    attacking1.setType(0, (Type)atk1_pokemon_type1_combobox->currentIndex());
-    attacking1.setType(1, (Type)atk1_pokemon_type2_combobox->currentIndex());
-    attacking1.setNature((Stats::Nature)atk1_pokemon_nature_combobox->currentIndex());
-    attacking1.setAbility((Ability)atk1_pokemon_ability_combobox->currentIndex());
-    attacking1.setItem(Item(atk1_pokemon_item_combobox->currentIndex()));
+    attacking1.setType(0, (Type)atk1_groupbox->findChild<QComboBox*>("atk1_type1_combobox")->currentIndex());
+    attacking1.setType(0, (Type)atk1_groupbox->findChild<QComboBox*>("atk1_type2_combobox")->currentIndex());
+    attacking1.setNature((Stats::Nature)atk1_groupbox->findChild<QComboBox*>("atk1_nature_combobox")->currentIndex());
+    attacking1.setAbility((Ability)atk1_groupbox->findChild<QComboBox*>("atk1_abilities_combobox")->currentIndex());
+    attacking1.setItem(Item(atk1_groupbox->findChild<QComboBox*>("atk1_items_combobox")->currentIndex()));
 
-    Move attacking1_move((Moves)atk1_pokemon_moves_combobox->currentIndex());
-    if( atk1_pokemon_target_combobox->currentIndex() == Move::Target::SINGLE ) attacking1_move.setTarget(Move::Target::SINGLE);
+    Move attacking1_move((Moves)atk1_groupbox->findChild<QComboBox*>("atk1_moves_combobox")->currentIndex());
+    if( atk1_groupbox->findChild<QComboBox*>("atk1_target_combobox")->currentIndex() == Move::Target::SINGLE ) attacking1_move.setTarget(Move::Target::SINGLE);
     else attacking1_move.setTarget(Move::Target::DOUBLE);
-    attacking1_move.setMoveType((Type)atk1_pokemon_movetype_combobox->currentIndex());
-    attacking1_move.setMoveCategory((Move::Category)atk1_pokemon_movecategory_combobox->currentIndex());
-    attacking1_move.setBasePower(atk1_pokemon_movebp_spinbox->value());
-    if( atk1_pokemon_crit_checkbox->checkState() == Qt::Checked ) attacking1_move.setCrit(true);
-    else if( atk1_pokemon_crit_checkbox->checkState() == Qt::Unchecked ) attacking1_move.setCrit(false);
+    attacking1_move.setMoveType((Type)atk1_groupbox->findChild<QComboBox*>("atk1_movetypes_combobox")->currentIndex());
+    attacking1_move.setMoveCategory((Move::Category)atk1_groupbox->findChild<QComboBox*>("atk1_movecategories_combobox")->currentIndex());
+    attacking1_move.setBasePower(atk1_groupbox->findChild<QSpinBox*>("atk1_movebp_spinbox")->value());
 
-    if( atk1_pokemon_z_checkbox->checkState() == Qt::Checked ) attacking1_move.setZ(true);
-    else if( atk1_pokemon_z_checkbox->checkState() == Qt::Unchecked ) attacking1_move.setZ(false);
+    if( atk1_groupbox->findChild<QCheckBox*>("atk1_crit")->checkState() == Qt::Checked ) attacking1_move.setCrit(true);
+    else if(atk1_groupbox->findChild<QCheckBox*>("atk1_crit")->checkState() == Qt::Unchecked ) attacking1_move.setCrit(false);
 
-    if( atk_pokemon_weather_none->isChecked() ) attacking1_move.setWeather(Move::Weather::WEATHER_NONE);
-    else if(  atk_pokemon_weather_sun->isChecked() ) attacking1_move.setWeather(Move::Weather::SUN);
-    else if(  atk_pokemon_weather_rain->isChecked() ) attacking1_move.setWeather(Move::Weather::RAIN);
+    if( atk1_groupbox->findChild<QCheckBox*>("atk1_z")->checkState() == Qt::Checked ) attacking1_move.setZ(true);
+    else if( atk1_groupbox->findChild<QCheckBox*>("atk1_z")->checkState() == Qt::Unchecked ) attacking1_move.setZ(false);
 
-    if( atk_pokemon_terrain_none->isChecked() ) attacking1_move.setTerrain(Move::Terrain::TERRAIN_NONE);
-    else if( atk_pokemon_terrain_misty->isChecked() ) attacking1_move.setTerrain(Move::Terrain::MISTY);
-    else if( atk_pokemon_terrain_grassy->isChecked() ) attacking1_move.setTerrain(Move::Terrain::GRASSY);
-    else if( atk_pokemon_terrain_electric->isChecked() ) attacking1_move.setTerrain(Move::Terrain::ELECTRIC);
-    else if( atk_pokemon_terrain_psychic->isChecked() ) attacking1_move.setTerrain(Move::Terrain::PSYCHIC);
+    attacking1_move.setWeather((Move::Weather)modifier_groupbox->findChild<QComboBox*>("weather_combobox")->currentIndex());
+    attacking1_move.setTerrain((Move::Terrain)modifier_groupbox->findChild<QComboBox*>("terrain_combobox")->currentIndex());
 
-    Pokemon attacking2(atk2_pokemon_species_combobox->currentIndex()+1);
-    attacking2.setForm(atk2_pokemon_form_combobox->currentIndex());
-    attacking2.setIV(Stats::ATK, atk2_pokemon_attack_iv_spinbox->value());
-    attacking2.setIV(Stats::SPATK, atk2_pokemon_spattack_iv_spinbox->value());
-    attacking2.setEV(Stats::ATK, atk2_pokemon_attack_ev_spinbox->value());
-    attacking2.setEV(Stats::SPATK, atk2_pokemon_spattack_ev_spinbox->value());
-    attacking2.setModifier(Stats::ATK, atk2_pokemon_attack_modifier_spinbox->value());
-    attacking2.setModifier(Stats::SPATK, atk2_pokemon_spattack_modifier_spinbox->value());
+    //now setting pokemon 1 iv/ev/modifier
+    Stats::Stat stat;
+    if( attacking1_move.getMoveCategory() == Move::Category::PHYSICAL ) stat = Stats::ATK;
+    else stat = Stats::SPATK;
 
-    attacking2.setType(0, (Type)atk2_pokemon_type1_combobox->currentIndex());
-    attacking2.setType(1, (Type)atk2_pokemon_type2_combobox->currentIndex());
-    attacking2.setNature((Stats::Nature)atk2_pokemon_nature_combobox->currentIndex());
-    attacking2.setAbility((Ability)atk2_pokemon_ability_combobox->currentIndex());
-    attacking2.setItem(Item(atk2_pokemon_item_combobox->currentIndex()));
+    attacking1.setIV(stat, atk1_groupbox->findChild<QSpinBox*>("atk1_iv_spinbox")->value());
+    attacking1.setEV(stat, atk1_groupbox->findChild<QSpinBox*>("atk1_ev_spinbox")->value());
+    attacking1.setModifier(stat, atk1_groupbox->findChild<QSpinBox*>("atk1_modifier_spinbox")->value());
 
-    Move attacking2_move((Moves)atk2_pokemon_moves_combobox->currentIndex());
-    if( atk2_pokemon_target_combobox->currentIndex() == Move::Target::SINGLE ) attacking2_move.setTarget(Move::Target::SINGLE);
+
+
+    Pokemon attacking2(atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->currentIndex()+1);
+    attacking2.setForm(atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->currentIndex());
+
+    attacking2.setType(0, (Type)atk2_groupbox->findChild<QComboBox*>("atk2_type1_combobox")->currentIndex());
+    attacking2.setType(0, (Type)atk2_groupbox->findChild<QComboBox*>("atk2_type2_combobox")->currentIndex());
+    attacking2.setNature((Stats::Nature)atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->currentIndex());
+    attacking2.setAbility((Ability)atk2_groupbox->findChild<QComboBox*>("atk2_abilities_combobox")->currentIndex());
+    attacking2.setItem(Item(atk2_groupbox->findChild<QComboBox*>("atk2_items_combobox")->currentIndex()));
+
+    Move attacking2_move((Moves)atk2_groupbox->findChild<QComboBox*>("atk2_moves_combobox")->currentIndex());
+    if( atk2_groupbox->findChild<QComboBox*>("atk2_target_combobox")->currentIndex() == Move::Target::SINGLE ) attacking2_move.setTarget(Move::Target::SINGLE);
     else attacking2_move.setTarget(Move::Target::DOUBLE);
-    attacking2_move.setMoveType((Type)atk2_pokemon_movetype_combobox->currentIndex());
-    attacking2_move.setMoveCategory((Move::Category)atk2_pokemon_movecategory_combobox->currentIndex());
-    attacking2_move.setBasePower(atk2_pokemon_movebp_spinbox->value());
-    if( atk2_pokemon_crit_checkbox->checkState() == Qt::Checked ) attacking2_move.setCrit(true);
-    else if( atk2_pokemon_crit_checkbox->checkState() == Qt::Unchecked ) attacking2_move.setCrit(false);
+    attacking2_move.setMoveType((Type)atk2_groupbox->findChild<QComboBox*>("atk2_movetypes_combobox")->currentIndex());
+    attacking2_move.setMoveCategory((Move::Category)atk2_groupbox->findChild<QComboBox*>("atk2_movecategories_combobox")->currentIndex());
+    attacking2_move.setBasePower(atk2_groupbox->findChild<QSpinBox*>("atk2_movebp_spinbox")->value());
 
-    if( atk2_pokemon_z_checkbox->checkState() == Qt::Checked ) attacking2_move.setZ(true);
-    else if( atk2_pokemon_z_checkbox->checkState() == Qt::Unchecked ) attacking2_move.setZ(false);
+    if( atk2_groupbox->findChild<QCheckBox*>("atk2_crit")->checkState() == Qt::Checked ) attacking2_move.setCrit(true);
+    else if(atk2_groupbox->findChild<QCheckBox*>("atk2_crit")->checkState() == Qt::Unchecked ) attacking2_move.setCrit(false);
 
-    if( atk_pokemon_weather_none->isChecked() ) attacking2_move.setWeather(Move::Weather::WEATHER_NONE);
-    else if(  atk_pokemon_weather_sun->isChecked() ) attacking2_move.setWeather(Move::Weather::SUN);
-    else if(  atk_pokemon_weather_rain->isChecked() ) attacking2_move.setWeather(Move::Weather::RAIN);
+    if( atk2_groupbox->findChild<QCheckBox*>("atk2_z")->checkState() == Qt::Checked ) attacking2_move.setZ(true);
+    else if( atk2_groupbox->findChild<QCheckBox*>("atk2_z")->checkState() == Qt::Unchecked ) attacking2_move.setZ(false);
 
-    if( atk_pokemon_terrain_none->isChecked() ) attacking2_move.setTerrain(Move::Terrain::TERRAIN_NONE);
-    else if( atk_pokemon_terrain_misty->isChecked() ) attacking2_move.setTerrain(Move::Terrain::MISTY);
-    else if( atk_pokemon_terrain_grassy->isChecked() ) attacking2_move.setTerrain(Move::Terrain::GRASSY);
-    else if( atk_pokemon_terrain_electric->isChecked() ) attacking2_move.setTerrain(Move::Terrain::ELECTRIC);
-    else if( atk_pokemon_terrain_psychic->isChecked() ) attacking2_move.setTerrain(Move::Terrain::PSYCHIC);
+    attacking2_move.setWeather((Move::Weather)modifier_groupbox->findChild<QComboBox*>("weather_combobox")->currentIndex());
+    attacking2_move.setTerrain((Move::Terrain)modifier_groupbox->findChild<QComboBox*>("terrain_combobox")->currentIndex());
+
+    //now setting pokemon 2 iv/ev/modifier
+    Stats::Stat stat2;
+    if( attacking2_move.getMoveCategory() == Move::Category::PHYSICAL ) stat2 = Stats::ATK;
+    else stat2 = Stats::SPATK;
+
+    attacking2.setIV(stat2, atk2_groupbox->findChild<QSpinBox*>("atk2_iv_spinbox")->value());
+    attacking2.setEV(stat2, atk2_groupbox->findChild<QSpinBox*>("atk2_ev_spinbox")->value());
+    attacking2.setModifier(stat2, atk2_groupbox->findChild<QSpinBox*>("atk2_modifier_spinbox")->value());
 
     Turn turn;
     turn.addMove(attacking1, attacking1_move);
-    if( atk2_pokemon_activated->checkState() == Qt::Checked ) turn.addMove(attacking2, attacking2_move);
-    turn.setHits(defending_pokemon_hits_modifier_spinbox->value()-1);
+    if( atk2_groupbox->findChild<QCheckBox*>("atk2_activated")->checkState() == Qt::Checked ) turn.addMove(attacking2, attacking2_move);
+    turn.setHits(defending_groupbox->findChild<QSpinBox*>("defending_hits_modifier")->value()-1);
 
-    defense_modifier def_mod = std::make_tuple(defending_pokemon_hp_modifier_spinbox->value(), defending_pokemon_def_modifier_spinbox->value(), defending_pokemon_spdef_modifier_spinbox->value());
+    defense_modifier def_mod = std::make_tuple(defending_groupbox->findChild<QSpinBox*>("defending_hp_modifier")->value(), defending_groupbox->findChild<QSpinBox*>("defending_def_modifier")->value(), defending_groupbox->findChild<QSpinBox*>("defending_spdef_modifier")->value());
 
     ((MainWindow*)parentWidget())->addTurn(turn, def_mod);
 }
 
-void MoveWindow::setAsBlank() { /*
-    atk1_pokemon_species_combobox->setCurrentIndex(0);
-    atk1_pokemon_form_combobox->setCurrentIndex(0);
-    atk1_pokemon_nature_combobox->setCurrentIndex(0);
-    atk1_pokemon_item_combobox->setCurrentIndex(0);
+void MoveWindow::setAsBlank() {
+    //atk1
+    atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->setCurrentIndex(0);
+    atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->setCurrentIndex(0);
+    atk1_groupbox->findChild<QComboBox*>("atk1_nature_combobox")->setCurrentIndex(0);
+    atk1_groupbox->findChild<QComboBox*>("atk1_items_combobox")->setCurrentIndex(0);
 
-    atk1_pokemon_attack_iv_spinbox->setValue(31);
-    atk1_pokemon_attack_ev_spinbox->setValue(0);
-    atk1_pokemon_attack_modifier_spinbox->setValue(0);
-    atk1_pokemon_spattack_iv_spinbox->setValue(31);
-    atk1_pokemon_spattack_ev_spinbox->setValue(0);
-    atk1_pokemon_spattack_modifier_spinbox->setValue(0);
+    atk1_groupbox->findChild<QSpinBox*>("atk1_iv_spinbox")->setValue(31);
+    atk1_groupbox->findChild<QSpinBox*>("atk1_ev_spinbox")->setValue(0);
+    atk1_groupbox->findChild<QSpinBox*>("atk1_modifier_spinbox")->setValue(0);
 
-    atk1_pokemon_moves_combobox->setCurrentIndex(0);
-    atk1_pokemon_target_combobox->setVisible(false); //THIS SHOULDN'T BE HERE
-    atk1_pokemon_crit_checkbox->setChecked(false);
-    atk1_pokemon_z_checkbox->setChecked(false);
+    atk1_groupbox->findChild<QComboBox*>("atk1_moves_combobox")->setCurrentIndex(0);
+    atk1_groupbox->findChild<QCheckBox*>("atk1_crit")->setChecked(false);
+    atk1_groupbox->findChild<QCheckBox*>("atk1_z")->setChecked(false);
 
-    atk_pokemon_weather_none->setChecked(true);
+    //atk2
+    atk2_groupbox->findChild<QCheckBox*>("atk2_activated")->setChecked(true);
+    atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->setCurrentIndex(0);
+    atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->setCurrentIndex(0);
+    atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->setCurrentIndex(0);
+    atk2_groupbox->findChild<QComboBox*>("atk2_items_combobox")->setCurrentIndex(0);
 
-    atk_pokemon_terrain_none->setChecked(true);
+    atk2_groupbox->findChild<QSpinBox*>("atk2_iv_spinbox")->setValue(31);
+    atk2_groupbox->findChild<QSpinBox*>("atk2_ev_spinbox")->setValue(0);
+    atk2_groupbox->findChild<QSpinBox*>("atk2_modifier_spinbox")->setValue(0);
 
-    atk2_pokemon_activated->setChecked(true);
-    atk2_pokemon_species_combobox->setCurrentIndex(0);
-    atk2_pokemon_nature_combobox->setCurrentIndex(0);
-    atk2_pokemon_item_combobox->setCurrentIndex(0);
+    atk2_groupbox->findChild<QComboBox*>("atk2_moves_combobox")->setCurrentIndex(0);
+    atk2_groupbox->findChild<QCheckBox*>("atk2_crit")->setChecked(false);
+    atk2_groupbox->findChild<QCheckBox*>("atk2_z")->setChecked(false);
 
-    atk2_pokemon_attack_iv_spinbox->setValue(31);
-    atk2_pokemon_attack_ev_spinbox->setValue(0);
-    atk2_pokemon_attack_modifier_spinbox->setValue(0);
-    atk2_pokemon_spattack_iv_spinbox->setValue(31);
-    atk2_pokemon_spattack_ev_spinbox->setValue(0);
-    atk2_pokemon_spattack_modifier_spinbox->setValue(0);
+    modifier_groupbox->findChild<QComboBox*>("weather_combobox")->setCurrentIndex(0);
+    modifier_groupbox->findChild<QComboBox*>("terrain_combobox")->setCurrentIndex(0);
 
-    atk2_pokemon_moves_combobox->setCurrentIndex(0);
-    atk2_pokemon_target_combobox->setVisible(false); //THIS SHOULDN'T BE HERE
-    atk2_pokemon_crit_checkbox->setChecked(false);
-    atk2_pokemon_z_checkbox->setChecked(false);
+    defending_groupbox->findChild<QSpinBox*>("defending_def_modifier")->setValue(0);
+    defending_groupbox->findChild<QSpinBox*>("defending_spdef_modifier")->setValue(0);
+    defending_groupbox->findChild<QSpinBox*>("defending_hp_modifier")->setValue(100);
+    defending_groupbox->findChild<QSpinBox*>("defending_hits_modifier")->setValue(0);
 
-    defending_pokemon_def_modifier_spinbox->setValue(0);
-    defending_pokemon_spdef_modifier_spinbox->setValue(0);
-    defending_pokemon_hp_modifier_spinbox->setValue(100);
-    defending_pokemon_hits_modifier_spinbox->setValue(2);*/
+    tabs->setCurrentIndex(0);
 }
 
 void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {
-    atk1_pokemon_species_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getPokedexNumber()-1);
-    atk1_pokemon_form_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getForm());
-    atk1_pokemon_nature_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getNature());
-    atk1_pokemon_item_combobox->setCurrentIndex(theTurn.getMoves()[0].first.getItem().getIndex());
+    //atk1
+    atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getPokedexNumber()-1);
+    atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getForm());
+    atk1_groupbox->findChild<QComboBox*>("atk1_nature_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getNature());
+    atk1_groupbox->findChild<QComboBox*>("atk1_items_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getItem().getIndex());
 
-    atk1_pokemon_attack_iv_spinbox->setValue(theTurn.getMoves()[0].first.getIV(Stats::ATK));
-    atk1_pokemon_attack_ev_spinbox->setValue(theTurn.getMoves()[0].first.getEV(Stats::ATK));
-    atk1_pokemon_attack_modifier_spinbox->setValue(theTurn.getMoves()[0].first.getModifier(Stats::ATK));
-    atk1_pokemon_spattack_iv_spinbox->setValue(theTurn.getMoves()[0].first.getIV(Stats::SPATK));
-    atk1_pokemon_spattack_ev_spinbox->setValue(theTurn.getMoves()[0].first.getEV(Stats::SPATK));
-    atk1_pokemon_spattack_modifier_spinbox->setValue(theTurn.getMoves()[0].first.getModifier(Stats::SPATK));
+    atk1_groupbox->findChild<QComboBox*>("atk1_moves_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getMoveIndex());
+    atk1_groupbox->findChild<QComboBox*>("atk1_target_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getTarget());
+    atk1_groupbox->findChild<QComboBox*>("atk1_movetypes_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getMoveType());
+    atk1_groupbox->findChild<QComboBox*>("atk1_movecategories_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getMoveCategory());
+    atk1_groupbox->findChild<QSpinBox*>("atk1_movebp_spinbox")->setValue(theTurn.getMoves()[0].second.getBasePower());
 
-    atk1_pokemon_moves_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveIndex());
-    atk1_pokemon_target_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getTarget());
-    atk1_pokemon_movetype_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveType());
-    atk1_pokemon_movecategory_combobox->setCurrentIndex(theTurn.getMoves()[0].second.getMoveCategory());
-    atk1_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[0].second.getBasePower());
-    atk1_pokemon_crit_checkbox->setChecked(theTurn.getMoves()[0].second.isCrit());
-    atk1_pokemon_z_checkbox->setChecked(theTurn.getMoves()[0].second.isZ());
+    atk1_groupbox->findChild<QCheckBox*>("atk1_crit")->setChecked(theTurn.getMoves()[0].second.isCrit());
+    atk1_groupbox->findChild<QCheckBox*>("atk1_z")->setChecked(theTurn.getMoves()[0].second.isZ());
 
-    if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::WEATHER_NONE ) atk_pokemon_weather_none->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::SUN ) atk_pokemon_weather_sun->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getWeather() == Move::Weather::RAIN ) atk_pokemon_weather_rain->setChecked(true);
+    Stats::Stat stat;
+    if( theTurn.getMoves()[0].second.getMoveCategory() == Move::Category::SPECIAL ) stat = Stats::SPATK;
+    else stat = Stats::ATK;
 
-    if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::TERRAIN_NONE ) atk_pokemon_terrain_none->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::GRASSY ) atk_pokemon_terrain_grassy->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::PSYCHIC ) atk_pokemon_terrain_psychic->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::MISTY ) atk_pokemon_terrain_misty->setChecked(true);
-    else if( theTurn.getMoves()[0].second.getTerrain() == Move::Terrain::ELECTRIC ) atk_pokemon_terrain_electric->setChecked(true);
+    atk1_groupbox->findChild<QSpinBox*>("atk1_iv_spinbox")->setValue(theTurn.getMoves()[0].first.getIV(stat));
+    atk1_groupbox->findChild<QSpinBox*>("atk1_ev_spinbox")->setValue(theTurn.getMoves()[0].first.getEV(stat));
+    atk1_groupbox->findChild<QSpinBox*>("atk1_modifier_spinbox")->setValue(theTurn.getMoves()[0].first.getModifier(stat));
 
-    if( theTurn.getMoveNum() > 1 ) {
-        atk2_pokemon_species_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getPokedexNumber()-1);
-        atk2_pokemon_form_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getForm());
-        atk2_pokemon_nature_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getNature());
-        atk2_pokemon_item_combobox->setCurrentIndex(theTurn.getMoves()[1].first.getItem().getIndex());
+    if(theTurn.getMoveNum() > 1) {
+        //atk2
+        atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getPokedexNumber()-1);
+        atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getForm());
+        atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getNature());
+        atk2_groupbox->findChild<QComboBox*>("atk2_items_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getItem().getIndex());
 
-        atk2_pokemon_attack_iv_spinbox->setValue(theTurn.getMoves()[1].first.getIV(Stats::ATK));
-        atk2_pokemon_attack_ev_spinbox->setValue(theTurn.getMoves()[1].first.getEV(Stats::ATK));
-        atk2_pokemon_attack_modifier_spinbox->setValue(theTurn.getMoves()[1].first.getModifier(Stats::ATK));
-        atk2_pokemon_spattack_iv_spinbox->setValue(theTurn.getMoves()[1].first.getIV(Stats::SPATK));
-        atk2_pokemon_spattack_ev_spinbox->setValue(theTurn.getMoves()[1].first.getEV(Stats::SPATK));
-        atk2_pokemon_spattack_modifier_spinbox->setValue(theTurn.getMoves()[1].first.getModifier(Stats::SPATK));
+        atk2_groupbox->findChild<QComboBox*>("atk2_moves_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getMoveIndex());
+        atk2_groupbox->findChild<QComboBox*>("atk2_target_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getTarget());
+        atk2_groupbox->findChild<QComboBox*>("atk2_movetypes_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getMoveType());
+        atk2_groupbox->findChild<QComboBox*>("atk2_movecategories_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getMoveCategory());
+        atk2_groupbox->findChild<QSpinBox*>("atk1_movebp_spinbox")->setValue(theTurn.getMoves()[1].second.getBasePower());
 
-        atk2_pokemon_moves_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveIndex());
-        atk2_pokemon_target_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getTarget());
-        atk2_pokemon_movetype_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveType());
-        atk2_pokemon_movecategory_combobox->setCurrentIndex(theTurn.getMoves()[1].second.getMoveCategory());
-        atk2_pokemon_movebp_spinbox->setValue(theTurn.getMoves()[1].second.getBasePower());
-        atk2_pokemon_crit_checkbox->setChecked(theTurn.getMoves()[1].second.isCrit());
-        atk2_pokemon_z_checkbox->setChecked(theTurn.getMoves()[1].second.isZ());
+        atk2_groupbox->findChild<QCheckBox*>("atk2_crit")->setChecked(theTurn.getMoves()[1].second.isCrit());
+        atk2_groupbox->findChild<QCheckBox*>("atk2_z")->setChecked(theTurn.getMoves()[1].second.isZ());
+
+        Stats::Stat stat2;
+        if( theTurn.getMoves()[1].second.getMoveCategory() == Move::Category::SPECIAL ) stat2 = Stats::SPATK;
+        else stat2 = Stats::ATK;
+
+        atk2_groupbox->findChild<QSpinBox*>("atk2_iv_spinbox")->setValue(theTurn.getMoves()[1].first.getIV(stat2));
+        atk2_groupbox->findChild<QSpinBox*>("atk2_ev_spinbox")->setValue(theTurn.getMoves()[1].first.getEV(stat2));
+        atk2_groupbox->findChild<QSpinBox*>("atk2_modifier_spinbox")->setValue(theTurn.getMoves()[1].first.getModifier(stat2));
     }
 
-    else atk2_pokemon_activated->setChecked(false);
+    else atk2_groupbox->findChild<QCheckBox*>("atk2_activated")->setChecked(true);
 
-    defending_pokemon_def_modifier_spinbox->setValue(std::get<1>(theDefenseModifier));
-    defending_pokemon_spdef_modifier_spinbox->setValue(std::get<2>(theDefenseModifier));
-    defending_pokemon_hp_modifier_spinbox->setValue(std::get<0>(theDefenseModifier));
-    defending_pokemon_hits_modifier_spinbox->setValue(theTurn.getHits()+1);
+    modifier_groupbox->findChild<QComboBox*>("weather_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getWeather());
+    modifier_groupbox->findChild<QComboBox*>("terrain_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getTerrain());
+
+    defending_groupbox->findChild<QSpinBox*>("defending_def_modifier")->setValue(std::get<1>(theDefenseModifier));
+    defending_groupbox->findChild<QSpinBox*>("defending_spdef_modifier")->setValue(std::get<2>(theDefenseModifier));
+    defending_groupbox->findChild<QSpinBox*>("defending_hp_modifier")->setValue(std::get<0>(theDefenseModifier));
+    defending_groupbox->findChild<QSpinBox*>("defending_hits_modifier")->setValue(theTurn.getHits()+1);
+
+    tabs->setCurrentIndex(0);
 }
 
 QString MoveWindow::retrieveFormName(const int species, const int form) {

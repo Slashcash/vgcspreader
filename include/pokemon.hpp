@@ -91,7 +91,7 @@ class Pokemon {
         void setItem(const Item theItem) { item = theItem; calculateTotal(); }
         void setType(const unsigned int theIndex, const Type& theType) { types[form][theIndex] = theType; }
         void setGrounded(const bool theValue) { grounded = theValue; }
-        void setForm(const unsigned int theForm) { if( theForm < formes_number ) { form = theForm; calculateTotal(); ability = possible_abilities[form][0]; } }
+        void setForm(const unsigned int theForm) { if( theForm < formes_number ) { form = theForm; ability = possible_abilities[form][0]; calculateTotal(); } }
 
         unsigned int getPokedexNumber() const { return pokedex_number; }
         uint8_t getLevel() const { return stats.getLevel(); }
