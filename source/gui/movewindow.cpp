@@ -1120,7 +1120,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
         atk2_groupbox->findChild<QSpinBox*>("atk2_modifier_spinbox")->setValue(theTurn.getMoves()[1].first.getModifier(stat2));
     }
 
-    else atk2_groupbox->findChild<QCheckBox*>("atk2_activated")->setChecked(true);
+    else atk2_groupbox->findChild<QCheckBox*>("atk2_activated")->setChecked(false);
 
     modifier_groupbox->findChild<QComboBox*>("weather_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getWeather());
     modifier_groupbox->findChild<QComboBox*>("terrain_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getTerrain());

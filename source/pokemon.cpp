@@ -218,7 +218,7 @@ float Pokemon::calculateStabModifier(const Pokemon& theAttacker, const Move& the
     if( theAttacker.getAbility() == Ability::Adaptability ) stab_modifier = 2;
     else stab_modifier = 1.5;
 
-    if( (theAttacker.getTypes()[form][0] == theMove.getMoveType()) || (theAttacker.getTypes()[form][1] == theMove.getMoveType())) return stab_modifier;
+    if( (theAttacker.getTypes()[theAttacker.getForm()][0] == theMove.getMoveType()) || (theAttacker.getTypes()[theAttacker.getForm()][1] == theMove.getMoveType())) return stab_modifier;
     else return 1;
 }
 
