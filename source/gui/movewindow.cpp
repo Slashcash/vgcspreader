@@ -1106,7 +1106,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
         atk2_groupbox->findChild<QComboBox*>("atk2_target_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getTarget());
         atk2_groupbox->findChild<QComboBox*>("atk2_movetypes_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getMoveType());
         atk2_groupbox->findChild<QComboBox*>("atk2_movecategories_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getMoveCategory());
-        atk2_groupbox->findChild<QSpinBox*>("atk1_movebp_spinbox")->setValue(theTurn.getMoves()[1].second.getBasePower());
+        atk2_groupbox->findChild<QSpinBox*>("atk2_movebp_spinbox")->setValue(theTurn.getMoves()[1].second.getBasePower());
 
         atk2_groupbox->findChild<QCheckBox*>("atk2_crit")->setChecked(theTurn.getMoves()[1].second.isCrit());
         atk2_groupbox->findChild<QCheckBox*>("atk2_z")->setChecked(theTurn.getMoves()[1].second.isZ());
