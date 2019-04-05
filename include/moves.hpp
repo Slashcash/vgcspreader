@@ -324,7 +324,7 @@ enum Moves {
 	X_Scissor,
 	Zap_Cannon,
 	Zen_Headbutt,
-	Zing_Zap
+    Zing_Zap,
 };
 
 #endif

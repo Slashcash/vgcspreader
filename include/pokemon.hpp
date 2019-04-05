@@ -64,6 +64,7 @@ class Pokemon {
         uint16_t calculateAttackInMove(const Pokemon& theAttacker, const Move& theMove) const;
         uint16_t calculateDefenseInMove(const Move& theMove) const;
         unsigned int calculateMoveBasePowerInAttack(const Pokemon& theAttacker, const Move& theMove) const;
+        void calculateMoveTypeInAttack(const Pokemon& theAttacker, Move& theMove) const;
 
         void recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<int>& theIntVector, std::vector<std::pair<Pokemon, Move>>& theVector, const unsigned int theHitNumber, std::vector<std::pair<Pokemon, Move>>::iterator& it) const;
         uint8_t calculateEVSNextStat(Pokemon thePokemon, const Stats::Stat& theStat, const unsigned int theStartingEVS) const;

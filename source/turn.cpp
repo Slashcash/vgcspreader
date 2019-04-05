@@ -36,6 +36,12 @@ void Turn::addMove(const Pokemon& thePokemon, const Move& theMove) {
     if( thePokemon.getAbility() == Ability::Dark_Aura )
         for(auto it = moves.begin(); it < moves.end(); it++)
             it->second.setDarkAura(true);
+
+    //ADDING A MOVE IF THE POKEMON HAS PARENTAL BOND
+    if( moves.back().first.getAbility() == Ability::Parental_Bond && moves.back().second.getTarget() == Move::Target::SINGLE && !moves.back().second.isZ() ) {
+        moves.back().second.setParentalBondMove(true);
+    }
+
 }
 
 std::vector<std::pair<Pokemon, Move>> Turn::getMovesEffective() const {

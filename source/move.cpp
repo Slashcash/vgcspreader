@@ -18,4 +18,5 @@ Move::Move(const Moves theMoveIndex) {
     is_crit = false;
     dark_aura = false;
     fairy_aura = false;
+    parental_bond_move = false;
 }

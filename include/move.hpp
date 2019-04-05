@@ -52,6 +52,7 @@ class Move {
         Terrain terrain;
         bool dark_aura;
         bool fairy_aura;
+        bool parental_bond_move;
 
         Modifier modifier;
 
@@ -73,6 +74,7 @@ class Move {
         bool isCrit() const { return is_crit; }
         bool isFairyAura() const { return fairy_aura; }
         bool isDarkAura() const { return dark_aura; }
+        bool isParentalBondMove() const { return parental_bond_move; }
         Moves getMoveIndex() const { return index; }
 
         void setBasePower(const unsigned int theBasePower) { base_power = theBasePower; }
@@ -87,6 +89,7 @@ class Move {
         void setCrit(const bool isCrit) { is_crit = isCrit; }
         void setDarkAura(const bool isDarkAura) { dark_aura = isDarkAura; }
         void setFairyAura(const bool isFairyAura) { fairy_aura = isFairyAura; }
+        void setParentalBondMove(const bool isParentalBondMove) { parental_bond_move = isParentalBondMove; }
 };
 
 #endif

@@ -120,6 +120,7 @@ void Pokemon::calculateTotal() {
 
     total[Stats::ATK] = (((((2 * base[form][Stats::ATK] + stats.getIV(Stats::ATK) + stats.getEV(Stats::ATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
     if( getItem() == Items::Choice_Band ) total[Stats::ATK] = total[Stats::ATK] * 1.5;
+    if( getAbility() == Ability::Huge_Power ) total[Stats::ATK] = total[Stats::ATK] * 2;
     boosted[Stats::ATK] = total[Stats::ATK] * atk_modifier_multiplier;
 
     //calculate def
@@ -356,6 +357,16 @@ uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& 
     return attack;
 }
 
+void Pokemon::calculateMoveTypeInAttack(const Pokemon& theAttacker, Move& theMove) const {
+    //accounting for the *late ability move type change
+    if( theAttacker.getAbility() == Ability::Aerilate && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) theMove.setMoveType(Type::Flying);
+    if( theAttacker.getAbility() == Ability::Pixilate && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) theMove.setMoveType(Type::Fairy);
+    if( theAttacker.getAbility() == Ability::Normalize && !theMove.isZ() ) theMove.setMoveType(Type::Normal);
+    if( theAttacker.getAbility() == Ability::Refrigerate && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) theMove.setMoveType(Type::Ice);
+    if( theAttacker.getAbility() == Ability::Galvanize && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) theMove.setMoveType(Type::Electric);
+
+}
+
 unsigned int Pokemon::calculateMoveBasePowerInAttack(const Pokemon& theAttacker, const Move& theMove) const {
     unsigned int bp;
 
@@ -377,6 +388,13 @@ unsigned int Pokemon::calculateMoveBasePowerInAttack(const Pokemon& theAttacker,
         else return bp;
     }
 
+    //*late abilities boost
+    if( theAttacker.getAbility() == Ability::Aerilate && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) bp = bp * 1.2;
+    if( theAttacker.getAbility() == Ability::Pixilate && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) bp = bp * 1.2;
+    if( theAttacker.getAbility() == Ability::Normalize && !theMove.isZ() ) bp = bp * 1.2;
+    if( theAttacker.getAbility() == Ability::Refrigerate && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) bp = bp * 1.2;
+    if( theAttacker.getAbility() == Ability::Galvanize && theMove.getMoveType() == Type::Normal && !theMove.isZ() ) bp = bp * 1.2;
+
     return bp;
 }
 
@@ -391,6 +409,9 @@ std::vector<int> Pokemon::getDamage(const Pokemon& theAttacker, Move theMove) co
 
     unsigned int base_damage = floor(floor((floor((2 * getLevel()) / 5 + 2) * theMove.getBasePower() * attack) / defense) / 50 + 2);
     if( base_damage == 0 ) base_damage = 1;
+
+    //changing the move type before anything else if needed (taking into account the *late abilities for example)
+    calculateMoveTypeInAttack(theAttacker, theMove);
 
     //calculating move modifiers
     theMove.setModifier().setWeatherModifier(calculateWeatherModifier(theMove)); //WEATHER
@@ -454,7 +475,16 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
     }
 
     //INFRA TURN MODIFIERS (these effects apply after each attack in a turn)
-    if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
+    if( buffer_it->second.isParentalBondMove() ) { //adding another move if it is a parental bond
+        qDebug() << "LOL";
+        Pokemon parental_pokemon = buffer_it->first;
+        Move parental_move = buffer_it->second;
+        parental_move.setBasePower(parental_move.getBasePower()/4);
+        parental_move.setParentalBondMove(false);
+         it = theVector.insert(it+1, std::make_pair(parental_pokemon, parental_move));
+         it--;
+    }
+    if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() && !buffer_it->second.isParentalBondMove() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
     if( theDefendingPokemon.getItem().isReducingBerry() && theDefendingPokemon.getItem().getReducingBerryType() == buffer_it->second.getMoveType() && calculateTypeModifier(buffer_it->first, buffer_it->second) >= 2 ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none if a reducing berry is consumed
 
     //END OF TURN MODIFIERS (these effects apply at the end of the turn

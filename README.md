@@ -29,7 +29,7 @@ VGCSpreader will take care of finding a distribution that will guarantee the sur
 **EXAMPLE 2:** Let's say you want a Careful Tsareena with 244 evs already assigned in speed that can take a Water Spout from Kyogre as a 3HKO and can survive a Water Spout from Kyogre + an Ice Beam from Ludicolo. Both of the benchmarks can only be hit with a roll, but there is a distribution that guarantees a better roll on Water Spout and another one that guarantees a better roll on Water Spout + Ice Beam. VGCSpreader will output the evs distribution that guarantees better roll for attack you inserted **first**. In this case the evs distribution provided will guarantee a better chance to survive Water Spout with a 3HKO but inverting the insertion order will guarantee a better survivability on Water Spout + Ice Beam.
 Long story short: attacks you need to survive have to be inserted in order of importance.
 
-##Item, Moves and abilities supported 
+## Item, Moves and abilities supported 
 As this is still in a testing phase only a limited amount of item, moves and abilities are supported with a correct damage calculation:
 
 **ABILITIES**  
@@ -49,6 +49,13 @@ Solid Rock
 Turboblaze  
 Teravolt  
 Levitate  
+Aerilate  
+Pixilate  
+Refrigerate  
+Normalize  
+Galvanize  
+Huge Power  
+Parental Bond  
 
 Abilities that do not affect damage caclculation like Intimidate are normally supported.
 
