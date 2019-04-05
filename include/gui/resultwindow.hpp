@@ -12,10 +12,9 @@
 class ResultWindow : public QDialog {
     private:
         QGroupBox* result_groupbox;
-        QLabel* hp_evs;
-        QLabel* def_evs;
-        QLabel* spdef_evs;
         QTextEdit* text_edit;
+
+        void createResultGroupBox();
 
     public:
         ResultWindow(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);

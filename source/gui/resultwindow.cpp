@@ -3,26 +3,15 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QDebug>
 
 ResultWindow::ResultWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) {
     QHBoxLayout* main_layout = new QHBoxLayout;
-    QVBoxLayout* result_layout = new QVBoxLayout;
-
-    //result groupbox
-    result_groupbox = new QGroupBox("Result:");
-    main_layout->addWidget(result_groupbox);
-    result_groupbox->setLayout(result_layout);
-
-    hp_evs = new QLabel(tr("HP EVS: ")+"0");
-    result_layout->addWidget(hp_evs);
-
-    def_evs = new QLabel(tr("Defense EVS: ")+"0");
-    result_layout->addWidget(def_evs);
-
-    spdef_evs = new QLabel(tr("Sp. Defense EVS: ")+"0");
-    result_layout->addWidget(spdef_evs);
 
     setLayout(main_layout);
+
+    createResultGroupBox();
+    main_layout->addWidget(result_groupbox);
 
     text_edit = new QTextEdit;
     main_layout->addWidget(text_edit);
@@ -30,25 +19,46 @@ ResultWindow::ResultWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent,
     layout()->setSizeConstraint( QLayout::SetFixedSize );
 }
 
+void ResultWindow::createResultGroupBox() {
+    result_groupbox = new QGroupBox("Result:");
+
+    QVBoxLayout* result_layout = new QVBoxLayout;
+
+    //result groupbox
+    result_groupbox->setLayout(result_layout);
+
+    QLabel* hp_evs = new QLabel(tr("HP EVS: ")+"0");
+    hp_evs->setObjectName("hp_evs");
+    result_layout->addWidget(hp_evs);
+
+    QLabel* def_evs = new QLabel(tr("Defense EVS: ")+"0");
+    def_evs->setObjectName("def_evs");
+    result_layout->addWidget(def_evs);
+
+    QLabel* spdef_evs = new QLabel(tr("Sp. Defense EVS: ")+"0");
+    spdef_evs->setObjectName("spdef_evs");
+    result_layout->addWidget(spdef_evs);
+}
+
 void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const std::tuple<int, int, int>& theResult, const std::vector<std::vector<float>>& theDamagePerc, const std::vector<std::vector<int>>& theDamageInt, const std::vector<float>& theRoll) {
     if( std::get<0>(theResult) == -1 || std::get<1>(theResult) == -1 || std::get<2>(theResult) == -1  ) {
-        def_evs->setVisible(false);
-        spdef_evs->setVisible(false);
+        result_groupbox->findChild<QLabel*>("def_evs")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
 
-        hp_evs->setText(tr("Sorry, no such spread exists"));
+        result_groupbox->findChild<QLabel*>("hp_evs")->setText(tr("Sorry, no such spread exists"));
         text_edit->setVisible(false);
     }
 
     else {
         text_edit->setText("");
-        hp_evs->setVisible(true);
-        def_evs->setVisible(true);
-        spdef_evs->setVisible(true);
+        result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("def_evs")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(true);
         text_edit->setVisible(true);
 
-        hp_evs->setText(tr("HP EVS: ")+QString::number(std::get<0>(theResult)));
-        def_evs->setText(tr("Defense EVS: ")+QString::number(std::get<1>(theResult)));
-        spdef_evs->setText(tr("Sp. Defense EVS: ")+QString::number(std::get<2>(theResult)));
+        result_groupbox->findChild<QLabel*>("hp_evs")->setText(tr("HP EVS: ")+QString::number(std::get<0>(theResult)));
+        result_groupbox->findChild<QLabel*>("def_evs")->setText(tr("Defense EVS: ")+QString::number(std::get<1>(theResult)));
+        result_groupbox->findChild<QLabel*>("spdef_evs")->setText(tr("Sp. Defense EVS: ")+QString::number(std::get<2>(theResult)));
 
         for( unsigned int it = 0; it < theTurns.size(); it++ ) {
             QString final_result;
@@ -312,4 +322,3 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         }
     }
 }
-
