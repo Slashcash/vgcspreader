@@ -56,6 +56,7 @@ Normalize
 Galvanize  
 Huge Power  
 Parental Bond  
+Heatproof  
 
 Abilities that do not affect damage caclculation like Intimidate are normally supported.
 

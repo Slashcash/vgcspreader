@@ -294,6 +294,7 @@ float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& th
         else if( getAbility() == Ability::Multiscale ) modifier = modifier * 0.5;
         else if( (getAbility() == Ability::Filter || getAbility() == Ability::Solid_Rock) && calculateTypeModifier(theAttacker, theMove) > 2  ) modifier = modifier * 0.75;
         else if( getAbility() == Ability::Levitate && theMove.getMoveType() == Type::Ground ) modifier = modifier * 0;
+        else if( getAbility() == Ability::Heatproof && theMove.getMoveType() == Type::Fire ) modifier = modifier * 0.5;
     }
 
     if( theAttacker.getItem() == Items::Life_Orb ) modifier = modifier * 1.3;
@@ -476,7 +477,6 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
 
     //INFRA TURN MODIFIERS (these effects apply after each attack in a turn)
     if( buffer_it->second.isParentalBondMove() ) { //adding another move if it is a parental bond
-        qDebug() << "LOL";
         Pokemon parental_pokemon = buffer_it->first;
         Move parental_move = buffer_it->second;
         parental_move.setBasePower(parental_move.getBasePower()/4);
@@ -528,10 +528,31 @@ float Pokemon::getKOProbability(const Turn& theTurn) const {
     return (float(ko_count) / damages.size()) * 100;
 }
 
+int Pokemon::outspeedPokemon(const std::vector<Pokemon>& theVector) {
+    const unsigned int MAX_EVS = 510;
+    const unsigned int MAX_EVS_SINGLE_STAT = 252;
+
+    Pokemon defender = *this;
+
+    unsigned int assignable_evs = MAX_EVS - (defender.getEV(Stats::ATK) + defender.getEV(Stats::SPATK) + defender.getEV(Stats::DEF) + defender.getEV(Stats::SPDEF) + defender.getEV(Stats::HP));
+    defender.setAllEV(0, 0, 0, 0, 0, 0);
+
+    std::vector<uint16_t> speed_stats;
+    for(auto it = theVector.begin(); it < theVector.end(); it++) speed_stats.push_back(it->getBoostedStat(Stats::SPE));
+
+    uint16_t speed_max = *std::max_element(speed_stats.begin(), speed_stats.end());
+
+    for(unsigned int i = 0; i < MAX_EVS_SINGLE_STAT; i++) {
+        defender.setEV(Stats::SPE, i);
+        if( defender.getBoostedStat(Stats::SPE) > speed_max && i <= assignable_evs ) return i;
+    }
+
+    return -1;
+}
 
 std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, std::vector<float>& theKoProbability) {
-    if( theTurn.size() != theDefModifiers.size() ) return std::make_tuple(-1, -1, -1);
-    if( theTurn.empty() ) return std::make_tuple(-1, -1, -1);
+    if( theTurn.size() != theDefModifiers.size() ) return std::make_tuple(-2, -2, -2);
+    if( theTurn.empty() ) return std::make_tuple(-3, -3, -3);
 
     auto results = resistMoveLoop(theTurn, theDefModifiers);
 
@@ -569,28 +590,6 @@ std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, 
     }
 
     return final_pair;
-}
-
-int Pokemon::outspeedPokemon(const std::vector<Pokemon>& theVector) {
-    const unsigned int MAX_EVS = 510;
-    const unsigned int MAX_EVS_SINGLE_STAT = 252;
-
-    Pokemon defender = *this;
-
-    unsigned int assignable_evs = MAX_EVS - (defender.getEV(Stats::ATK) + defender.getEV(Stats::SPATK) + defender.getEV(Stats::DEF) + defender.getEV(Stats::SPDEF) + defender.getEV(Stats::HP));
-    defender.setAllEV(0, 0, 0, 0, 0, 0);
-
-    std::vector<uint16_t> speed_stats;
-    for(auto it = theVector.begin(); it < theVector.end(); it++) speed_stats.push_back(it->getBoostedStat(Stats::SPE));
-
-    uint16_t speed_max = *std::max_element(speed_stats.begin(), speed_stats.end());
-
-    for(unsigned int i = 0; i < MAX_EVS_SINGLE_STAT; i++) {
-        defender.setEV(Stats::SPE, i);
-        if( defender.getBoostedStat(Stats::SPE) > speed_max && i <= assignable_evs ) return i;
-    }
-
-    return -1;
 }
 
 std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) {

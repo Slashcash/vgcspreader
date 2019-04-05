@@ -20,6 +20,7 @@ class Move;
 class Turn;
 
 typedef std::tuple<float, int16_t, int16_t> defense_modifier;
+typedef std::pair<int16_t, int16_t> attack_modifier;
 
 enum Status {
     NO_STATUS,
