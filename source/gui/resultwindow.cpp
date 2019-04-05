@@ -13,8 +13,13 @@ ResultWindow::ResultWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent,
     createResultGroupBox();
     main_layout->addWidget(result_groupbox);
 
-    text_edit = new QTextEdit;
-    main_layout->addWidget(text_edit);
+    QVBoxLayout* calc_layout = new QVBoxLayout;
+    calc_groupbox = new QGroupBox("Calcs:");
+    calc_groupbox->setLayout(calc_layout);
+    QTextEdit* text_edit = new QTextEdit;
+    text_edit->setObjectName("text_edit");
+    calc_layout->addWidget(text_edit);
+    main_layout->addWidget(calc_groupbox);
 
     layout()->setSizeConstraint( QLayout::SetFixedSize );
 }
@@ -46,15 +51,14 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
 
         result_groupbox->findChild<QLabel*>("hp_evs")->setText(tr("Sorry, no such spread exists"));
-        text_edit->setVisible(false);
+        calc_groupbox->setVisible(false);
     }
 
     else {
-        text_edit->setText("");
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(true);
-        text_edit->setVisible(true);
+        calc_groupbox->findChild<QTextEdit*>("text_edit")->setVisible(true);
 
         result_groupbox->findChild<QLabel*>("hp_evs")->setText(tr("HP EVS: ")+QString::number(std::get<0>(theResult)));
         result_groupbox->findChild<QLabel*>("def_evs")->setText(tr("Defense EVS: ")+QString::number(std::get<1>(theResult)));
@@ -318,7 +322,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
 
             final_result = first_result + second_result + defender_result + modifier_result + roll_result + damage_result + restore_result + "\n\n";
 
-            text_edit->setText(text_edit->toPlainText() + final_result);
+            calc_groupbox->findChild<QTextEdit*>("text_edit")->setText(calc_groupbox->findChild<QTextEdit*>("text_edit")->toPlainText() + final_result);
         }
     }
 }

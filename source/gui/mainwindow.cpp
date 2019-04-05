@@ -374,31 +374,13 @@ void MainWindow::createDefendingPokemonGroupBox() {
     assigned_layout->setSpacing(10);
 
     //atk evs
-    QLabel* atkev_label = new QLabel(tr("Atk EV:"));
-    assigned_layout->addWidget(atkev_label);
+    QLabel* assignedev_label = new QLabel(tr("Already assigned EV:"));
+    assigned_layout->addWidget(assignedev_label);
 
-    QSpinBox* atkev = new QSpinBox;
-    atkev->setObjectName("defending_atkev_spinbox");
-    atkev->setRange(0, 252);
-    assigned_layout->addWidget(atkev);
-
-    //spatk evs
-    QLabel* spatkev_label = new QLabel(tr("Sp. Atk EV:"));
-    assigned_layout->addWidget(spatkev_label);
-
-    QSpinBox* spatkev = new QSpinBox;
-    spatkev->setRange(0, 252);
-    spatkev->setObjectName("defending_spatkev_spinbox");
-    assigned_layout->addWidget(spatkev);
-
-    //spe ev
-    QLabel* speev_label = new QLabel(tr("Speed EV:"));
-    assigned_layout->addWidget(speev_label);
-
-    QSpinBox* speev = new QSpinBox;
-    speev->setObjectName("defending_speev_spinbox");
-    speev->setRange(0, 252);
-    assigned_layout->addWidget(speev);
+    QSpinBox* assignedev = new QSpinBox;
+    assignedev->setObjectName("defending_assignedev_spinbox");
+    assignedev->setRange(0, 508);
+    assigned_layout->addWidget(assignedev);
 
     main_form_layout->addLayout(assigned_layout);
 
@@ -570,9 +552,7 @@ void MainWindow::calculate() {
     selected_pokemon.setIV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->value());
     selected_pokemon.setIV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->value());
     selected_pokemon.setIV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->value());
-    selected_pokemon.setEV(Stats::ATK, defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->value());
-    selected_pokemon.setEV(Stats::SPATK, defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->value());
-    selected_pokemon.setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->value());
+    selected_pokemon.setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->value());
 
     std::vector<float> rolls;
     auto result = selected_pokemon.resistMove(turns, modifiers, rolls);

@@ -5,6 +5,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QTextEdit>
+#include <QHBoxLayout>
 
 #include "pokemon.hpp"
 #include "turn.hpp"
@@ -12,7 +13,7 @@
 class ResultWindow : public QDialog {
     private:
         QGroupBox* result_groupbox;
-        QTextEdit* text_edit;
+        QGroupBox* calc_groupbox;
 
         void createResultGroupBox();
 

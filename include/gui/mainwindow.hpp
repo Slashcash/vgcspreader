@@ -37,35 +37,6 @@ class MainWindow : public QDialog {
 
         QGroupBox* defending_groupbox;
 
-        //DEFENDING POKEMON GROUPBOX
-        QGridLayout* defending_pokemon_layout;
-        QComboBox* defending_pokemon_species_combobox;
-        QLabel* defending_pokemon_species_label;
-        QComboBox* defending_pokemon_form_combobox;
-        QLabel* defending_pokemon_form_label;
-        QComboBox* defending_pokemon_type1_combobox;
-        QLabel* defending_pokemon_type1_label;
-        QComboBox* defending_pokemon_type2_combobox;
-        QLabel* defending_pokemon_type2_label;
-        QComboBox* defending_pokemon_ability_combobox;
-        QLabel* defending_pokemon_ability_label;
-        QComboBox* defending_pokemon_nature_combobox;
-        QLabel* defending_pokemon_nature_label;
-        QComboBox* defending_pokemon_item_combobox;
-        QLabel* defending_pokemon_item_label;
-        QSpinBox* defending_pokemon_attack_spinbox;
-        QLabel* defending_pokemon_attack_label;
-        QSpinBox* defending_pokemon_spattack_spinbox;
-        QLabel* defending_pokemon_spattack_label;
-        QSpinBox* defending_pokemon_speed_spinbox;
-        QLabel* defending_pokemon_speed_label;
-        QLabel* defending_pokemon_hpiv_label;
-        QSpinBox* defending_pokemon_hpiv_spinbox;
-        QLabel* defending_pokemon_defiv_label;
-        QSpinBox* defending_pokemon_defiv_spinbox;
-        QLabel* defending_pokemon_spdefiv_label;
-        QSpinBox* defending_pokemon_spdefiv_spinbox;
-
         //MOVES GROUPBOX
         QGridLayout* moves_layout;
         QGroupBox* moves_groupbox;
