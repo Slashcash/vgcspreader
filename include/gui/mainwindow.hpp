@@ -36,15 +36,7 @@ class MainWindow : public QDialog {
         ResultWindow* result_window;
 
         QGroupBox* defending_groupbox;
-
-        //MOVES GROUPBOX
-        QGridLayout* moves_layout;
         QGroupBox* moves_groupbox;
-        QPushButton* moves_add_button;
-        QPushButton* moves_edit_button;
-        QPushButton* moves_delete_button;
-        QTableWidget* moves_view;
-
         QDialogButtonBox* bottom_buttons;
 
         std::vector<QString> species_names;
