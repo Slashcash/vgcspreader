@@ -61,7 +61,7 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         calc_groupbox->setVisible(false);
     }
 
-    if( std::get<0>(theResult) == -3 || std::get<1>(theResult) == -3 || std::get<2>(theResult) == -3  ) {
+    else if( std::get<0>(theResult) == -3 || std::get<1>(theResult) == -3 || std::get<2>(theResult) == -3  ) {
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(false);
@@ -74,7 +74,8 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(true);
-        calc_groupbox->findChild<QTextEdit*>("text_edit")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("sprite")->setVisible(true);
+        calc_groupbox->setVisible(true);
         calc_groupbox->findChild<QTextEdit*>("text_edit")->clear();
 
         //setting correct sprite
