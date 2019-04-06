@@ -634,6 +634,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                 defender.setEV(Stats::SPDEF, spdef_assigned);
 
                 for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
+                    //qDebug() << QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
                     if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
                     defender.setEV(Stats::DEF, def_assigned);
 
@@ -664,7 +665,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     tolerances.resize(theTurn.size(), 0);
 
     while( results.empty() && roll_count < (MAX_ROLL+1) * theTurn.size()/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
-        for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
+        //for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
 
         unsigned int tolerance_index = roll_count / (MAX_ROLL+1);
         (*(tolerances.end()-1-tolerance_index)) += ROLL_OFFSET;
@@ -692,6 +693,8 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                 if( simplified && simplified_type == Move::PHYSICAL && spdef_assigned > 0 ) break;
 
                 for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
+                    //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
+
                     if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
 
                     bool to_add = true;
