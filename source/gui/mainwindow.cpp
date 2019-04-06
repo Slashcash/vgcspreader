@@ -578,7 +578,7 @@ void MainWindow::calculate() {
     for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
 
     result_window->setModal(true);
-    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, int_damages, rolls);
+    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, rolls);
     result_window->show();
 }
 
