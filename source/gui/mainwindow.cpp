@@ -10,6 +10,8 @@
 #include <QHeaderView>
 #include <QFormLayout>
 #include <QDebug>
+#include <QThread>
+#include <qtconcurrentrun.h>
 
 #include "pokemon.hpp"
 
@@ -45,16 +47,26 @@ MainWindow::MainWindow() {
 
     //bottom buttons
     bottom_buttons = new QDialogButtonBox;
+    QPushButton* calculate_button = new QPushButton(tr("Calculate"));
+    calculate_button->setObjectName("calculate_button");
+    QPushButton* clear_button = new QPushButton(tr("Clear"));
+    clear_button->setObjectName("clear_button");
+    QPushButton* stop_button = new QPushButton(tr("Stop"));
+    stop_button->setObjectName("stop_button");
 
-    bottom_buttons->addButton(tr("Clear"), QDialogButtonBox::ButtonRole::RejectRole);
-    bottom_buttons->addButton(tr("Calculate"), QDialogButtonBox::ButtonRole::AcceptRole);
+    bottom_buttons->addButton(clear_button, QDialogButtonBox::ButtonRole::ResetRole);
+    bottom_buttons->addButton(calculate_button, QDialogButtonBox::ButtonRole::AcceptRole);
+    bottom_buttons->addButton(stop_button, QDialogButtonBox::ButtonRole::RejectRole);
+    stop_button->setVisible(false);
 
     main_layout->addWidget(bottom_buttons, Qt::AlignRight);
 
     //SIGNAL
     connect(move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMove()));
-    connect(bottom_buttons, SIGNAL(rejected()), this, SLOT(clear()));
+    connect(bottom_buttons, SIGNAL(clicked(QAbstractButton*)), this, SLOT(clear(QAbstractButton*)));
     connect(bottom_buttons, SIGNAL(accepted()), this, SLOT(calculate()));
+    connect(bottom_buttons, SIGNAL(rejected()), this, SLOT(calculateStop()));
+    connect(&this->future_watcher, SIGNAL (finished()), this, SLOT (calculateFinished()));
 
     layout()->setSizeConstraint( QLayout::SetFixedSize );
 }
@@ -528,58 +540,45 @@ void MainWindow::addTurn(const Turn& theTurn, const defense_modifier& theModifie
     }
 }
 
-void MainWindow::clear() {
-    defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->setCurrentIndex(0);
-    defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setCurrentIndex(0);
-    defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->setCurrentIndex(0);
-    defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->setCurrentIndex(0);
-    defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->setValue(31);
-    defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->setValue(31);
-    defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->setValue(31);
-    defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->setValue(0);
+void MainWindow::clear(QAbstractButton* theButton) {
+    if( theButton->objectName() == "clear_button" ) {
+        defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->setCurrentIndex(0);
+        defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setCurrentIndex(0);
+        defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->setCurrentIndex(0);
+        defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->setCurrentIndex(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->setValue(31);
+        defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->setValue(31);
+        defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->setValue(31);
+        defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->setValue(0);
 
-    moves_groupbox->findChild<QTableWidget*>("moves_view")->clear();
-    turns.clear();
-    modifiers.clear();
+        moves_groupbox->findChild<QTableWidget*>("moves_view")->clear();
+        turns.clear();
+        modifiers.clear();
+    }
 }
 
 void MainWindow::calculate() {
-    Pokemon selected_pokemon(defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->currentIndex()+1);
-    selected_pokemon.setForm(defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->currentIndex());
-    selected_pokemon.setType(0, (Type)defending_groupbox->findChild<QComboBox*>("defending_type1_combobox")->currentIndex());
-    selected_pokemon.setType(1, (Type)defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->currentIndex());
-    selected_pokemon.setNature((Stats::Nature)defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->currentIndex());
-    selected_pokemon.setAbility((Ability)defending_groupbox->findChild<QComboBox*>("defending_abilities_combobox")->currentIndex());
-    selected_pokemon.setItem(Item(defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->currentIndex()));
-    selected_pokemon.setIV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->value());
-    selected_pokemon.setIV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->value());
-    selected_pokemon.setIV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->value());
-    selected_pokemon.setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->value());
+    selected_pokemon = new Pokemon(defending_groupbox->findChild<QComboBox*>("defending_species_combobox")->currentIndex()+1);
+    selected_pokemon->setForm(defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->currentIndex());
+    selected_pokemon->setType(0, (Type)defending_groupbox->findChild<QComboBox*>("defending_type1_combobox")->currentIndex());
+    selected_pokemon->setType(1, (Type)defending_groupbox->findChild<QComboBox*>("defending_type2_combobox")->currentIndex());
+    selected_pokemon->setNature((Stats::Nature)defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->currentIndex());
+    selected_pokemon->setAbility((Ability)defending_groupbox->findChild<QComboBox*>("defending_abilities_combobox")->currentIndex());
+    selected_pokemon->setItem(Item(defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->currentIndex()));
+    selected_pokemon->setIV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->value());
+    selected_pokemon->setIV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->value());
+    selected_pokemon->setIV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->value());
+    selected_pokemon->setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->value());
 
-    std::vector<float> rolls;
-    auto result = selected_pokemon.resistMove(turns, modifiers, rolls);
+    //enabling the stop button
+    //bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(true);
+    //disabling other buttons
+    bottom_buttons->findChild<QPushButton*>("calculate_button")->setEnabled(false);
+    bottom_buttons->findChild<QPushButton*>("clear_button")->setEnabled(false);
 
-    //THIS SHOULD PROBABLY BE CALCULATED INSIDE THE resistMove FUNCTION; WE'LL SEE
-    selected_pokemon.setEV(Stats::HP, std::get<0>(result));
-    selected_pokemon.setEV(Stats::DEF, std::get<1>(result));
-    selected_pokemon.setEV(Stats::SPDEF, std::get<2>(result));
 
-    std::vector<std::vector<float>> damages;
-    std::vector<std::vector<int>> int_damages;
-
-    for( auto it = 0; it < turns.size(); it++ ) {
-        selected_pokemon.setModifier(Stats::HP, std::get<0>(modifiers[it]));
-        selected_pokemon.setModifier(Stats::DEF, std::get<1>(modifiers[it]));
-        selected_pokemon.setModifier(Stats::SPDEF, std::get<2>(modifiers[it]));
-        damages.push_back(selected_pokemon.getDamagePercentage(turns[it]));
-        int_damages.push_back(selected_pokemon.getDamageInt(turns[it]));
-    }
-
-    for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
-
-    result_window->setModal(true);
-    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, rolls);
-    result_window->show();
+    future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns, modifiers, std::ref(rolls));
+    future_watcher.setFuture(future);
 }
 
 QString MainWindow::retrieveFormName(const int species, const int form) {
@@ -595,4 +594,40 @@ QString MainWindow::retrieveFormName(const int species, const int form) {
     }*/
 
     else return "Form " + QString::number(form);
+}
+
+void MainWindow::calculateFinished() {
+    std::tuple<int, int, int> result = future.result();
+
+    //THIS SHOULD PROBABLY BE CALCULATED INSIDE THE resistMove FUNCTION; WE'LL SEE
+    selected_pokemon->setEV(Stats::HP, std::get<0>(result));
+    selected_pokemon->setEV(Stats::DEF, std::get<1>(result));
+    selected_pokemon->setEV(Stats::SPDEF, std::get<2>(result));
+
+    std::vector<std::vector<float>> damages;
+    std::vector<std::vector<int>> int_damages;
+
+    for( auto it = 0; it < turns.size(); it++ ) {
+        selected_pokemon->setModifier(Stats::HP, std::get<0>(modifiers[it]));
+        selected_pokemon->setModifier(Stats::DEF, std::get<1>(modifiers[it]));
+        selected_pokemon->setModifier(Stats::SPDEF, std::get<2>(modifiers[it]));
+        damages.push_back(selected_pokemon->getDamagePercentage(turns[it]));
+        int_damages.push_back(selected_pokemon->getDamageInt(turns[it]));
+    }
+
+    for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
+
+    result_window->setModal(true);
+    result_window->setResult(*selected_pokemon, modifiers, turns, result, damages, rolls);
+    result_window->show();
+    delete selected_pokemon;
+
+    //enabling/disabling buttons back
+    bottom_buttons->findChild<QPushButton*>("calculate_button")->setEnabled(true);
+    bottom_buttons->findChild<QPushButton*>("clear_button")->setEnabled(true);
+    //bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(false);
+}
+
+void MainWindow::calculateStop() {
+    future.cancel();
 }

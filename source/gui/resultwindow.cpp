@@ -97,7 +97,6 @@ void ResultWindow::setResult(const Pokemon& theDefendingPokemon, const std::vect
         result_groupbox->findChild<QLabel*>("spdef_evs")->setText(tr("Sp. Defense EVS: ")+QString::number(std::get<2>(theResult)));
 
         for( unsigned int it = 0; it < theTurns.size(); it++ ) {
-
             QString final_result = getCompleteString(theTurns[it], theDefendingPokemon, theResult, theDefModifier[it], true, theRoll[it], theDamagePerc[it]);
             calc_groupbox->findChild<QTextEdit*>("text_edit")->setText(calc_groupbox->findChild<QTextEdit*>("text_edit")->toPlainText() + final_result + "\n\n");
         }

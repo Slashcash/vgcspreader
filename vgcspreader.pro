@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets concurrent
 
 INCLUDEPATH += include include/gui
 

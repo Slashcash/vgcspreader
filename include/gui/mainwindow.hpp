@@ -11,6 +11,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QTableWidget>
+#include <QFutureWatcher>
 
 #include "movewindow.hpp"
 #include "resultwindow.hpp"
@@ -28,12 +29,19 @@ class MainWindow : public QDialog {
         void openMoveWindowEdit(bool checked);
         void solveMove();
         void openMoveWindow(bool checked);
-        void clear();
+        void clear(QAbstractButton* theButton);
         void calculate();
+        void calculateStop();
+        void calculateFinished();
 
     private:
         MoveWindow* move_window;
         ResultWindow* result_window;
+
+        QFutureWatcher<void> future_watcher;
+        QFuture<std::tuple<int, int, int>> future;
+        Pokemon* selected_pokemon; //here because when i calculate damages i need this, but it can be done better (some calculate() for explanation)
+        std::vector<float> rolls; //this one too
 
         QGroupBox* defending_groupbox;
         QGroupBox* moves_groupbox;
