@@ -60,8 +60,8 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::setButtonClickable(int row, int column) {
-    moves_edit_button->setEnabled(true);
-    moves_delete_button->setEnabled(true);
+    moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(true);
+    moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(true);
 }
 
 void MainWindow::setDefendingPokemonSpecies(int index) {
@@ -131,14 +131,14 @@ void MainWindow::setDefendingPokemonForm(int index) {
 }
 
 void MainWindow::eraseMove(bool checked) {
-    turns.erase(turns.begin() + moves_view->currentRow());
-    modifiers.erase(modifiers.begin() + moves_view->currentRow());
+    turns.erase(turns.begin() +  moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow());
+    modifiers.erase(modifiers.begin() + moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow());
 
-    moves_view->removeRow(moves_view->currentRow());
+    moves_groupbox->findChild<QTableWidget*>("moves_view")->removeRow(moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow());
 
     if( turns.empty() ) {
-        moves_edit_button->setEnabled(false);
-        moves_delete_button->setEnabled(false);
+        moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
+        moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
     }
 }
 
@@ -374,31 +374,13 @@ void MainWindow::createDefendingPokemonGroupBox() {
     assigned_layout->setSpacing(10);
 
     //atk evs
-    QLabel* atkev_label = new QLabel(tr("Atk EV:"));
-    assigned_layout->addWidget(atkev_label);
+    QLabel* assignedev_label = new QLabel(tr("Already assigned EV:"));
+    assigned_layout->addWidget(assignedev_label);
 
-    QSpinBox* atkev = new QSpinBox;
-    atkev->setObjectName("defending_atkev_spinbox");
-    atkev->setRange(0, 252);
-    assigned_layout->addWidget(atkev);
-
-    //spatk evs
-    QLabel* spatkev_label = new QLabel(tr("Sp. Atk EV:"));
-    assigned_layout->addWidget(spatkev_label);
-
-    QSpinBox* spatkev = new QSpinBox;
-    spatkev->setRange(0, 252);
-    spatkev->setObjectName("defending_spatkev_spinbox");
-    assigned_layout->addWidget(spatkev);
-
-    //spe ev
-    QLabel* speev_label = new QLabel(tr("Speed EV:"));
-    assigned_layout->addWidget(speev_label);
-
-    QSpinBox* speev = new QSpinBox;
-    speev->setObjectName("defending_speev_spinbox");
-    speev->setRange(0, 252);
-    assigned_layout->addWidget(speev);
+    QSpinBox* assignedev = new QSpinBox;
+    assignedev->setObjectName("defending_assignedev_spinbox");
+    assignedev->setRange(0, 508);
+    assigned_layout->addWidget(assignedev);
 
     main_form_layout->addLayout(assigned_layout);
 
@@ -418,26 +400,30 @@ void MainWindow::createDefendingPokemonGroupBox() {
 void MainWindow::createMovesGroupBox() {
     moves_groupbox = new QGroupBox(tr("Moves:"));
 
-    moves_layout = new QGridLayout;
+    QGridLayout* moves_layout = new QGridLayout;
 
     moves_groupbox->setLayout(moves_layout);
 
     //MOVES ADD BUTTON
-    moves_add_button = new QPushButton(tr("Add"));
+    QPushButton* moves_add_button = new QPushButton(tr("Add"));
+    moves_add_button->setObjectName("moves_add_button");
     moves_layout->addWidget(moves_add_button, 0, 0);
 
     //MOVES EDIT BUTTON
-    moves_edit_button = new QPushButton(tr("Edit"));
+    QPushButton* moves_edit_button = new QPushButton(tr("Edit"));
+    moves_edit_button->setObjectName("moves_edit_button");
     moves_edit_button->setEnabled(false);
     moves_layout->addWidget(moves_edit_button, 1, 0);
 
     //MOVES DELETE BUTTON
-    moves_delete_button = new QPushButton(tr("Delete"));
+    QPushButton* moves_delete_button = new QPushButton(tr("Delete"));
+    moves_delete_button->setObjectName("moves_delete_button");
     moves_delete_button->setEnabled(false);
     moves_layout->addWidget(moves_delete_button, 2, 0);
 
     //MOVES VIEW
-    moves_view = new QTableWidget(0, 3);
+    QTableWidget* moves_view = new QTableWidget(0, 3);
+    moves_view->setObjectName("moves_view");
     moves_layout->addWidget(moves_view, 0, 1, 10, 10);
     moves_view->horizontalHeader()->setVisible(false);
     moves_view->verticalHeader()->setVisible(false);
@@ -454,7 +440,7 @@ void MainWindow::createMovesGroupBox() {
 
 void MainWindow::solveMove() {
     if( !move_window->isEditMode() ) {
-        moves_view->setRowCount(moves_view->rowCount()+1);
+        moves_groupbox->findChild<QTableWidget*>("moves_view")->setRowCount(moves_groupbox->findChild<QTableWidget*>("moves_view")->rowCount()+1);
 
         auto buffer = turns.back().getMoves();
 
@@ -463,9 +449,9 @@ void MainWindow::solveMove() {
         else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
         QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + move_name_1);
 
-        moves_view->setItem(turns.size()-1, 0, new QTableWidgetItem(move1));
+       moves_groupbox->findChild<QTableWidget*>("moves_view")->setItem(turns.size()-1, 0, new QTableWidgetItem(move1));
 
-        moves_view->resizeColumnToContents(0);
+        moves_groupbox->findChild<QTableWidget*>("moves_view")->resizeColumnToContents(0);
 
         if( turns.back().getMoveNum() > 1 ) {
             QString move_name_2;
@@ -476,25 +462,25 @@ void MainWindow::solveMove() {
 
             QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
             plus_sign->setTextAlignment(Qt::AlignCenter);
-            moves_view->setItem(turns.size()-1, 1, plus_sign);
-            moves_view->setItem(turns.size()-1, 2, new QTableWidgetItem(move2));
-            moves_view->resizeColumnToContents(2);
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->setItem(turns.size()-1, 1, plus_sign);
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->setItem(turns.size()-1, 2, new QTableWidgetItem(move2));
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->resizeColumnToContents(2);
         }
     }
 
     else {
-        auto buffer = turns[moves_view->currentRow()].getMoves();
+        auto buffer = turns[moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow()].getMoves();
 
         QString move_name_1;
         if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
         else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
         QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + move_name_1);
 
-        moves_view->setItem(moves_view->currentRow(), 0, new QTableWidgetItem(move1));
+        moves_groupbox->findChild<QTableWidget*>("moves_view")->setItem(moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow(), 0, new QTableWidgetItem(move1));
 
-        moves_view->resizeColumnToContents(0);
+        moves_groupbox->findChild<QTableWidget*>("moves_view")->resizeColumnToContents(0);
 
-        if( turns[moves_view->currentRow()].getMoveNum() > 1 ) {
+        if( turns[moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow()].getMoveNum() > 1 ) {
             QString move_name_2;
             if( buffer[1].second.isZ() ) move_name_2 = tr("Z-") + moves_names[buffer[1].second.getMoveIndex()];
             else move_name_2 = moves_names[buffer[1].second.getMoveIndex()];
@@ -503,14 +489,14 @@ void MainWindow::solveMove() {
 
             QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
             plus_sign->setTextAlignment(Qt::AlignCenter);
-            moves_view->setItem(moves_view->currentRow(), 1, plus_sign);
-            moves_view->setItem(moves_view->currentRow(), 2, new QTableWidgetItem(move2));
-            moves_view->resizeColumnToContents(2);
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->setItem(moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow(), 1, plus_sign);
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->setItem(moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow(), 2, new QTableWidgetItem(move2));
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->resizeColumnToContents(2);
         }
 
         else {
-            moves_view->takeItem(moves_view->currentRow(), 1);
-            moves_view->takeItem(moves_view->currentRow(), 2);
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->takeItem(moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow(), 1);
+            moves_groupbox->findChild<QTableWidget*>("moves_view")->takeItem(moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow(), 2);
         }
     }
 }
@@ -524,7 +510,7 @@ void MainWindow::openMoveWindow(bool checked) {
 
 void MainWindow::openMoveWindowEdit(bool checked) {
     move_window->setAsBlank();
-    move_window->setAsTurn(turns[moves_view->currentRow()], modifiers[moves_view->currentRow()]);
+    move_window->setAsTurn(turns[moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow()], modifiers[moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow()]);
     move_window->setEditMode(true);
     move_window->setModal(true);
     move_window->setVisible(true);
@@ -537,8 +523,8 @@ void MainWindow::addTurn(const Turn& theTurn, const defense_modifier& theModifie
     }
 
     else {
-        turns[moves_view->currentRow()] = theTurn;
-        modifiers[moves_view->currentRow()] = theModifier;
+        turns[ moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow()] = theTurn;
+        modifiers[ moves_groupbox->findChild<QTableWidget*>("moves_view")->currentRow()] = theModifier;
     }
 }
 
@@ -550,11 +536,9 @@ void MainWindow::clear() {
     defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->setValue(31);
     defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->setValue(31);
     defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->setValue(31);
-    defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->setValue(0);
-    defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->setValue(0);
-    defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->setValue(0);
+    defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->setValue(0);
 
-    moves_view->clear();
+    moves_groupbox->findChild<QTableWidget*>("moves_view")->clear();
     turns.clear();
     modifiers.clear();
 }
@@ -570,9 +554,7 @@ void MainWindow::calculate() {
     selected_pokemon.setIV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->value());
     selected_pokemon.setIV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->value());
     selected_pokemon.setIV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->value());
-    selected_pokemon.setEV(Stats::ATK, defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->value());
-    selected_pokemon.setEV(Stats::SPATK, defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->value());
-    selected_pokemon.setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->value());
+    selected_pokemon.setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->value());
 
     std::vector<float> rolls;
     auto result = selected_pokemon.resistMove(turns, modifiers, rolls);
@@ -596,7 +578,7 @@ void MainWindow::calculate() {
     for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
 
     result_window->setModal(true);
-    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, int_damages, rolls);
+    result_window->setResult(selected_pokemon, modifiers, turns, result, damages, rolls);
     result_window->show();
 }
 
