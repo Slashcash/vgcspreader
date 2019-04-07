@@ -40,7 +40,7 @@ class MainWindow : public QDialog {
 
         QFutureWatcher<void> future_watcher;
         QFuture<std::tuple<int, int, int>> future;
-        Pokemon* selected_pokemon; //here because when i calculate damages i need this, but it can be done better (some calculate() for explanation)
+        Pokemon* selected_pokemon; //here because when i calculate damages i need this, but it can be done better (see calculate() for explanation)
         std::vector<float> rolls; //this one too
 
         QGroupBox* defending_groupbox;

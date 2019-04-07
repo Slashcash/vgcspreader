@@ -11,6 +11,7 @@
 #include <QFormLayout>
 #include <QDebug>
 #include <QThread>
+#include <QProgressBar>
 #include <qtconcurrentrun.h>
 
 #include "pokemon.hpp"
@@ -433,6 +434,21 @@ void MainWindow::createMovesGroupBox() {
     moves_delete_button->setEnabled(false);
     moves_layout->addWidget(moves_delete_button, 2, 0);
 
+    //adding the calculate spread label
+    QLabel* calculating_spread_label = new QLabel(tr("Calculating spread..."));
+    calculating_spread_label->setObjectName("calculating_spread_label");
+    calculating_spread_label->setVisible(false);
+    moves_layout->addWidget(calculating_spread_label, 11, 1);
+
+    //adding the progress bar
+    QProgressBar* progress_bar = new QProgressBar;
+    progress_bar->setObjectName("progress_bar");
+    progress_bar->setMinimum(0);
+    progress_bar->setMaximum(0);
+    progress_bar->setMaximumWidth(60);
+    moves_layout->addWidget(progress_bar, 11, 2);
+    progress_bar->setVisible(false);
+
     //MOVES VIEW
     QTableWidget* moves_view = new QTableWidget(0, 3);
     moves_view->setObjectName("moves_view");
@@ -575,6 +591,9 @@ void MainWindow::calculate() {
     //disabling other buttons
     bottom_buttons->findChild<QPushButton*>("calculate_button")->setEnabled(false);
     bottom_buttons->findChild<QPushButton*>("clear_button")->setEnabled(false);
+    //enabling the progress bar
+    moves_groupbox->findChild<QLabel*>("calculating_spread_label")->setVisible(true);
+    moves_groupbox->findChild<QProgressBar*>("progress_bar")->setVisible(true);
 
 
     future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns, modifiers, std::ref(rolls));
@@ -628,6 +647,9 @@ void MainWindow::calculateFinished() {
     bottom_buttons->findChild<QPushButton*>("calculate_button")->setEnabled(true);
     bottom_buttons->findChild<QPushButton*>("clear_button")->setEnabled(true);
     bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(false);
+    moves_groupbox->findChild<QLabel*>("calculating_spread_label")->setVisible(false);
+    moves_groupbox->findChild<QProgressBar*>("progress_bar")->setVisible(false);
+
 }
 
 void MainWindow::calculateStop() {
