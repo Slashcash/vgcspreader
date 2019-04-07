@@ -19,6 +19,7 @@
 MainWindow::MainWindow() {
     setObjectName("MainWindow");
     setWindowTitle("VGCSpreader");
+    selected_pokemon = nullptr;
 
     createDefendingPokemonGroupBox();
     createMovesGroupBox();
