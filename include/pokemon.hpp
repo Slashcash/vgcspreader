@@ -49,6 +49,7 @@ class Pokemon {
         unsigned int form;
         static std::mutex buffer_mutex;
         static std::mutex result_mutex;
+        bool abort_calculation; //this variable is needed to request a stop for the resistMove function
 
         void calculateTotal();
         std::vector<int> getDamage(const Pokemon& theAttacker, Move theMove) const;
@@ -94,6 +95,7 @@ class Pokemon {
         void setType(const unsigned int theIndex, const Type& theType) { types[form][theIndex] = theType; }
         void setGrounded(const bool theValue) { grounded = theValue; }
         void setForm(const unsigned int theForm) { if( theForm < formes_number ) { form = theForm; ability = possible_abilities[form][0]; calculateTotal(); } }
+        void abortCalculation() { abort_calculation = true; }
 
         unsigned int getPokedexNumber() const { return pokedex_number; }
         uint8_t getLevel() const { return stats.getLevel(); }

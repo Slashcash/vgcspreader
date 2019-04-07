@@ -571,7 +571,7 @@ void MainWindow::calculate() {
     selected_pokemon->setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->value());
 
     //enabling the stop button
-    //bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(true);
+    bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(true);
     //disabling other buttons
     bottom_buttons->findChild<QPushButton*>("calculate_button")->setEnabled(false);
     bottom_buttons->findChild<QPushButton*>("clear_button")->setEnabled(false);
@@ -617,17 +617,19 @@ void MainWindow::calculateFinished() {
 
     for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
 
-    result_window->setModal(true);
-    result_window->setResult(*selected_pokemon, modifiers, turns, result, damages, rolls);
-    result_window->show();
+    if( std::get<0>(result) != -4 && std::get<1>(result) != -4 && std::get<2>(result) != -4  ) { //if an abort has been requested we don't show the result window
+        result_window->setModal(true);
+        result_window->setResult(*selected_pokemon, modifiers, turns, result, damages, rolls);
+        result_window->show();
+    }
     delete selected_pokemon;
 
     //enabling/disabling buttons back
     bottom_buttons->findChild<QPushButton*>("calculate_button")->setEnabled(true);
     bottom_buttons->findChild<QPushButton*>("clear_button")->setEnabled(true);
-    //bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(false);
+    bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(false);
 }
 
 void MainWindow::calculateStop() {
-    future.cancel();
+    selected_pokemon->abortCalculation();
 }

@@ -37,6 +37,7 @@ const float Pokemon::type_matrix[18][18] = {
 
 Pokemon::Pokemon(const unsigned int thePokedexNumber, const Stats& theStats) {
     current_hp_percentage = 100;
+    abort_calculation = false;
 
     pokedex_number = thePokedexNumber;
 
@@ -556,7 +557,8 @@ std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, 
 
     auto results = resistMoveLoop(theTurn, theDefModifiers);
 
-    if( results.empty() ) return std::make_tuple(-1, -1, -1);
+    if( results.empty() && !abort_calculation ) return std::make_tuple(-1, -1, -1);
+    else if( abort_calculation ) return std::make_tuple(-4, -4, -4); //in case the function returned an abort request
 
     //finding all the minimum elements
     std::vector<unsigned int> sum_results;
@@ -626,7 +628,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     results_buffer.resize(theTurn.size());
     for(auto it = results_buffer.begin(); it < results_buffer.end(); it++) it->resize(ARRAY_SIZE*ARRAY_SIZE*ARRAY_SIZE);
 
-    for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+    for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1 && !abort_calculation; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
         defender.setEV(Stats::HP, hp_assigned);
 
         for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
@@ -657,6 +659,9 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     for( auto it = threads.begin(); it < threads.end(); it++ ) { (*it)->join(); delete *it; }
     threads.clear();
 
+    //if an abort has been requested we return an empty result
+    if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
+
     //if no result is found we search some rolls
     unsigned int roll_count = 0;
     const unsigned int MAX_ROLL = 20;
@@ -664,7 +669,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     std::vector<float> tolerances;
     tolerances.resize(theTurn.size(), 0);
 
-    while( results.empty() && roll_count < (MAX_ROLL+1) * theTurn.size()/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
+    while( results.empty() && roll_count < (MAX_ROLL+1) * theTurn.size() && !abort_calculation/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
         //for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
 
         unsigned int tolerance_index = roll_count / (MAX_ROLL+1);
@@ -715,6 +720,8 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
         roll_count++;
     }
 
+    //if an abort request is made
+    if( abort_calculation ) { std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> abort_result; abort_result.push_back(std::make_tuple(-4, -4, -4)); return abort_result; }
     return results;
 }
 
