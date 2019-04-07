@@ -61,6 +61,9 @@ class MainWindow : public QDialog {
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();
 
+    protected:
+        void reject();
+
     public:
         MainWindow();
 

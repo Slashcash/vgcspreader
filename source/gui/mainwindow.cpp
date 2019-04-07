@@ -58,7 +58,7 @@ MainWindow::MainWindow() {
 
     bottom_buttons->addButton(clear_button, QDialogButtonBox::ButtonRole::ResetRole);
     bottom_buttons->addButton(calculate_button, QDialogButtonBox::ButtonRole::AcceptRole);
-    bottom_buttons->addButton(stop_button, QDialogButtonBox::ButtonRole::RejectRole);
+    bottom_buttons->addButton(stop_button, QDialogButtonBox::ButtonRole::ApplyRole);
     stop_button->setVisible(false);
 
     main_layout->addWidget(bottom_buttons, Qt::AlignRight);
@@ -67,7 +67,7 @@ MainWindow::MainWindow() {
     connect(move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMove()));
     connect(bottom_buttons, SIGNAL(clicked(QAbstractButton*)), this, SLOT(clear(QAbstractButton*)));
     connect(bottom_buttons, SIGNAL(accepted()), this, SLOT(calculate()));
-    connect(bottom_buttons, SIGNAL(rejected()), this, SLOT(calculateStop()));
+    //connect(bottom_buttons, SIGNAL(rejected()), this, SLOT(calculateStop()));
     connect(&this->future_watcher, SIGNAL (finished()), this, SLOT (calculateFinished()));
 
     layout()->setSizeConstraint( QLayout::SetFixedSize );
@@ -572,6 +572,8 @@ void MainWindow::clear(QAbstractButton* theButton) {
         turns.clear();
         modifiers.clear();
     }
+
+    else if( theButton->objectName() == "stop_button" ) calculateStop();
 }
 
 void MainWindow::calculate() {
@@ -655,4 +657,9 @@ void MainWindow::calculateFinished() {
 
 void MainWindow::calculateStop() {
     selected_pokemon->abortCalculation();
+}
+
+void MainWindow::reject() {
+    calculateStop(); //just in case a calculation is still in process
+    QDialog::reject();
 }
