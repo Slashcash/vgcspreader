@@ -628,7 +628,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     results_buffer.resize(theTurn.size());
     for(auto it = results_buffer.begin(); it < results_buffer.end(); it++) it->resize(ARRAY_SIZE*ARRAY_SIZE*ARRAY_SIZE);
 
-    for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1 && !abort_calculation; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+    for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
         defender.setEV(Stats::HP, hp_assigned);
 
         for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
@@ -638,6 +638,9 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                 for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
                     //qDebug() << QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
                     if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
+                    //if an abort has been requested we return an empty result
+                    if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
+
                     defender.setEV(Stats::DEF, def_assigned);
 
                     //if we are on a single-core architecture launching it in a separate thread just creates an useless overhead
@@ -659,7 +662,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     for( auto it = threads.begin(); it < threads.end(); it++ ) { (*it)->join(); delete *it; }
     threads.clear();
 
-    //if an abort has been requested we return an empty result
+    //if an abort has been requested between the loop and the join operation we return an empty result
     if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
 
     //if no result is found we search some rolls
@@ -699,7 +702,8 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
 
                 for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
                     //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
-
+                    //if an abort request is made
+                    if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
                     if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
 
                     bool to_add = true;
@@ -720,8 +724,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
         roll_count++;
     }
 
-    //if an abort request is made
-    if( abort_calculation ) { std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> abort_result; abort_result.push_back(std::make_tuple(-4, -4, -4)); return abort_result; }
+
     return results;
 }
 

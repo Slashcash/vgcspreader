@@ -637,7 +637,7 @@ void MainWindow::calculateFinished() {
         int_damages.push_back(selected_pokemon->getDamageInt(turns[it]));
     }
 
-    for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
+    //for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
 
     if( std::get<0>(result) != -4 && std::get<1>(result) != -4 && std::get<2>(result) != -4  ) { //if an abort has been requested we don't show the result window
         result_window->setModal(true);
