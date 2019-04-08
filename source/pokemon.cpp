@@ -288,6 +288,7 @@ float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& th
 
     if( getAbility() == Ability::Shadow_Shield && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
     else if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 0.75;
+    else if( getAbility() == Ability::Neuroforce && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 1.25;
 
     //these effects are ignored by solgaleo & lunala peculiar moves and zekrom e reshiram abilities
     if( theMove.getMoveIndex() != Moves::Moongeist_Beam && theMove.getMoveIndex() != Moves::Sunsteel_Strike && theMove.getMoveIndex() != Moves::Menacing_Moonraze_Maelstrom && theMove.getMoveIndex() != Moves::Searing_Sunraze_Smash && theAttacker.getAbility() != Ability::Turboblaze && theAttacker.getAbility() != Ability::Teravolt) {
