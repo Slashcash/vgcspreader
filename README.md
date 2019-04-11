@@ -58,6 +58,7 @@ Huge Power
 Parental Bond  
 Heatproof  
 Neuroforce  
+Fur Coat  
 
 Abilities that do not affect damage caclculation like Intimidate are normally supported.
 

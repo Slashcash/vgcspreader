@@ -136,6 +136,7 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::DEF] = (((((2 * base[form][Stats::DEF] + stats.getIV(Stats::DEF) + stats.getEV(Stats::DEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
+    if( getAbility() == Ability::Fur_Coat ) total[Stats::DEF] = total[Stats::DEF] * 2;
     boosted[Stats::DEF] = total[Stats::DEF] * def_modifier_multiplier;
 
     //calculate spatk
