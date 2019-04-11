@@ -13,7 +13,8 @@ SOURCES += \
     source/gui/mainwindow.cpp \
     source/gui/movewindow.cpp \
     source/gui/resultwindow.cpp \
-    source/item.cpp
+    source/item.cpp \
+    source/gui/alertwindow.cpp
 
 HEADERS += \
     include/abilities.hpp \
@@ -29,7 +30,8 @@ HEADERS += \
     include/gui/mainwindow.hpp \
     include/gui/movewindow.hpp \
     include/gui/resultwindow.hpp \
-    include/item.hpp
+    include/item.hpp \
+    include/gui/alertwindow.hpp
 
 RESOURCES += \
     resources.qrc

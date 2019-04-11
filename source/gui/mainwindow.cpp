@@ -47,6 +47,10 @@ MainWindow::MainWindow() {
     result_window->setObjectName("ResultWindow");
     result_window->setWindowTitle("VGCSpreader");
 
+    alert_window = new AlertWindow(this);
+    alert_window->setObjectName("ResultWindow");
+    alert_window->setWindowTitle("VGCSpreader");
+
     //bottom buttons
     bottom_buttons = new QDialogButtonBox;
     QPushButton* calculate_button = new QPushButton(tr("Calculate"));
@@ -65,8 +69,9 @@ MainWindow::MainWindow() {
 
     //SIGNAL
     connect(move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMove()));
+    connect(alert_window->bottom_buttons, SIGNAL(accepted()), this, SLOT(calculate()));
     connect(bottom_buttons, SIGNAL(clicked(QAbstractButton*)), this, SLOT(clear(QAbstractButton*)));
-    connect(bottom_buttons, SIGNAL(accepted()), this, SLOT(calculate()));
+    connect(bottom_buttons, SIGNAL(accepted()), this, SLOT(calculateStart()));
     //connect(bottom_buttons, SIGNAL(rejected()), this, SLOT(calculateStop()));
     connect(&this->future_watcher, SIGNAL (finished()), this, SLOT (calculateFinished()));
 
@@ -662,4 +667,20 @@ void MainWindow::calculateStop() {
 void MainWindow::reject() {
     calculateStop(); //just in case a calculation is still in process
     QDialog::reject();
+}
+
+void MainWindow::calculateStart() {
+    bool prompt = false;
+
+    //checking if we have to show the prompt for the long calculation
+    for( auto it = turns.begin(); it < turns.end(); it++ )
+        if( it->getMoveNum() > 1 && it->getHits() > 2 )
+            prompt = true;
+
+    if( prompt ) {
+        alert_window->setModal(true);
+        alert_window->setVisible(true);
+    }
+
+    else calculate();
 }

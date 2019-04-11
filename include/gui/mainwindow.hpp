@@ -15,6 +15,7 @@
 
 #include "movewindow.hpp"
 #include "resultwindow.hpp"
+#include "alertwindow.hpp"
 #include "turn.hpp"
 #include "pokemon.hpp"
 
@@ -31,12 +32,14 @@ class MainWindow : public QDialog {
         void openMoveWindow(bool checked);
         void clear(QAbstractButton* theButton);
         void calculate();
+        void calculateStart();
         void calculateStop();
         void calculateFinished();
 
     private:
         MoveWindow* move_window;
         ResultWindow* result_window;
+        AlertWindow* alert_window;
 
         QFutureWatcher<void> future_watcher;
         QFuture<std::tuple<int, int, int>> future;
