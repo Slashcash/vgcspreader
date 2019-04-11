@@ -253,6 +253,8 @@ float Pokemon::calculateBurnModifier(const Pokemon& theAttacker, const Move& the
 }
 
 float Pokemon::calculateTypeModifier(const Pokemon& theAttacker, const Move& theMove) const {
+    //i should probably re-engineer this function
+
     //taking into account the strong winds if enabled
     if( theMove.getWeather() == Move::STRONG_WINDS && getAbility() != Ability::Cloud_Nine && getAbility() != Ability::Air_Lock ) {
         //single type
@@ -273,6 +275,21 @@ float Pokemon::calculateTypeModifier(const Pokemon& theAttacker, const Move& the
 
             return part_1 * part_2;
         }
+    }
+
+    //in case it is scrappy
+    else if( theAttacker.getAbility() == Ability::Scrappy ) {
+        float part_1;
+        float part_2;
+
+        if( getTypes()[form][0] == Type::Ghost && (theMove.getMoveType() == Type::Normal || theMove.getMoveType() == Type::Fighting) ) part_1 = 1;
+        else part_1 = type_matrix[theMove.getMoveType()][getTypes()[form][0]];
+
+        if( getTypes()[form][1] == Type::Ghost && (theMove.getMoveType() == Type::Normal || theMove.getMoveType() == Type::Fighting) ) part_2 = 1;
+        else part_2 = type_matrix[theMove.getMoveType()][getTypes()[form][1]];
+
+        if( getTypes()[form][0] == getTypes()[form][1] ) return part_1;
+        else return part_1 * part_2;
     }
 
     else {

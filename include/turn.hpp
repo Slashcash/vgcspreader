@@ -35,7 +35,7 @@ class Turn {
         unsigned int getHits() const { return hits; }
         unsigned int getMoveNum() const { return moves.size(); }
         std::vector<std::pair<Pokemon, Move>> getMoves() const { return moves; }
-        ;
+        unsigned int getMovesEffectiveNumber() const { return getMovesEffective().size(); }
 };
 
 #endif // _TURN_HPP_

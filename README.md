@@ -59,6 +59,7 @@ Parental Bond
 Heatproof  
 Neuroforce  
 Fur Coat  
+Scrappy  
 
 Abilities that do not affect damage caclculation like Intimidate are normally supported.
 
