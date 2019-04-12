@@ -570,14 +570,49 @@ int Pokemon::outspeedPokemon(const std::vector<Pokemon>& theVector) {
     return -1;
 }
 
-std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, std::vector<float>& theKoProbability) {
-    if( theTurn.size() != theDefModifiers.size() ) return std::make_tuple(-2, -2, -2);
-    if( theTurn.empty() ) return std::make_tuple(-3, -3, -3);
+DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) {
+    //this would'nt be a valid calculation
+    if( theTurn.size() != theDefModifiers.size() ) {
+        DefenseResult temp;
+        temp.hp_ev = -2;
+        temp.def_ev = -2;
+        temp.spdef_ev = -2;
+
+        return temp;
+    }
+
+    //if there is no attack in the vector
+    if( theTurn.empty() ) {
+        DefenseResult temp;
+        temp.hp_ev = -3;
+        temp.def_ev = -3;
+        temp.spdef_ev = -3;
+
+        return temp;
+    }
 
     auto results = resistMoveLoop(theTurn, theDefModifiers);
+    //if no result has been found
+    if( results.empty() && !abort_calculation ) {
+        DefenseResult temp;
+        temp.hp_ev = -1;
+        temp.def_ev = -1;
+        temp.spdef_ev = -1;
 
-    if( results.empty() && !abort_calculation ) return std::make_tuple(-1, -1, -1);
-    else if( abort_calculation ) return std::make_tuple(-4, -4, -4); //in case the function returned an abort request
+        return temp;
+    }
+
+    //if an abort has been requested
+    else if( abort_calculation ) {
+        DefenseResult temp;
+        temp.hp_ev = -4;
+        temp.def_ev = -4;
+        temp.spdef_ev = -4;
+
+        return temp;
+    }
+
+    DefenseResult returnable;
 
     //finding all the minimum elements
     std::vector<unsigned int> sum_results;
@@ -597,7 +632,11 @@ std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, 
     for(auto it = returnable_results.begin(); it < returnable_results.end(); it++)
         if( std::get<0>(*it) >= std::get<0>(final_pair) ) final_pair = *it;
 
-    theKoProbability.clear();
+    returnable.hp_ev = std::get<0>(final_pair);
+    returnable.def_ev = std::get<1>(final_pair);
+    returnable.spdef_ev = std::get<2>(final_pair);
+
+    //now calculating all the damages
     Pokemon buffer = *this;
     buffer.setEV(Stats::HP, std::get<0>(final_pair));
     buffer.setEV(Stats::DEF, std::get<1>(final_pair));
@@ -607,10 +646,12 @@ std::tuple<int, int, int> Pokemon::resistMove(const std::vector<Turn>& theTurn, 
         buffer.setModifier(Stats::HP, std::get<0>(theDefModifiers[it]));
         buffer.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
         buffer.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
-        theKoProbability.push_back(buffer.getKOProbability(theTurn[it]));
+        returnable.def_ko_prob.push_back(buffer.getKOProbability(theTurn[it]));
+        returnable.def_damage_perc.push_back(buffer.getDamagePercentage(theTurn[it]));
+        returnable.def_damage_int.push_back(buffer.getDamageInt(theTurn[it]));
     }
 
-    return final_pair;
+    return returnable;
 }
 
 std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) {

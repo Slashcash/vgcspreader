@@ -163,7 +163,7 @@ void MainWindow::eraseMove(bool checked) {
 }
 
 void MainWindow::createDefendingPokemonGroupBox() {
-    defending_groupbox = new QGroupBox(tr("Defending Pokemon:"));
+    defending_groupbox = new QGroupBox(tr("Pokemon:"));
 
     //the main horizontal layout for this window
     QHBoxLayout* defending_layout = new QHBoxLayout;
@@ -673,7 +673,7 @@ void MainWindow::calculate() {
     moves_groupbox->findChild<QProgressBar*>("progress_bar")->setVisible(true);
 
 
-    future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns, modifiers, std::ref(rolls));
+    future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns, modifiers);
     future_watcher.setFuture(future);
 }
 
@@ -693,29 +693,11 @@ QString MainWindow::retrieveFormName(const int species, const int form) {
 }
 
 void MainWindow::calculateFinished() {
-    std::tuple<int, int, int> result = future.result();
+    DefenseResult result = future.result();
 
-    //THIS SHOULD PROBABLY BE CALCULATED INSIDE THE resistMove FUNCTION; WE'LL SEE
-    selected_pokemon->setEV(Stats::HP, std::get<0>(result));
-    selected_pokemon->setEV(Stats::DEF, std::get<1>(result));
-    selected_pokemon->setEV(Stats::SPDEF, std::get<2>(result));
-
-    std::vector<std::vector<float>> damages;
-    std::vector<std::vector<int>> int_damages;
-
-    for( auto it = 0; it < turns.size(); it++ ) {
-        selected_pokemon->setModifier(Stats::HP, std::get<0>(modifiers[it]));
-        selected_pokemon->setModifier(Stats::DEF, std::get<1>(modifiers[it]));
-        selected_pokemon->setModifier(Stats::SPDEF, std::get<2>(modifiers[it]));
-        damages.push_back(selected_pokemon->getDamagePercentage(turns[it]));
-        int_damages.push_back(selected_pokemon->getDamageInt(turns[it]));
-    }
-
-    //for(auto it = int_damages.begin(); it < int_damages.end(); it++) qDebug() << *it;
-
-    if( std::get<0>(result) != -4 && std::get<1>(result) != -4 && std::get<2>(result) != -4  ) { //if an abort has been requested we don't show the result window
+    if( result.hp_ev != -4 && result.def_ev != -4 && result.spdef_ev != -4  ) { //if an abort has been requested we don't show the result window
         result_window->setModal(true);
-        result_window->setResult(*selected_pokemon, modifiers, turns, result, damages, rolls);
+        result_window->setResult(*selected_pokemon, modifiers, turns, std::make_tuple(result.hp_ev,result.def_ev, result.spdef_ev), result.def_damage_perc, result.def_ko_prob);
         result_window->show();
     }
     delete selected_pokemon;

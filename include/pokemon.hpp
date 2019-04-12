@@ -15,6 +15,7 @@
 #include "types.hpp"
 #include "abilities.hpp"
 #include "item.hpp"
+#include "defenseresult.hpp"
 
 class Move;
 class Turn;
@@ -120,7 +121,7 @@ class Pokemon {
         std::vector<int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;
         float getKOProbability(const Turn& theTurn) const;
-        std::tuple<int, int, int> resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, std::vector<float>& theKoProbability);
+        DefenseResult resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers);
         int outspeedPokemon(const std::vector<Pokemon>& theVector);
 };
 
