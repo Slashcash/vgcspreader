@@ -951,7 +951,7 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
                     else if( results_buffer[it][atk_assigned + spatk_assigned * ARRAY_SIZE] < (100 - tolerances[it]) ) to_add = false;
                 }
 
-                if( to_add ) { results.push_back(std::make_pair(atk_assigned, spatk_assigned)); qDebug() << atk_assigned << " " << spatk_assigned; }
+                if( to_add ) results.push_back(std::make_pair(atk_assigned, spatk_assigned));
             }
         }
 
