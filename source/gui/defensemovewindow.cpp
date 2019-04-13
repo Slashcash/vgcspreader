@@ -33,7 +33,6 @@ DefenseMoveWindow::DefenseMoveWindow(QWidget* parent, Qt::WindowFlags f) : QDial
     main_layout->insertSpacing(2, 35);
     main_layout->addWidget(defending_groupbox);
 
-
     bottom_button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     main_layout->addWidget(bottom_button_box, Qt::AlignRight);
 
@@ -789,7 +788,6 @@ void DefenseMoveWindow::setSpecies1(int index) {
     //setting correct ability
     QComboBox* ability = atk1_groupbox->findChild<QComboBox*>("atk1_abilities_combobox");
     ability->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0][0]);
-
 }
 
 void DefenseMoveWindow::setForm1(int index) {
@@ -987,8 +985,6 @@ void DefenseMoveWindow::solveMove(void) {
     attacking1.setEV(stat, atk1_groupbox->findChild<QSpinBox*>("atk1_ev_spinbox")->value());
     attacking1.setModifier(stat, atk1_groupbox->findChild<QSpinBox*>("atk1_modifier_spinbox")->value());
 
-
-
     Pokemon attacking2(atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->currentIndex()+1);
     attacking2.setForm(atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->currentIndex());
 
@@ -1030,15 +1026,18 @@ void DefenseMoveWindow::solveMove(void) {
 
     defense_modifier def_mod = std::make_tuple(defending_groupbox->findChild<QSpinBox*>("defending_hp_modifier")->value(), defending_groupbox->findChild<QSpinBox*>("defending_def_modifier")->value(), defending_groupbox->findChild<QSpinBox*>("defending_spdef_modifier")->value());
 
-    ((MainWindow*)parentWidget())->addTurn(turn, def_mod);
+    ((MainWindow*)parentWidget())->addDefenseTurn(turn, def_mod);
 }
 
 void DefenseMoveWindow::setAsBlank() {
     //atk1
     atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->setCurrentIndex(0);
+    //atk1_groupbox->findChild<QComboBox*>("atk1_type1_combobox")->setCurrentIndex(0);
+    //atk1_groupbox->findChild<QComboBox*>("atk1_type2_combobox")->setCurrentIndex(0);
     atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->setCurrentIndex(0);
     atk1_groupbox->findChild<QComboBox*>("atk1_nature_combobox")->setCurrentIndex(0);
     atk1_groupbox->findChild<QComboBox*>("atk1_items_combobox")->setCurrentIndex(0);
+    //atk1_groupbox->findChild<QComboBox*>("atk1_abilities_combobox")->setCurrentIndex(0);
 
     atk1_groupbox->findChild<QSpinBox*>("atk1_iv_spinbox")->setValue(31);
     atk1_groupbox->findChild<QSpinBox*>("atk1_ev_spinbox")->setValue(0);
@@ -1050,10 +1049,13 @@ void DefenseMoveWindow::setAsBlank() {
 
     //atk2
     atk2_groupbox->findChild<QCheckBox*>("atk2_activated")->setChecked(true);
+    //atk2_groupbox->findChild<QComboBox*>("atk2_type1_combobox")->setCurrentIndex(0);
+    //atk2_groupbox->findChild<QComboBox*>("atk2_type2_combobox")->setCurrentIndex(0);
     atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->setCurrentIndex(0);
     atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->setCurrentIndex(0);
     atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->setCurrentIndex(0);
     atk2_groupbox->findChild<QComboBox*>("atk2_items_combobox")->setCurrentIndex(0);
+    //atk2_groupbox->findChild<QComboBox*>("atk2_abilities_combobox")->setCurrentIndex(0);
 
     atk2_groupbox->findChild<QSpinBox*>("atk2_iv_spinbox")->setValue(31);
     atk2_groupbox->findChild<QSpinBox*>("atk2_ev_spinbox")->setValue(0);
@@ -1077,9 +1079,12 @@ void DefenseMoveWindow::setAsBlank() {
 void DefenseMoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {
     //atk1
     atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getPokedexNumber()-1);
+    atk1_groupbox->findChild<QComboBox*>("atk1_type1_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getTypes()[theTurn.getMoves()[0].first.getForm()][0]);
+    atk1_groupbox->findChild<QComboBox*>("atk1_type2_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getTypes()[theTurn.getMoves()[0].first.getForm()][1]);
     atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getForm());
     atk1_groupbox->findChild<QComboBox*>("atk1_nature_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getNature());
     atk1_groupbox->findChild<QComboBox*>("atk1_items_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getItem().getIndex());
+    atk1_groupbox->findChild<QComboBox*>("atk1_abilities_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getAbility());
 
     atk1_groupbox->findChild<QComboBox*>("atk1_moves_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getMoveIndex());
     atk1_groupbox->findChild<QComboBox*>("atk1_target_combobox")->setCurrentIndex(theTurn.getMoves()[0].second.getTarget());
@@ -1101,9 +1106,12 @@ void DefenseMoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &t
     if(theTurn.getMoveNum() > 1) {
         //atk2
         atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getPokedexNumber()-1);
+        atk2_groupbox->findChild<QComboBox*>("atk2_type1_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getTypes()[theTurn.getMoves()[0].first.getForm()][0]);
+        atk2_groupbox->findChild<QComboBox*>("atk2_type2_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getTypes()[theTurn.getMoves()[0].first.getForm()][1]);
         atk2_groupbox->findChild<QComboBox*>("atk2_forms_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getForm());
         atk2_groupbox->findChild<QComboBox*>("atk2_nature_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getNature());
         atk2_groupbox->findChild<QComboBox*>("atk2_items_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getItem().getIndex());
+        atk2_groupbox->findChild<QComboBox*>("atk2_abilities_combobox")->setCurrentIndex(theTurn.getMoves()[1].first.getAbility());
 
         atk2_groupbox->findChild<QComboBox*>("atk2_moves_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getMoveIndex());
         atk2_groupbox->findChild<QComboBox*>("atk2_target_combobox")->setCurrentIndex(theTurn.getMoves()[1].second.getTarget());

@@ -40,9 +40,13 @@ MainWindow::MainWindow() {
         moves_names.push_back(line);
     }
 
-    move_window = new DefenseMoveWindow(this);
-    move_window->setObjectName("MoveWindow");
-    move_window->setWindowTitle("VGCSpreader");
+    defense_move_window = new DefenseMoveWindow(this);
+    defense_move_window->setObjectName("DefenseMoveWindow");
+    defense_move_window->setWindowTitle("VGCSpreader");
+
+    attack_move_window = new AttackMoveWindow(this);
+    attack_move_window->setObjectName("AttackMoveWindow");
+    attack_move_window->setWindowTitle("VGCSpreader");
 
     result_window = new ResultWindow(this);
     result_window->setObjectName("ResultWindow");
@@ -69,7 +73,8 @@ MainWindow::MainWindow() {
     main_layout->addWidget(bottom_buttons, Qt::AlignRight);
 
     //SIGNAL
-    connect(move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMoveDefense()));
+    connect(defense_move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMoveDefense()));
+    connect(attack_move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMoveAttack()));
     connect(alert_window->bottom_buttons, SIGNAL(accepted()), this, SLOT(calculate()));
     connect(bottom_buttons, SIGNAL(clicked(QAbstractButton*)), this, SLOT(clear(QAbstractButton*)));
     connect(bottom_buttons, SIGNAL(accepted()), this, SLOT(calculateStart()));
@@ -553,7 +558,7 @@ void MainWindow::createMovesGroupBox() {
 }
 
 void MainWindow::solveMoveDefense() {
-    if( !move_window->isEditMode() ) {
+    if( !defense_move_window->isEditMode() ) {
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setRowCount(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->rowCount()+1);
 
         auto buffer = turns_def.back().getMoves();
@@ -620,36 +625,49 @@ void MainWindow::openMoveWindow(bool checked) {
     if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 0 ) openMoveWindowDefense();
 
     //if the attacking window is requested
-    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 1 ) {
-        //temporary test
-        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setRowCount(1);
-        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(0, 0, new QTableWidgetItem("Schyter Precipice Blades"));
-
-        //until here
-    }
+    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 1 ) openMoveWindowAttack();
 }
 
 void MainWindow::openMoveWindowEdit(bool checked) {
-    openMoveWindowEditDefense();
+    //if the defensive window is requested
+    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 0 ) openMoveWindowEditDefense();
+
+    //if the attacking window is requested
+    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 1 ) openMoveWindowEditAttack();
 }
 
 void MainWindow::openMoveWindowDefense() {
-    move_window->setAsBlank();
-    move_window->setEditMode(false);
-    move_window->setModal(true);
-    move_window->setVisible(true);
+    defense_move_window->setAsBlank();
+    defense_move_window->setEditMode(false);
+    defense_move_window->setModal(true);
+    defense_move_window->setVisible(true);
+}
+
+void MainWindow::openMoveWindowAttack() {
+    attack_move_window->setAsBlank();
+    attack_move_window->setEditMode(false);
+    attack_move_window->setModal(true);
+    attack_move_window->setVisible(true);
 }
 
 void MainWindow::openMoveWindowEditDefense() {
-    move_window->setAsBlank();
-    move_window->setAsTurn(turns_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()], modifiers_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()]);
-    move_window->setEditMode(true);
-    move_window->setModal(true);
-    move_window->setVisible(true);
+    defense_move_window->setAsBlank();
+    defense_move_window->setAsTurn(turns_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()], modifiers_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()]);
+    defense_move_window->setEditMode(true);
+    defense_move_window->setModal(true);
+    defense_move_window->setVisible(true);
 }
 
-void MainWindow::addTurn(const Turn& theTurn, const defense_modifier& theModifier) {
-    if( !move_window->isEditMode() ) {
+void MainWindow::openMoveWindowEditAttack() {
+    attack_move_window->setAsBlank();
+    attack_move_window->setAsTurn(turns_atk[moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()], defending_pokemons_in_attack[moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()], modifiers_atk[moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()]);
+    attack_move_window->setEditMode(true);
+    attack_move_window->setModal(true);
+    attack_move_window->setVisible(true);
+}
+
+void MainWindow::addDefenseTurn(const Turn& theTurn, const defense_modifier& theModifier) {
+    if( !defense_move_window->isEditMode() ) {
         turns_def.push_back(theTurn);
         modifiers_def.push_back(theModifier);
     }
@@ -791,4 +809,49 @@ void MainWindow::calculateStart() {
     }
 
     else calculate();
+}
+
+void MainWindow::addAttackTurn(const Turn& theTurn, const Pokemon& theDefendingPokemon, const attack_modifier& theModifier) {
+    if( !attack_move_window->isEditMode() ) {
+        turns_atk.push_back(theTurn);
+        modifiers_atk.push_back(theModifier);
+        defending_pokemons_in_attack.push_back(theDefendingPokemon);
+    }
+
+    else {
+        turns_atk[ moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()] = theTurn;
+        modifiers_atk[ moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()] = theModifier;
+        defending_pokemons_in_attack[moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()] = theDefendingPokemon;
+    }
+}
+
+void MainWindow::solveMoveAttack() {
+    if( !attack_move_window->isEditMode() ) {
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setRowCount(moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->rowCount()+1);
+
+        auto buffer = turns_atk.back().getMoves();
+        auto buffer_pokemon = defending_pokemons_in_attack.back();
+
+        QString move_name_1;
+        if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
+        else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
+        QString move1(species_names[buffer_pokemon.getPokedexNumber()-1] + " " + move_name_1);
+
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(turns_atk.size()-1, 0, new QTableWidgetItem(move1));
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->resizeColumnToContents(0);
+    }
+
+    else {
+        auto buffer = turns_atk[moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()].getMoves();
+        auto pokemon_buffer = defending_pokemons_in_attack[moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow()];
+
+        QString move_name_1;
+        if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
+        else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
+        QString move1(species_names[pokemon_buffer.getPokedexNumber()-1] + " " + move_name_1);
+
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow(), 0, new QTableWidgetItem(move1));
+
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->resizeColumnToContents(0);
+    }
 }

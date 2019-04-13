@@ -14,6 +14,7 @@
 #include <QFutureWatcher>
 
 #include "defensemovewindow.hpp"
+#include "attackmovewindow.hpp"
 #include "resultwindow.hpp"
 #include "alertwindow.hpp"
 #include "turn.hpp"
@@ -28,6 +29,7 @@ class MainWindow : public QDialog {
         void setButtonClickable(int row, int column);
         void eraseMove(bool checked);
         void solveMoveDefense();
+        void solveMoveAttack();
         void openMoveWindow(bool checked);
         void openMoveWindowEdit(bool checked);
         void moveTabChanged(int index);
@@ -38,7 +40,8 @@ class MainWindow : public QDialog {
         void calculateFinished();
 
     private:
-        DefenseMoveWindow* move_window;
+        DefenseMoveWindow* defense_move_window;
+        AttackMoveWindow* attack_move_window;
         ResultWindow* result_window;
         AlertWindow* alert_window;
 
@@ -67,7 +70,9 @@ class MainWindow : public QDialog {
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();
         void openMoveWindowDefense();
+        void openMoveWindowAttack();
         void openMoveWindowEditDefense();
+        void openMoveWindowEditAttack();
 
     protected:
         void reject();
@@ -82,7 +87,8 @@ class MainWindow : public QDialog {
         const std::vector<QString>& getTypesNames() const { return types_names; }
         const std::vector<QString>& getItemsNames() const { return items_names; }
         const std::vector<QString>& getMovesNames() const { return moves_names; }
-        void addTurn(const Turn& theTurn, const defense_modifier& theModifier);
+        void addDefenseTurn(const Turn& theTurn, const defense_modifier& theModifier);
+        void addAttackTurn(const Turn& theTurn, const Pokemon& theDefendingPokemon, const attack_modifier& theModifier);
 
         //MISC
         QString retrieveFormName(const int species, const int form);
