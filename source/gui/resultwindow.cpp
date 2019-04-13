@@ -434,9 +434,9 @@ QString ResultWindow::getModifiers(const Turn& theTurn) {
 
 QString ResultWindow::getResults(const Turn& theTurn, const Pokemon& thePokemon, const float theRoll, const std::vector<float>& theDamagePerc) {
     //RESULT
-    QString roll_result;
-    if(theTurn.getHits() > 1) roll_result = QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " moves ";
-    else roll_result = QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " move ";
+    QString roll_result = "--";
+    if(theTurn.getHits() > 1) roll_result = roll_result + QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " moves ";
+    else roll_result = roll_result + QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " move ";
 
     //DAMAGE
     QString damage_result = "(" + QString::number(*theDamagePerc.begin(), 'f', 1) + "% - " + QString::number(theDamagePerc.back(), 'f', 1) + "%)" /*+ "\n("*/;

@@ -11,12 +11,12 @@ SOURCES += \
     source/stats.cpp \
     source/turn.cpp \
     source/gui/mainwindow.cpp \
-    source/gui/movewindow.cpp \
     source/gui/resultwindow.cpp \
     source/item.cpp \
     source/gui/alertwindow.cpp \
     source/defenseresult.cpp \
-    source/attackresult.cpp
+    source/attackresult.cpp \
+    source/gui/defensemovewindow.cpp
 
 HEADERS += \
     include/abilities.hpp \
@@ -30,12 +30,12 @@ HEADERS += \
     include/turn.hpp \
     include/types.hpp \
     include/gui/mainwindow.hpp \
-    include/gui/movewindow.hpp \
     include/gui/resultwindow.hpp \
     include/item.hpp \
     include/gui/alertwindow.hpp \
     include/defenseresult.hpp \
-    include/attackresult.hpp
+    include/attackresult.hpp \
+    include/gui/defensemovewindow.hpp
 
 RESOURCES += \
     resources.qrc

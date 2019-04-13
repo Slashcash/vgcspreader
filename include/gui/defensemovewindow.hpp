@@ -1,5 +1,5 @@
-#ifndef MOVEWINDOW_HPP
-#define MOVEWINDOW_HPP
+#ifndef DEFENSEMOVEWINDOW_HPP
+#define DEFENSEMOVEWINDOW_HPP
 
 #include <QDialog>
 #include <QGridLayout>
@@ -14,7 +14,7 @@
 
 #include "turn.hpp"
 
-class MoveWindow : public QDialog {
+class DefenseMoveWindow : public QDialog {
     Q_OBJECT
 
     private slots:
@@ -42,7 +42,7 @@ class MoveWindow : public QDialog {
         QString retrieveFormName(const int species, const int form);
 
     public:
-        MoveWindow(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);
+        DefenseMoveWindow(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);
 
         QDialogButtonBox* bottom_button_box; //HERE BECAUSE IT HAS TO BE ACCESSED BY MAINWINDOW
 

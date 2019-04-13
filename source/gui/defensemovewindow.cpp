@@ -1,4 +1,4 @@
-#include "movewindow.hpp"
+#include "defensemovewindow.hpp"
 
 #include <QDebug>
 #include <QHBoxLayout>
@@ -16,7 +16,7 @@
 #include "turn.hpp"
 #include "items.hpp"
 
-MoveWindow::MoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) {
+DefenseMoveWindow::DefenseMoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) {
     QVBoxLayout* main_layout = new QVBoxLayout;
 
     //creating the tab
@@ -47,7 +47,7 @@ MoveWindow::MoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) 
     layout()->setSizeConstraint( QLayout::SetFixedSize );
 }
 
-void MoveWindow::createAtk1GroupBox() {
+void DefenseMoveWindow::createAtk1GroupBox() {
     //the main horizontal layout for this window
     QHBoxLayout* atk1_layout = new QHBoxLayout;
 
@@ -329,7 +329,7 @@ void MoveWindow::createAtk1GroupBox() {
     moves->setCurrentIndex(0);
 }
 
-void MoveWindow::createAtk2GroupBox() {
+void DefenseMoveWindow::createAtk2GroupBox() {
     //the main horizontal layout for this window
     QHBoxLayout* atk2_layout = new QHBoxLayout;
 
@@ -627,7 +627,7 @@ void MoveWindow::createAtk2GroupBox() {
     moves->setCurrentIndex(0);
 }
 
-void MoveWindow::createDefendingGroupBox() {
+void DefenseMoveWindow::createDefendingGroupBox() {
     defending_groupbox = new QGroupBox("Defending Pokemon Modifiers:");
 
     QHBoxLayout* defending_layout = new QHBoxLayout;
@@ -721,7 +721,7 @@ void MoveWindow::createDefendingGroupBox() {
     modifier_layout->addLayout(terrain_layout);
 }
 
-void MoveWindow::setMove1(int index) {
+void DefenseMoveWindow::setMove1(int index) {
     Move selected_move((Moves)index);
 
     atk1_groupbox->findChild<QComboBox*>("atk1_movetypes_combobox")->setCurrentIndex(selected_move.getMoveType());
@@ -749,7 +749,7 @@ void MoveWindow::setMove1(int index) {
     }
 }
 
-void MoveWindow::setSpecies1(int index) {
+void DefenseMoveWindow::setSpecies1(int index) {
     Pokemon selected_pokemon(index + 1);
 
     //setting correct sprite
@@ -792,7 +792,7 @@ void MoveWindow::setSpecies1(int index) {
 
 }
 
-void MoveWindow::setForm1(int index) {
+void DefenseMoveWindow::setForm1(int index) {
     Pokemon selected_pokemon(atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->currentIndex() + 1);
 
     //setting correct sprite
@@ -825,7 +825,7 @@ void MoveWindow::setForm1(int index) {
     ability->setCurrentIndex(selected_pokemon.getPossibleAbilities()[index][0]);
 }
 
-void MoveWindow::setForm2(int index) {
+void DefenseMoveWindow::setForm2(int index) {
     Pokemon selected_pokemon(atk2_groupbox->findChild<QComboBox*>("atk2_species_combobox")->currentIndex() + 1);
 
     //setting correct sprite
@@ -858,7 +858,7 @@ void MoveWindow::setForm2(int index) {
     ability->setCurrentIndex(selected_pokemon.getPossibleAbilities()[index][0]);
 }
 
-void MoveWindow::setMove2(int index) {
+void DefenseMoveWindow::setMove2(int index) {
     Move selected_move((Moves)index);
 
     atk2_groupbox->findChild<QComboBox*>("atk2_movetypes_combobox")->setCurrentIndex(selected_move.getMoveType());
@@ -886,7 +886,7 @@ void MoveWindow::setMove2(int index) {
     }
 }
 
-void MoveWindow::setSpecies2(int index) {
+void DefenseMoveWindow::setSpecies2(int index) {
     Pokemon selected_pokemon(index + 1);
 
     //setting correct sprite
@@ -928,7 +928,7 @@ void MoveWindow::setSpecies2(int index) {
     ability->setCurrentIndex(selected_pokemon.getPossibleAbilities()[0][0]);
 }
 
-void MoveWindow::activateAtk2(int state) {
+void DefenseMoveWindow::activateAtk2(int state) {
     bool value;
     if( state == Qt::Checked ) value = true;
     else value = false;
@@ -952,7 +952,7 @@ void MoveWindow::activateAtk2(int state) {
     atk2_groupbox->findChild<QCheckBox*>("atk2_z")->setEnabled(value);
 }
 
-void MoveWindow::solveMove(void) {
+void DefenseMoveWindow::solveMove(void) {
     Pokemon attacking1(atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->currentIndex()+1);
     attacking1.setForm(atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->currentIndex());
 
@@ -1033,7 +1033,7 @@ void MoveWindow::solveMove(void) {
     ((MainWindow*)parentWidget())->addTurn(turn, def_mod);
 }
 
-void MoveWindow::setAsBlank() {
+void DefenseMoveWindow::setAsBlank() {
     //atk1
     atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->setCurrentIndex(0);
     atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->setCurrentIndex(0);
@@ -1074,7 +1074,7 @@ void MoveWindow::setAsBlank() {
     tabs->setCurrentIndex(0);
 }
 
-void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {
+void DefenseMoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefenseModifier) {
     //atk1
     atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getPokedexNumber()-1);
     atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->setCurrentIndex(theTurn.getMoves()[0].first.getForm());
@@ -1136,7 +1136,7 @@ void MoveWindow::setAsTurn(const Turn &theTurn, const defense_modifier &theDefen
     tabs->setCurrentIndex(0);
 }
 
-QString MoveWindow::retrieveFormName(const int species, const int form) {
+QString DefenseMoveWindow::retrieveFormName(const int species, const int form) {
     //this function is written with the help of Kaphotics here: https://github.com/kwsch/PKHeX/issues/2259
     if( form == 0 ) return "Base";
 

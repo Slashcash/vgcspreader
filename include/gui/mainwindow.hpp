@@ -13,7 +13,7 @@
 #include <QTableWidget>
 #include <QFutureWatcher>
 
-#include "movewindow.hpp"
+#include "defensemovewindow.hpp"
 #include "resultwindow.hpp"
 #include "alertwindow.hpp"
 #include "turn.hpp"
@@ -27,9 +27,10 @@ class MainWindow : public QDialog {
         void setDefendingPokemonForm(int index);
         void setButtonClickable(int row, int column);
         void eraseMove(bool checked);
-        void openMoveWindowEditDefense(bool checked);
-        void solveMove();
-        void openMoveWindowDefense(bool checked);
+        void solveMoveDefense();
+        void openMoveWindow(bool checked);
+        void openMoveWindowEdit(bool checked);
+        void moveTabChanged(int index);
         void clear(QAbstractButton* theButton);
         void calculate();
         void calculateStart();
@@ -37,7 +38,7 @@ class MainWindow : public QDialog {
         void calculateFinished();
 
     private:
-        MoveWindow* move_window;
+        DefenseMoveWindow* move_window;
         ResultWindow* result_window;
         AlertWindow* alert_window;
 
@@ -65,6 +66,8 @@ class MainWindow : public QDialog {
 
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();
+        void openMoveWindowDefense();
+        void openMoveWindowEditDefense();
 
     protected:
         void reject();

@@ -40,7 +40,7 @@ MainWindow::MainWindow() {
         moves_names.push_back(line);
     }
 
-    move_window = new MoveWindow(this);
+    move_window = new DefenseMoveWindow(this);
     move_window->setObjectName("MoveWindow");
     move_window->setWindowTitle("VGCSpreader");
 
@@ -69,14 +69,22 @@ MainWindow::MainWindow() {
     main_layout->addWidget(bottom_buttons, Qt::AlignRight);
 
     //SIGNAL
-    connect(move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMove()));
+    connect(move_window->bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMoveDefense()));
     connect(alert_window->bottom_buttons, SIGNAL(accepted()), this, SLOT(calculate()));
     connect(bottom_buttons, SIGNAL(clicked(QAbstractButton*)), this, SLOT(clear(QAbstractButton*)));
     connect(bottom_buttons, SIGNAL(accepted()), this, SLOT(calculateStart()));
-    //connect(bottom_buttons, SIGNAL(rejected()), this, SLOT(calculateStop()));
     connect(&this->future_watcher, SIGNAL (finished()), this, SLOT (calculateFinished()));
 
     layout()->setSizeConstraint( QLayout::SetFixedSize );
+}
+
+void MainWindow::moveTabChanged(int index) {
+    moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
+    moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
+
+    moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setCurrentItem(nullptr);
+    moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setCurrentItem(nullptr);
+
 }
 
 void MainWindow::setButtonClickable(int row, int column) {
@@ -482,6 +490,7 @@ void MainWindow::createMovesGroupBox() {
     QVBoxLayout* tab_layout = new QVBoxLayout;
 
     QTabWidget* tabs = new QTabWidget;
+    tabs->setObjectName("moves_tabs");
     tab_layout->addWidget(tabs);
 
     //MOVES DEFENSE VIEW
@@ -536,12 +545,14 @@ void MainWindow::createMovesGroupBox() {
 
     //CONNECTING SIGNALS
     connect(moves_defense_view, SIGNAL(cellClicked(int,int)), this, SLOT(setButtonClickable(int,int)));
+    connect(moves_attack_view, SIGNAL(cellClicked(int,int)), this, SLOT(setButtonClickable(int,int)));
     connect(moves_delete_button, SIGNAL(clicked(bool)), this, SLOT(eraseMove(bool)));
-    connect(moves_add_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowDefense(bool)));
-    connect(moves_edit_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowEditDefense(bool)));
+    connect(moves_add_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindow(bool)));
+    connect(moves_edit_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowEdit(bool)));
+    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(moveTabChanged(int)));
 }
 
-void MainWindow::solveMove() {
+void MainWindow::solveMoveDefense() {
     if( !move_window->isEditMode() ) {
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setRowCount(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->rowCount()+1);
 
@@ -604,14 +615,32 @@ void MainWindow::solveMove() {
     }
 }
 
-void MainWindow::openMoveWindowDefense(bool checked) {
+void MainWindow::openMoveWindow(bool checked) {
+    //if the defensive window is requested
+    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 0 ) openMoveWindowDefense();
+
+    //if the attacking window is requested
+    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 1 ) {
+        //temporary test
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setRowCount(1);
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(0, 0, new QTableWidgetItem("Schyter Precipice Blades"));
+
+        //until here
+    }
+}
+
+void MainWindow::openMoveWindowEdit(bool checked) {
+    openMoveWindowEditDefense();
+}
+
+void MainWindow::openMoveWindowDefense() {
     move_window->setAsBlank();
     move_window->setEditMode(false);
     move_window->setModal(true);
     move_window->setVisible(true);
 }
 
-void MainWindow::openMoveWindowEditDefense(bool checked) {
+void MainWindow::openMoveWindowEditDefense() {
     move_window->setAsBlank();
     move_window->setAsTurn(turns_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()], modifiers_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()]);
     move_window->setEditMode(true);
@@ -646,10 +675,12 @@ void MainWindow::clear(QAbstractButton* theButton) {
         moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
 
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->clear();
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->clear();
         turns_def.clear();
         modifiers_def.clear();
-
-
+        turns_atk.clear();
+        modifiers_atk.clear();
+        defending_pokemons_in_attack.clear();
     }
 
     else if( theButton->objectName() == "stop_button" ) calculateStop();
