@@ -457,9 +457,9 @@ void AttackMoveWindow::setMove(int index) {
     }
 
     else {
-        defending_pokemon_groupbox->findChild<QLabel*>("def_iv_label")->setText(tr("Sp. Atk IV"));
-        defending_pokemon_groupbox->findChild<QLabel*>("def_ev_label")->setText(tr("Sp. Atk EV"));
-        defending_pokemon_groupbox->findChild<QLabel*>("def_modifier_label")->setText(tr("Sp. Atk Modifier"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_iv_label")->setText(tr("Sp. Def IV"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_ev_label")->setText(tr("Sp. Def EV"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_modifier_label")->setText(tr("Sp. Def Modifier"));
         atk_modifier_groupbox->findChild<QLabel*>("attacking_atk_modifier_label")->setText(tr("Sp. Attack Modifier"));
     }
 }

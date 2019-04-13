@@ -727,7 +727,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
 
     //if no result is found we search some rolls
     unsigned int roll_count = 0;
-    const unsigned int MAX_ROLL = 20;
+    const unsigned int MAX_ROLL = 30;
     const unsigned int ROLL_OFFSET = 1;
     std::vector<float> tolerances;
     tolerances.resize(theTurn.size(), 0);
@@ -897,13 +897,65 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
 
                 float ko_prob;
                 if( attacker.getEV(Stats::ATK) + attacker.getEV(Stats::SPATK) > assignable_evs ) to_add = false;
-                else if( (ko_prob = theDefendingPokemon[it].getKOProbability(temp_turn)) < 100 ) { results_buffer[it][attacker.getEV(Stats::DEF) + attacker.getEV(Stats::SPDEF) * ARRAY_SIZE] = ko_prob; to_add = false; }
+                else if( (ko_prob = theDefendingPokemon[it].getKOProbability(temp_turn)) < 100 ) { results_buffer[it][attacker.getEV(Stats::ATK) + attacker.getEV(Stats::SPATK) * ARRAY_SIZE] = ko_prob; to_add = false; }
 
-                else results_buffer[it][attacker.getEV(Stats::DEF) + attacker.getEV(Stats::SPDEF) * ARRAY_SIZE] = ko_prob;
+                else results_buffer[it][attacker.getEV(Stats::ATK) + attacker.getEV(Stats::SPATK) * ARRAY_SIZE] = ko_prob;
             }
 
             if( to_add ) results.push_back(std::make_pair(attacker.getEV(Stats::ATK), attacker.getEV(Stats::SPATK)));
         }
+    }
+
+    //if no result is found we search some rolls
+    unsigned int roll_count = 0;
+    const unsigned int MAX_ROLL = 70;
+    const unsigned int ROLL_OFFSET = 1;
+    std::vector<float> tolerances;
+    tolerances.resize(theTurn.size(), 0);
+
+    while( results.empty() && roll_count < (MAX_ROLL+1) * theTurn.size() && !abort_calculation/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
+        //for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
+
+        unsigned int tolerance_index = roll_count / (MAX_ROLL+1);
+        (*(tolerances.end()-1-tolerance_index)) += ROLL_OFFSET;
+
+        /*these are two different algorithm that produce different result i like the first one more so i'm keeping it for now
+        bool to_increment = true;
+        for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) {
+            if( *it == MAX_ROLL ) {
+                bool to_increment_local = true;
+                for( auto it2 = it+1; it2 < tolerances.end(); it2++ ) if( *it2 != MAX_ROLL ) to_increment_local = false;
+                if( to_increment_local && (*(tolerances.begin())) != MAX_ROLL ) {
+                    (*(it-1)) += ROLL_OFFSET;
+                    for(auto it3 = it; it3 < tolerances.end(); it3++) *it3 = 0;
+                    to_increment = false;
+                }
+            }
+        }
+
+        if( to_increment ) tolerances.back()++;
+        */
+
+        for(unsigned int spatk_assigned = 0; spatk_assigned < MAX_EVS_SINGLE_STAT + 1; spatk_assigned = spatk_assigned + calculateEVSNextStat(attacker, Stats::SPATK, spatk_assigned)) {
+            if( simplified && simplified_type == Move::PHYSICAL && spatk_assigned > 0 ) break;
+
+            for(unsigned int atk_assigned = 0; atk_assigned < MAX_EVS_SINGLE_STAT + 1; atk_assigned = atk_assigned + calculateEVSNextStat(attacker, Stats::ATK, atk_assigned)) {
+                //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
+                //if an abort request is made
+                if( abort_calculation ) { AttackResult temp; temp.atk_ev = -4; temp.spatk_ev = -4; return temp; }
+                if( simplified && simplified_type == Move::SPECIAL && atk_assigned > 0 ) break;
+
+                bool to_add = true;
+                for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
+                    if( spatk_assigned + atk_assigned > assignable_evs ) to_add = false;
+                    else if( results_buffer[it][atk_assigned + spatk_assigned * ARRAY_SIZE] < (100 - tolerances[it]) ) to_add = false;
+                }
+
+                if( to_add ) { results.push_back(std::make_pair(atk_assigned, spatk_assigned)); qDebug() << atk_assigned << " " << spatk_assigned; }
+            }
+        }
+
+    roll_count++;
     }
     //
 
