@@ -642,9 +642,14 @@ void MainWindow::clear(QAbstractButton* theButton) {
         defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->setValue(31);
         defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->setValue(0);
 
+        moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
+        moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
+
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->clear();
         turns_def.clear();
         modifiers_def.clear();
+
+
     }
 
     else if( theButton->objectName() == "stop_button" ) calculateStop();
