@@ -46,7 +46,7 @@ class MainWindow : public QDialog {
         AlertWindow* alert_window;
 
         QFutureWatcher<void> future_watcher;
-        QFuture<DefenseResult> future;
+        QFuture<FinalResult> future;
         Pokemon* selected_pokemon; //here because when i calculate damages i need this, but it can be done better (see calculate() for explanation)
 
         QGroupBox* defending_groupbox;

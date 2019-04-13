@@ -70,6 +70,7 @@ void ResultWindow::createCalcGroupBox() {
     calc_groupbox->setLayout(calc_layout);
 
     QTabWidget* result_tab = new QTabWidget;
+    result_tab->setObjectName("result_tab");
 
     //defense
     QVBoxLayout* defense_tab_layout = new QVBoxLayout;
@@ -143,6 +144,8 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
 
     //if the calculation is correct
     else {
+        calc_groupbox->findChild<QTabWidget*>("result_tab")->setCurrentIndex(0);
+
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(true);
@@ -301,7 +304,7 @@ QString ResultWindow::getAttackPokemon(const Pokemon& thePokemon, const Move& th
 
 QString ResultWindow::getDefendPokemon(const Pokemon& thePokemon, const std::tuple<int, int, int>& theResult, const defense_modifier& theDefModifier, const Move& theMove, const bool isDualDefense) {
     //hp
-    QString hp_evs = QString::number(std::get<0>(theResult)) + " HP / ";
+    QString hp_evs = QString::number(std::get<0>(theResult)) + " HP ";
 
     //def
     QString def_evs;
@@ -311,11 +314,11 @@ QString ResultWindow::getDefendPokemon(const Pokemon& thePokemon, const std::tup
             def_evs = def_evs + QString::number(std::get<1>(theDefModifier)) + " ";
         }
 
-        def_evs = def_evs + QString::number(std::get<1>(theResult));
+        def_evs = def_evs + " / " + QString::number(std::get<1>(theResult));
 
-        if( thePokemon.getNature() == Stats::BOLD || thePokemon.getNature() == Stats::RELAXED || thePokemon.getNature() == Stats::IMPISH || thePokemon.getNature() == Stats::LAX ) def_evs = def_evs + "+ Def / ";
-        else if( thePokemon.getNature() == Stats::HASTY || thePokemon.getNature() == Stats::MILD || thePokemon.getNature() == Stats::LONELY || thePokemon.getNature() == Stats::GENTLE ) def_evs = def_evs + "- Def / ";
-        else def_evs = def_evs + " Def / ";
+        if( thePokemon.getNature() == Stats::BOLD || thePokemon.getNature() == Stats::RELAXED || thePokemon.getNature() == Stats::IMPISH || thePokemon.getNature() == Stats::LAX ) def_evs = def_evs + "+ Def ";
+        else if( thePokemon.getNature() == Stats::HASTY || thePokemon.getNature() == Stats::MILD || thePokemon.getNature() == Stats::LONELY || thePokemon.getNature() == Stats::GENTLE ) def_evs = def_evs + "- Def ";
+        else def_evs = def_evs + " Def ";
     }
 
     //spdef
@@ -326,11 +329,11 @@ QString ResultWindow::getDefendPokemon(const Pokemon& thePokemon, const std::tup
             spdef_evs = spdef_evs + QString::number(std::get<2>(theDefModifier)) + " ";
         }
 
-        spdef_evs = spdef_evs + QString::number(std::get<2>(theResult));
+        spdef_evs = spdef_evs + "/ " + QString::number(std::get<2>(theResult));
 
         if( thePokemon.getNature() == Stats::CALM || thePokemon.getNature() == Stats::GENTLE || thePokemon.getNature() == Stats::SASSY || thePokemon.getNature() == Stats::CAREFUL ) spdef_evs = spdef_evs + "+ SpD ";
         else if( thePokemon.getNature() == Stats::NAUGHTY || thePokemon.getNature() == Stats::LAX || thePokemon.getNature() == Stats::NAIVE || thePokemon.getNature() == Stats::RASH ) spdef_evs = spdef_evs + "- SpD ";
-        else spdef_evs = spdef_evs + " SpD ";
+        else spdef_evs = spdef_evs + "SpD ";
     }
 
     //item
@@ -434,7 +437,7 @@ QString ResultWindow::getModifiers(const Turn& theTurn) {
 
 QString ResultWindow::getResults(const Turn& theTurn, const Pokemon& thePokemon, const float theRoll, const std::vector<float>& theDamagePerc) {
     //RESULT
-    QString roll_result = "--";
+    QString roll_result = "-- ";
     if(theTurn.getHits() > 1) roll_result = roll_result + QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " moves ";
     else roll_result = roll_result + QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " move ";
 

@@ -16,12 +16,21 @@
 #include "abilities.hpp"
 #include "item.hpp"
 #include "defenseresult.hpp"
+#include "attackresult.hpp"
 
 class Move;
 class Turn;
 
 typedef std::tuple<float, int16_t, int16_t> defense_modifier;
 typedef std::pair<int16_t, int16_t> attack_modifier;
+typedef std::pair<DefenseResult, AttackResult> FinalResult;
+
+class EVCalculationInput;
+
+enum Priority {
+    PRIORITY_DEFENSE,
+    PRIORITY_ATTACK
+};
 
 enum Status {
     NO_STATUS,
@@ -69,6 +78,8 @@ class Pokemon {
         unsigned int calculateMoveBasePowerInAttack(const Pokemon& theAttacker, const Move& theMove) const;
         void calculateMoveTypeInAttack(const Pokemon& theAttacker, Move& theMove) const;
 
+        DefenseResult resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers);
+        AttackResult koMove(const std::vector<Turn>& theTurn, const std::vector<Pokemon>& theDefendingPokemon, const std::vector<attack_modifier>& theAtkModifier);
         void recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<int>& theIntVector, std::vector<std::pair<Pokemon, Move>>& theVector, const unsigned int theHitNumber, std::vector<std::pair<Pokemon, Move>>::iterator& it) const;
         uint8_t calculateEVSNextStat(Pokemon thePokemon, const Stats::Stat& theStat, const unsigned int theStartingEVS) const;
         std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers);
@@ -121,8 +132,18 @@ class Pokemon {
         std::vector<int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;
         float getKOProbability(const Turn& theTurn) const;
-        DefenseResult resistMove(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers);
+        FinalResult calculateEVSDistrisbution(const EVCalculationInput& theInput);
         int outspeedPokemon(const std::vector<Pokemon>& theVector);
+};
+
+class EVCalculationInput { //this class is here to encapsulate the input for the evs distribution calculation function (which has 6 arguments and Qtconcurrent does not like it
+    public:
+        std::vector<Turn> def_turn;
+        std::vector<Turn> atk_turn;
+        std::vector<Pokemon> defending_pokemon;
+        std::vector<attack_modifier> atk_modifier;
+        std::vector<defense_modifier> def_modifier;
+        Priority priority;
 };
 
 #endif

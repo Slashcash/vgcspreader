@@ -381,7 +381,7 @@ void AttackMoveWindow::createModifierGroupbox() {
 
     QSpinBox* hits_modifier_spinbox = new QSpinBox;
     hits_modifier_spinbox->setObjectName("attacking_hits_modifier");
-    hits_modifier_spinbox->setRange(2, 5);
+    hits_modifier_spinbox->setRange(1, 4);
     hits_modifier_spinbox->setSuffix("HKO");
     attacking_layout->addWidget(hits_modifier_spinbox, Qt::AlignLeft);
 
@@ -579,7 +579,7 @@ void AttackMoveWindow::solveMove(void) {
 
     Turn turn;
     turn.addMove(Pokemon(1), attacking1_move); //adding a random pokemon in the turn since when using the turn class in an offensive manner Pokemon is ignored
-    turn.setHits(atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->value()-1);
+    turn.setHits(atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->value());
 
     int atk_mod;
     int spatk_mod;
@@ -611,7 +611,7 @@ void AttackMoveWindow::setAsBlank() {
     move_modifier_groupbox->findChild<QComboBox*>("terrain_combobox")->setCurrentIndex(0);
 
     atk_modifier_groupbox->findChild<QSpinBox*>("attacking_atk_modifier")->setValue(0);
-    atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->setValue(0);
+    atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->setValue(1);
 }
 
 void AttackMoveWindow::setAsTurn(const Turn& theTurn, const Pokemon& theDefendingPokemon, const attack_modifier& theAttackModifier) {
@@ -650,5 +650,5 @@ void AttackMoveWindow::setAsTurn(const Turn& theTurn, const Pokemon& theDefendin
     if( theTurn.getMoves()[0].second.getMoveCategory() == Move::Category::SPECIAL ) atk_modifier_groupbox->findChild<QSpinBox*>("attacking_atk_modifier")->setValue(std::get<1>(theAttackModifier));
     else atk_modifier_groupbox->findChild<QSpinBox*>("attacking_atk_modifier")->setValue(std::get<0>(theAttackModifier));
 
-    atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->setValue(theTurn.getHits()+1);
+    atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->setValue(theTurn.getHits());
 }

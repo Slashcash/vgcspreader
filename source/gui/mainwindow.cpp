@@ -164,14 +164,29 @@ void MainWindow::setDefendingPokemonForm(int index) {
 }
 
 void MainWindow::eraseMove(bool checked) {
-    turns_def.erase(turns_def.begin() +  moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
-    modifiers_def.erase(modifiers_def.begin() + moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
+    if( moves_groupbox->findChild<QTabWidget*>("moves_tabs")->currentIndex() == 0 ) {
+        turns_def.erase(turns_def.begin() +  moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
+        modifiers_def.erase(modifiers_def.begin() + moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
 
-    moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->removeRow(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
+        moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->removeRow(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
 
-    if( turns_def.empty() ) {
-        moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
-        moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
+        if( turns_def.empty() ) {
+            moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
+            moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
+        }
+    }
+
+    else {
+        turns_atk.erase(turns_atk.begin() +  moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow());
+        modifiers_atk.erase(modifiers_atk.begin() + moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow());
+        defending_pokemons_in_attack.erase(defending_pokemons_in_attack.begin() + moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow());
+
+        moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->removeRow(moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow());
+
+        if( turns_atk.empty() ) {
+            moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
+            moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
+        }
     }
 }
 
@@ -726,8 +741,15 @@ void MainWindow::calculate() {
     moves_groupbox->findChild<QLabel*>("calculating_spread_label")->setVisible(true);
     moves_groupbox->findChild<QProgressBar*>("progress_bar")->setVisible(true);
 
-
-    future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns_def, modifiers_def);
+    //encapsulating the input into a wrapper
+    EVCalculationInput input;
+    input.def_turn = turns_def;
+    input.def_modifier = modifiers_def;
+    input.atk_turn = turns_atk;
+    input.atk_modifier = modifiers_atk;
+    input.defending_pokemon = defending_pokemons_in_attack;
+    input.priority = (Priority)moves_groupbox->findChild<QComboBox*>("prioritize_combobox")->currentIndex();
+    future = QtConcurrent::run(selected_pokemon, &Pokemon::calculateEVSDistrisbution, input);
     future_watcher.setFuture(future);
 }
 
@@ -747,32 +769,12 @@ QString MainWindow::retrieveFormName(const int species, const int form) {
 }
 
 void MainWindow::calculateFinished() {
-    DefenseResult result = future.result();
+    std::pair<DefenseResult, AttackResult> result = future.result();
 
-    if( !result.isAborted()  ) { //if an abort has been requested we don't show the result window
+    if( !result.first.isAborted() && !result.second.isAborted()  ) { //if an abort has been requested we don't show the result window
         result_window->setModal(true);
 
-        //this part here is pure test
-        modifiers_atk.push_back(std::make_pair(0, 0));
-
-        Turn test_turn;
-        test_turn.addMove(Pokemon(100), Move(Moves::Precipice_Blades));
-        turns_atk.push_back(test_turn);
-
-        defending_pokemons_in_attack.push_back(Pokemon(2));
-
-        AttackResult test_result;
-        test_result.atk_ev = 2;
-        test_result.spatk_ev = 1;
-        test_result.atk_ko_prob.push_back(100);
-
-        std::vector<float> test_float;
-        test_float.push_back(10);
-        test_float.push_back(15);
-        test_result.atk_damage_perc.push_back(test_float);
-        //until here
-
-        result_window->setResult(*selected_pokemon, modifiers_def, modifiers_atk, turns_def, turns_atk, defending_pokemons_in_attack, result, test_result);
+        result_window->setResult(*selected_pokemon, modifiers_def, modifiers_atk, turns_def, turns_atk, defending_pokemons_in_attack, result.first, result.second);
         result_window->show();
     }
     delete selected_pokemon;
@@ -835,7 +837,7 @@ void MainWindow::solveMoveAttack() {
         QString move_name_1;
         if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
         else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
-        QString move1(species_names[buffer_pokemon.getPokedexNumber()-1] + " " + move_name_1);
+        QString move1(move_name_1 + " vs " + species_names[buffer_pokemon.getPokedexNumber()-1]);
 
         moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(turns_atk.size()-1, 0, new QTableWidgetItem(move1));
         moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->resizeColumnToContents(0);
@@ -848,7 +850,7 @@ void MainWindow::solveMoveAttack() {
         QString move_name_1;
         if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
         else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
-        QString move1(species_names[pokemon_buffer.getPokedexNumber()-1] + " " + move_name_1);
+        QString move1(move_name_1 + " vs " + species_names[pokemon_buffer.getPokedexNumber()-1]);
 
         moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow(), 0, new QTableWidgetItem(move1));
 
