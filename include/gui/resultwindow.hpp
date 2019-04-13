@@ -20,7 +20,7 @@ class ResultWindow : public QDialog {
         void createResultGroupBox();
         void createCalcGroupBox();
         void setResultDefense(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const DefenseResult theResult);
-        void setResultAttack(const Pokemon& theAttackingPokemon, const std::vector<attack_modifier>& theAtkModifier, const std::vector<std::pair<Pokemon, Move>>& theTurns, const AttackResult theResult);
+        void setResultAttack(const Pokemon& theAttackingPokemon, const std::vector<Pokemon>& theDefendingPokemon, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theTurns, const AttackResult theResult);
         QString getAttackPokemon(const Pokemon& thePokemon, const Move& theMove);
         QString getDefendPokemon(const Pokemon& thePokemon, const std::tuple<int, int, int>& theResult, const defense_modifier& theDefModifier, const Move& theMove, const bool isDualDefense);
         QString getModifiers(const Turn& theTurn);
@@ -30,7 +30,7 @@ class ResultWindow : public QDialog {
     public:
         ResultWindow(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);
 
-        void setResult(const Pokemon& thePokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theDefendTurns, const std::vector<std::pair<Pokemon, Move>>& theAttackTurns, const DefenseResult theDefenseResult, const AttackResult theAttackResult); //MONSTROUS
+        void setResult(const Pokemon& thePokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theDefendTurns, const std::vector<Turn>& theAttackTurns, const std::vector<Pokemon>& theDefPokemonInAtk, const DefenseResult theDefenseResult, const AttackResult theAttackResult); //MONSTROUS
 };
 
 #endif // RESULTWINDOW_HPP

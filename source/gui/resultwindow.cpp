@@ -112,7 +112,7 @@ void ResultWindow::createCalcGroupBox() {
     calc_layout->addWidget(result_tab);
 }
 
-void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theDefendTurns, const std::vector<std::pair<Pokemon, Move>>& theAttackTurns, const DefenseResult theDefenseResult, const AttackResult theAttackResult) {
+void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theDefendTurns, const std::vector<Turn>& theAttackTurns, const std::vector<Pokemon>& theDefPokemonInAtk, const DefenseResult theDefenseResult, const AttackResult theAttackResult) {
     //if no valid spread exists
     if( theDefenseResult.isEmpty() || theAttackResult.isEmpty() ) {
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(false);
@@ -191,7 +191,7 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         }
 
         setResultDefense(thePokemon, theDefModifier, theDefendTurns, theDefenseResult);
-        setResultAttack(thePokemon, theAtkModifier, theAttackTurns, theAttackResult);
+        setResultAttack(thePokemon, theDefPokemonInAtk, theAtkModifier, theAttackTurns,theAttackResult);
     }
 }
 
@@ -220,7 +220,7 @@ void ResultWindow::setResultDefense(const Pokemon& theDefendingPokemon, const st
     }
 }
 
-void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std::vector<attack_modifier>& theAtkModifier, const std::vector<std::pair<Pokemon, Move>>& theTurns, const AttackResult theResult) {
+void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std::vector<Pokemon>& theDefendingPokemon, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theTurns, const AttackResult theResult) {
     if( theResult.isEmptyInput()  ) {
         calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->setVisible(false);
         calc_groupbox->findChild<QLabel*>("noattacks_attack_label")->setVisible(true);
@@ -231,16 +231,20 @@ void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std
         calc_groupbox->findChild<QLabel*>("noattacks_attack_label")->setVisible(false);
 
         for( unsigned int it = 0; it < theTurns.size(); it++ ) {
+            //we need this switch because of the dual defensive/offensive nature of the Turn class
             Pokemon pokemon_buffer = theAttackingPokemon;
             pokemon_buffer.setEV(Stats::ATK, theResult.atk_ev);
             pokemon_buffer.setEV(Stats::SPATK, theResult.spatk_ev);
             pokemon_buffer.setModifier(Stats::ATK, theAtkModifier[it].first);
             pokemon_buffer.setModifier(Stats::SPATK, theAtkModifier[it].second);
 
-            Turn buffer_turn;
-            buffer_turn.addMove(pokemon_buffer, theTurns[it].second);
+            std::vector<Turn> temp_turns = theTurns;
+            Turn temp_turn;
+            temp_turn.addMove(pokemon_buffer, temp_turns[it].getMoves()[0].second);
 
-            QString final_result = getCompleteString(buffer_turn, theTurns[it].first, false, theResult.atk_ko_prob[it], theResult.atk_damage_perc[it]);
+            temp_turns[it] = temp_turn;
+
+            QString final_result = getCompleteString(temp_turns[it], theDefendingPokemon[it], false, theResult.atk_ko_prob[it], theResult.atk_damage_perc[it]);
             calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->setText(calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->toPlainText() + final_result + "\n\n");
         }
     }

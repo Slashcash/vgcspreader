@@ -58,7 +58,10 @@ class MainWindow : public QDialog {
         std::vector<QString> forms_names;
 
         std::vector<Turn> turns_def;
+        std::vector<Turn> turns_atk;
         std::vector<defense_modifier> modifiers_def;
+        std::vector<attack_modifier> modifiers_atk;
+        std::vector<Pokemon> defending_pokemons_in_attack;
 
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();

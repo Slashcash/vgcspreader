@@ -704,11 +704,13 @@ void MainWindow::calculateFinished() {
         result_window->setModal(true);
 
         //this part here is pure test
-        std::vector<attack_modifier> test_atk_modifier;
-        test_atk_modifier.push_back(std::make_pair(0, 0));
+        modifiers_atk.push_back(std::make_pair(0, 0));
 
-        std::vector<std::pair<Pokemon, Move>> test_move;
-        test_move.push_back(std::make_pair(Pokemon(2),  Move(Moves::Precipice_Blades)));
+        Turn test_turn;
+        test_turn.addMove(Pokemon(100), Move(Moves::Precipice_Blades));
+        turns_atk.push_back(test_turn);
+
+        defending_pokemons_in_attack.push_back(Pokemon(2));
 
         AttackResult test_result;
         test_result.atk_ev = 2;
@@ -721,7 +723,7 @@ void MainWindow::calculateFinished() {
         test_result.atk_damage_perc.push_back(test_float);
         //until here
 
-        result_window->setResult(*selected_pokemon, modifiers_def, test_atk_modifier, turns_def, test_move, result, test_result);
+        result_window->setResult(*selected_pokemon, modifiers_def, modifiers_atk, turns_def, turns_atk, defending_pokemons_in_attack, result, test_result);
         result_window->show();
     }
     delete selected_pokemon;
