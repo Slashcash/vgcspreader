@@ -27,9 +27,9 @@ class MainWindow : public QDialog {
         void setDefendingPokemonForm(int index);
         void setButtonClickable(int row, int column);
         void eraseMove(bool checked);
-        void openMoveWindowEdit(bool checked);
+        void openMoveWindowEditDefense(bool checked);
         void solveMove();
-        void openMoveWindow(bool checked);
+        void openMoveWindowDefense(bool checked);
         void clear(QAbstractButton* theButton);
         void calculate();
         void calculateStart();
@@ -57,8 +57,8 @@ class MainWindow : public QDialog {
         std::vector<QString> moves_names;
         std::vector<QString> forms_names;
 
-        std::vector<Turn> turns;
-        std::vector<defense_modifier> modifiers;
+        std::vector<Turn> turns_def;
+        std::vector<defense_modifier> modifiers_def;
 
         void createDefendingPokemonGroupBox();
         void createMovesGroupBox();

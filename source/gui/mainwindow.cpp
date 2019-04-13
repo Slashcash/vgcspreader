@@ -151,12 +151,12 @@ void MainWindow::setDefendingPokemonForm(int index) {
 }
 
 void MainWindow::eraseMove(bool checked) {
-    turns.erase(turns.begin() +  moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
-    modifiers.erase(modifiers.begin() + moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
+    turns_def.erase(turns_def.begin() +  moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
+    modifiers_def.erase(modifiers_def.begin() + moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
 
     moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->removeRow(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow());
 
-    if( turns.empty() ) {
+    if( turns_def.empty() ) {
         moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
         moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
     }
@@ -537,26 +537,26 @@ void MainWindow::createMovesGroupBox() {
     //CONNECTING SIGNALS
     connect(moves_defense_view, SIGNAL(cellClicked(int,int)), this, SLOT(setButtonClickable(int,int)));
     connect(moves_delete_button, SIGNAL(clicked(bool)), this, SLOT(eraseMove(bool)));
-    connect(moves_add_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindow(bool)));
-    connect(moves_edit_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowEdit(bool)));
+    connect(moves_add_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowDefense(bool)));
+    connect(moves_edit_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowEditDefense(bool)));
 }
 
 void MainWindow::solveMove() {
     if( !move_window->isEditMode() ) {
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setRowCount(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->rowCount()+1);
 
-        auto buffer = turns.back().getMoves();
+        auto buffer = turns_def.back().getMoves();
 
         QString move_name_1;
         if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
         else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
         QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + move_name_1);
 
-       moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns.size()-1, 0, new QTableWidgetItem(move1));
+       moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns_def.size()-1, 0, new QTableWidgetItem(move1));
 
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->resizeColumnToContents(0);
 
-        if( turns.back().getMoveNum() > 1 ) {
+        if( turns_def.back().getMoveNum() > 1 ) {
             QString move_name_2;
             if( buffer[1].second.isZ() ) move_name_2 = tr("Z-") + moves_names[buffer[1].second.getMoveIndex()];
             else move_name_2 = moves_names[buffer[1].second.getMoveIndex()];
@@ -565,14 +565,14 @@ void MainWindow::solveMove() {
 
             QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
             plus_sign->setTextAlignment(Qt::AlignCenter);
-            moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns.size()-1, 1, plus_sign);
-            moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns.size()-1, 2, new QTableWidgetItem(move2));
+            moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns_def.size()-1, 1, plus_sign);
+            moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns_def.size()-1, 2, new QTableWidgetItem(move2));
             moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->resizeColumnToContents(2);
         }
     }
 
     else {
-        auto buffer = turns[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()].getMoves();
+        auto buffer = turns_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()].getMoves();
 
         QString move_name_1;
         if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
@@ -583,7 +583,7 @@ void MainWindow::solveMove() {
 
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->resizeColumnToContents(0);
 
-        if( turns[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()].getMoveNum() > 1 ) {
+        if( turns_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()].getMoveNum() > 1 ) {
             QString move_name_2;
             if( buffer[1].second.isZ() ) move_name_2 = tr("Z-") + moves_names[buffer[1].second.getMoveIndex()];
             else move_name_2 = moves_names[buffer[1].second.getMoveIndex()];
@@ -604,16 +604,16 @@ void MainWindow::solveMove() {
     }
 }
 
-void MainWindow::openMoveWindow(bool checked) {
+void MainWindow::openMoveWindowDefense(bool checked) {
     move_window->setAsBlank();
     move_window->setEditMode(false);
     move_window->setModal(true);
     move_window->setVisible(true);
 }
 
-void MainWindow::openMoveWindowEdit(bool checked) {
+void MainWindow::openMoveWindowEditDefense(bool checked) {
     move_window->setAsBlank();
-    move_window->setAsTurn(turns[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()], modifiers[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()]);
+    move_window->setAsTurn(turns_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()], modifiers_def[moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()]);
     move_window->setEditMode(true);
     move_window->setModal(true);
     move_window->setVisible(true);
@@ -621,13 +621,13 @@ void MainWindow::openMoveWindowEdit(bool checked) {
 
 void MainWindow::addTurn(const Turn& theTurn, const defense_modifier& theModifier) {
     if( !move_window->isEditMode() ) {
-        turns.push_back(theTurn);
-        modifiers.push_back(theModifier);
+        turns_def.push_back(theTurn);
+        modifiers_def.push_back(theModifier);
     }
 
     else {
-        turns[ moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()] = theTurn;
-        modifiers[ moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()] = theModifier;
+        turns_def[ moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()] = theTurn;
+        modifiers_def[ moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->currentRow()] = theModifier;
     }
 }
 
@@ -643,8 +643,8 @@ void MainWindow::clear(QAbstractButton* theButton) {
         defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->setValue(0);
 
         moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->clear();
-        turns.clear();
-        modifiers.clear();
+        turns_def.clear();
+        modifiers_def.clear();
     }
 
     else if( theButton->objectName() == "stop_button" ) calculateStop();
@@ -673,7 +673,7 @@ void MainWindow::calculate() {
     moves_groupbox->findChild<QProgressBar*>("progress_bar")->setVisible(true);
 
 
-    future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns, modifiers);
+    future = QtConcurrent::run(selected_pokemon, &Pokemon::resistMove, turns_def, modifiers_def);
     future_watcher.setFuture(future);
 }
 
@@ -716,7 +716,7 @@ void MainWindow::calculateFinished() {
         test_result.atk_damage_perc.push_back(test_float);
         //until here
 
-        result_window->setResult(*selected_pokemon, modifiers, test_atk_modifier, turns, test_move, result, test_result);
+        result_window->setResult(*selected_pokemon, modifiers_def, test_atk_modifier, turns_def, test_move, result, test_result);
         result_window->show();
     }
     delete selected_pokemon;
@@ -743,7 +743,7 @@ void MainWindow::calculateStart() {
     bool prompt = false;
 
     //checking if we have to show the prompt for the long calculation
-    for( auto it = turns.begin(); it < turns.end(); it++ )
+    for( auto it = turns_def.begin(); it < turns_def.end(); it++ )
         if( it->getMoveNum() > 1 && it->getHits() > 2 )
             prompt = true;
 
