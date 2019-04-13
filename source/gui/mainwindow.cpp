@@ -695,9 +695,28 @@ QString MainWindow::retrieveFormName(const int species, const int form) {
 void MainWindow::calculateFinished() {
     DefenseResult result = future.result();
 
-    if( result.hp_ev != -4 && result.def_ev != -4 && result.spdef_ev != -4  ) { //if an abort has been requested we don't show the result window
+    if( !result.isAborted()  ) { //if an abort has been requested we don't show the result window
         result_window->setModal(true);
-        result_window->setResult(*selected_pokemon, modifiers, turns, std::make_tuple(result.hp_ev,result.def_ev, result.spdef_ev), result.def_damage_perc, result.def_ko_prob);
+
+        //this part here is pure test
+        std::vector<attack_modifier> test_atk_modifier;
+        test_atk_modifier.push_back(std::make_pair(0, 0));
+
+        std::vector<std::pair<Pokemon, Move>> test_move;
+        test_move.push_back(std::make_pair(Pokemon(2),  Move(Moves::Precipice_Blades)));
+
+        AttackResult test_result;
+        test_result.atk_ev = 2;
+        test_result.spatk_ev = 1;
+        test_result.atk_ko_prob.push_back(100);
+
+        std::vector<float> test_float;
+        test_float.push_back(10);
+        test_float.push_back(15);
+        test_result.atk_damage_perc.push_back(test_float);
+        //until here
+
+        result_window->setResult(*selected_pokemon, modifiers, test_atk_modifier, turns, test_move, result, test_result);
         result_window->show();
     }
     delete selected_pokemon;

@@ -15,7 +15,8 @@ SOURCES += \
     source/gui/resultwindow.cpp \
     source/item.cpp \
     source/gui/alertwindow.cpp \
-    source/defenseresult.cpp
+    source/defenseresult.cpp \
+    source/attackresult.cpp
 
 HEADERS += \
     include/abilities.hpp \
@@ -33,7 +34,8 @@ HEADERS += \
     include/gui/resultwindow.hpp \
     include/item.hpp \
     include/gui/alertwindow.hpp \
-    include/defenseresult.hpp
+    include/defenseresult.hpp \
+    include/attackresult.hpp
 
 RESOURCES += \
     resources.qrc
