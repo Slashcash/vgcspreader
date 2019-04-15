@@ -53,6 +53,12 @@ void ResultWindow::createResultGroupBox() {
     spdef_evs->setObjectName("spdef_evs");
     result_layout->addWidget(spdef_evs);
 
+    result_layout->addSpacing(15);
+
+    QLabel* remaining_evs = new QLabel(tr("Remaining EVS: ")+"0");
+    remaining_evs->setObjectName("remaining_evs");
+    result_layout->addWidget(remaining_evs);
+
     QLabel* no_spread_label = new QLabel(tr("Sorry, no such spread exists"));
     no_spread_label->setObjectName("no_spread_label");
     no_spread_label->setVisible(false);
@@ -121,6 +127,7 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(true);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(false);
@@ -135,6 +142,7 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(true);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(false);
@@ -151,6 +159,7 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(true);
@@ -178,7 +187,28 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("def_evs")->setText(tr("Defense EVS: ")+QString::number(theDefenseResult.def_ev));
         result_groupbox->findChild<QLabel*>("spdef_evs")->setText(tr("Sp. Defense EVS: ")+QString::number(theDefenseResult.spdef_ev));
         result_groupbox->findChild<QLabel*>("atk_evs")->setText(tr("Attack EVS: ")+QString::number(theAttackResult.atk_ev));
-        result_groupbox->findChild<QLabel*>("spatk_evs")->setText(tr("Sp. Attack EVS: ")+QString::number(theAttackResult.spatk_ev));
+        result_groupbox->findChild<QLabel*>("spatk_evs")->setText(tr("Sp. Attack EVS: ")+QString::number(theAttackResult.spatk_ev));        result_groupbox->findChild<QLabel*>("spatk_evs")->setText(tr("Sp. Attack EVS: ")+QString::number(theAttackResult.spatk_ev));
+
+        //calculating how many evs do remain to use
+        int rem_hp = theDefenseResult.hp_ev;
+        if( rem_hp < 0 ) rem_hp = 0; //all of there are necessaries because in some special cases the returned result is < 0
+
+        int rem_def = theDefenseResult.def_ev;
+        if( rem_def < 0 ) rem_def = 0;
+
+        int rem_spdef = theDefenseResult.spdef_ev;
+        if( rem_spdef < 0 ) rem_spdef = 0;
+
+        int rem_atk = theAttackResult.atk_ev;
+        if( rem_atk < 0 ) rem_atk = 0;
+
+        int rem_spatk = theAttackResult.spatk_ev;
+        if( rem_spatk < 0 ) rem_spatk = 0;
+
+        int rem_spe = thePokemon.getEV(Stats::SPE);
+        if( rem_spe < 0 ) rem_spe = 0;
+
+        result_groupbox->findChild<QLabel*>("remaining_evs")->setText(tr("Remaining EVS: ")+QString::number(508 - rem_hp - rem_def - rem_spdef - rem_atk - rem_spatk - rem_spe));
 
         if( theDefenseResult.isEmptyInput() ) {
             result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(false);
