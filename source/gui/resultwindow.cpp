@@ -478,10 +478,8 @@ QString ResultWindow::getResults(const Turn& theTurn, const Pokemon& thePokemon,
     float min_damage;
     float max_damage;
     min_damage = std::floor(*theDamagePerc.begin()*10) / 10;
-    qDebug() << *theDamagePerc.begin();
 
     max_damage = std::floor(theDamagePerc.back()*10) / 10;
-    qDebug() << theDamagePerc.back();
 
     QString damage_result = "(" + QString::number(min_damage, 'f', 1) + "% - " + QString::number(max_damage, 'f', 1) + "%)" /*+ "\n("*/;
 
