@@ -8,7 +8,7 @@ You can now move on to define which attacks you want to survive with your pokemo
 
 **EXAMPLE:** I want an Adamant Incineroar that can resist a combination of a Fake Out by an opposing Incineroar + a Precipice Blades from an opposing Primal Groudon, both at -1 attack. I also want my Incineroar to survive two consecutive Kartana's Sacred Sword at -1. On top of that i want my Incineroar to be able to 1HKO an opposing Lunala with a -1 Malicious Moonsault. VGCSpreader can find the spread that does this in a matter of seconds.
 
-![Example](https://ibb.co/rkmY8Pp) ![Example](https://ibb.co/6wmqCjT) ![Example](https://ibb.co/fXbhQzp)
+![Example](https://i.ibb.co/Q9fLSBH/vgc-1.png) ![Example](https://i.ibb.co/pwxkFYM/vgc-2.png) ![Example](https://i.ibb.co/BfmXw5Z/vgc-3.png)
 
 Be aware that:
 1) You can add as many turn as you want, VGCSpreader will calculate the spread that guarantees you to hit all the benchmarks.
@@ -25,7 +25,7 @@ VGCSpreader will take care of finding a distribution that will guarantee to hit 
 **EXAMPLE:** Let's say you want a Careful Tsareena with 244 evs already assigned in speed that can take a Water Spout from Kyogre as a 3HKO and can also survive a Flare Blitz from Incineroar. Both of the benchmarks can only be hit with a roll, but there is a distribution that guarantees a better roll on Water Spout and another one that guarantees a better roll on Flare Blitz. VGCSpreader will output the evs distribution that guarantees better roll for attack you inserted **first**. As you can see from the screenshots inserting the turn in a different order provides two different distributions: the first one giving you a better chance to survive two Water Spouts and the second one a better chance to survive a Flare Blitz.
 The same mechanism can be applied to offensive benchmarks.
 
-![Example](https://ibb.co/nnvzRF2) ![Example](https://ibb.co/1nMJ9Yb)
+![Example](https://i.ibb.co/YyMpbx9/vgc-4.png) ![Example](https://i.ibb.co/PYMz5st/vgc-5.png)
 
 Long story short: benchmarks you want to hit have to be inserted in an order of importance.
 
