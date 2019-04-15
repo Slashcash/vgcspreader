@@ -6,29 +6,31 @@ Simply: choose the Pokémon you want to calculate the spread for by completing t
 
 You can now move on to define which attacks you want to survive with your pokemon and which ko you need to get. Since VGC is a double format and you can be targeted by two attacks in a turn instead of one, VGCSpreader lets you define a **turn** you need to survive. A turn consisting of a couple of attacks or a single attack in perfect VGC fashion.
 
-**EXAMPLE:** I want an Adamant Incineroar that can resist a combination of a Fake Out by an opposing Incineroar + a Precipice Blades from Primal Groudon, both at -1 attack. I also want my Incineroar to survive two consecutive Kartana's Sacred Sword at -1. On top of that i want my Incineroar to be able to 1HKO an opposing Lunala with a -1 Malicious Moonsault. VGCSpreader can find the spread that does this in a matter of seconds.
+**EXAMPLE:** I want an Adamant Incineroar that can resist a combination of a Fake Out by an opposing Incineroar + a Precipice Blades from an opposing Primal Groudon, both at -1 attack. I also want my Incineroar to survive two consecutive Kartana's Sacred Sword at -1. On top of that i want my Incineroar to be able to 1HKO an opposing Lunala with a -1 Malicious Moonsault. VGCSpreader can find the spread that does this in a matter of seconds.
+
+![Example](https://ibb.co/rkmY8Pp) ![Example](https://ibb.co/6wmqCjT) ![Example](https://ibb.co/fXbhQzp)
 
 Be aware that:
 1) You can add as many turn as you want, VGCSpreader will calculate the spread that guarantees you to hit all the benchmarks.
 
 2) VGCSpreader provides the **minimum** number of evs you need to hit all the benchmarks you inserted. You are free to distribute the remaining evs where you need them most.
 
-3) When calculating for a defensive benchmark the order in which you insert the attacks in a turn **does matter**, calculating a spread for a Knock Off + Water Spout on an AV Yveltal is different than calculating a Water Spout + Knock Off (as water spout will deal more damage in the latter case than in the former due to the effect of Knock Off of removing items)
+3) When calculating for a defensive benchmark the order in which you insert the attacks in a turn **does matter**, calculating a spread for a Knock Off + Water Spout on an AV Yveltal is different than calculating a Water Spout + Knock Off (as Water Spout will deal more damage in the latter case than in the former due to the effect of Knock Off of removing items)
 
-After having inserted all the turns you wish to resist, you can then click the **Calculate** button and a prompt with the calculated evs distribution will pop-up alongside a useful damage calculation for the turns you inserted.
+After having inserted all the benchmarks you need to hit, you can then click the **Calculate** button and a prompt with the calculated evs distribution will pop-up alongside a useful damage calculation for the turns you inserted.
 
 ## What happens if there is no valid evs distribution to hit all the inserted benchmarks?
 VGCSpreader will take care of finding a distribution that will guarantee to hit all the benchmarks with varying degree of chance.
 
-**EXAMPLE:** While there is no valid spread for a Careful Incineroar to survive a Fake out and a +2 Xerneas Moonblast in the same turn 100% of the time VGCSpreader can find a spread that guarantees surviving in most of the cases.
-
-**EXAMPLE 2:** Let's say you want a Careful Tsareena with 244 evs already assigned in speed that can take a Water Spout from Kyogre as a 3HKO and can also survive a Flare Blitz from Incineroar. Both of the benchmarks can only be hit with a roll, but there is a distribution that guarantees a better roll on Water Spout and another one that guarantees a better roll on Flare Blitz. VGCSpreader will output the evs distribution that guarantees better roll for attack you inserted **first**. As you can see from the screenshots inserting the turn in a different order provides two different distributions: the first one giving you a better chance to survive two Water Spouts and the second one a better chance to survive a Flare Blitz.
+**EXAMPLE:** Let's say you want a Careful Tsareena with 244 evs already assigned in speed that can take a Water Spout from Kyogre as a 3HKO and can also survive a Flare Blitz from Incineroar. Both of the benchmarks can only be hit with a roll, but there is a distribution that guarantees a better roll on Water Spout and another one that guarantees a better roll on Flare Blitz. VGCSpreader will output the evs distribution that guarantees better roll for attack you inserted **first**. As you can see from the screenshots inserting the turn in a different order provides two different distributions: the first one giving you a better chance to survive two Water Spouts and the second one a better chance to survive a Flare Blitz.
 The same mechanism can be applied to offensive benchmarks.
 
-Long story short: Benchmarks you want to hit have to be inserted in an order of importance.
+![Example](https://ibb.co/nnvzRF2) ![Example](https://ibb.co/1nMJ9Yb)
+
+Long story short: benchmarks you want to hit have to be inserted in an order of importance.
 
 ## What's with the Prioritize Defense / Prioritize Attack option?
-If you have some defensive and offensive benchmark that can only be hit with rolls at best prioritizing the offensive or the defensive side will output spreads that give better rolls on the defensive or offensive side.
+If you have some defensive and offensive benchmark that can only be hit with rolls at best, prioritizing the offensive or the defensive side will output spreads that give better rolls on the defensive or offensive side.
 
 ## Item, Moves and abilities supported 
 As this is still in a testing phase only a limited amount of item, moves and abilities are supported with a correct damage calculation:
