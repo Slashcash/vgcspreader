@@ -474,7 +474,16 @@ QString ResultWindow::getResults(const Turn& theTurn, const Pokemon& thePokemon,
     else roll_result = roll_result + QString::number(100-theRoll, 'f', 1) + "% chance of resisting " + QString::number(theTurn.getHits()) + " move ";
 
     //DAMAGE
-    QString damage_result = "(" + QString::number(*theDamagePerc.begin(), 'f', 1) + "% - " + QString::number(theDamagePerc.back(), 'f', 1) + "%)" /*+ "\n("*/;
+    //doing this to match showdown's output format
+    float min_damage;
+    float max_damage;
+    min_damage = std::floor(*theDamagePerc.begin()*10) / 10;
+    qDebug() << *theDamagePerc.begin();
+
+    max_damage = std::floor(theDamagePerc.back()*10) / 10;
+    qDebug() << theDamagePerc.back();
+
+    QString damage_result = "(" + QString::number(min_damage, 'f', 1) + "% - " + QString::number(max_damage, 'f', 1) + "%)" /*+ "\n("*/;
 
     //RESTORER
     //grassy terrain restore
