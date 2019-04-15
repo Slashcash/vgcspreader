@@ -727,7 +727,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
 
     //if no result is found we search some rolls
     unsigned int roll_count = 0;
-    const unsigned int MAX_ROLL = 30;
+    const unsigned int MAX_ROLL = 70;
     const unsigned int ROLL_OFFSET = 1;
     std::vector<float> tolerances;
     tolerances.resize(theTurn.size(), 0);
