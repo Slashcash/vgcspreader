@@ -2,7 +2,7 @@
 VGCSpreader is an algorithm to create efficient spreads for Pokemon in the VGC format. It currently is in a testing phase and has limited capabilities. As of now only some items, moves and abilities are supported.
 
 ## How do i use it?
-Simply: choose the Pokémon you want to calculate the spread for by completing the form in the **Pokemon** section. You can select its ability, item and nature and you can specify how many evs you already assigned to other stats. The algorithm will then assign the remaining evs in the best way possible given some benchmarks you decide to hit.
+Simply: choose the Pokémon you want to calculate the spread for by completing the form in the **Pokemon** section. You can select its ability, item and nature and you can specify how many evs you already assigned to other stats. The algorithm will then assign the remaining evs in the best possible way given some benchmarks you decide to hit.
 
 You can now move on to define which attacks you want to survive with your pokemon and which ko you need to get. Since VGC is a double format and you can be targeted by two attacks in a turn instead of one, VGCSpreader lets you define a **turn** you need to survive. A turn consisting of a couple of attacks or a single attack in perfect VGC fashion.
 
@@ -13,7 +13,7 @@ You can now move on to define which attacks you want to survive with your pokemo
 Be aware that:
 1) You can add as many turn as you want, VGCSpreader will calculate the spread that guarantees you to hit all the benchmarks.
 
-2) VGCSpreader provides the **minimum** number of evs you need to hit all the benchmarks you inserted. You are free to distribute the remaining evs where you need them most.
+2) VGCSpreader provides the **minimum** number of evs in order to hit all the benchmarks you inserted. You are free to distribute the remaining evs where you need them most.
 
 3) When calculating for a defensive benchmark the order in which you insert the attacks in a turn **does matter**, calculating a spread for a Knock Off + Water Spout on an AV Yveltal is different than calculating a Water Spout + Knock Off (as Water Spout will deal more damage in the latter case than in the former due to the effect of Knock Off of removing items)
 
