@@ -304,32 +304,34 @@ QString ResultWindow::getAttackPokemon(const Pokemon& thePokemon, const Move& th
 
 QString ResultWindow::getDefendPokemon(const Pokemon& thePokemon, const std::tuple<int, int, int>& theResult, const defense_modifier& theDefModifier, const Move& theMove, const bool isDualDefense) {
     //hp
-    QString hp_evs = QString::number(std::get<0>(theResult)) + " HP ";
+    QString hp_evs = QString::number(std::get<0>(theResult)) + " HP";
 
     //def
     QString def_evs;
+    def_evs = def_evs + " / ";
     if(theMove.getMoveCategory() == Move::PHYSICAL || isDualDefense ) {
         if( std::get<1>(theDefModifier) != 0 ) {
             if( std::get<1>(theDefModifier) > 0 ) def_evs = def_evs + "+";
             def_evs = def_evs + QString::number(std::get<1>(theDefModifier)) + " ";
         }
 
-        def_evs = def_evs + " / " + QString::number(std::get<1>(theResult));
+        def_evs = def_evs + QString::number(std::get<1>(theResult));
 
-        if( thePokemon.getNature() == Stats::BOLD || thePokemon.getNature() == Stats::RELAXED || thePokemon.getNature() == Stats::IMPISH || thePokemon.getNature() == Stats::LAX ) def_evs = def_evs + "+ Def ";
-        else if( thePokemon.getNature() == Stats::HASTY || thePokemon.getNature() == Stats::MILD || thePokemon.getNature() == Stats::LONELY || thePokemon.getNature() == Stats::GENTLE ) def_evs = def_evs + "- Def ";
-        else def_evs = def_evs + " Def ";
+        if( thePokemon.getNature() == Stats::BOLD || thePokemon.getNature() == Stats::RELAXED || thePokemon.getNature() == Stats::IMPISH || thePokemon.getNature() == Stats::LAX ) def_evs = def_evs + "+ Def";
+        else if( thePokemon.getNature() == Stats::HASTY || thePokemon.getNature() == Stats::MILD || thePokemon.getNature() == Stats::LONELY || thePokemon.getNature() == Stats::GENTLE ) def_evs = def_evs + "- Def";
+        else def_evs = def_evs + " Def";
     }
 
     //spdef
     QString spdef_evs;
+    spdef_evs = spdef_evs + "/ ";
     if( theMove.getMoveCategory() == Move::SPECIAL || isDualDefense ) {
         if( std::get<2>(theDefModifier) != 0 ) {
             if( std::get<2>(theDefModifier) > 0 ) spdef_evs = spdef_evs + "+";
             spdef_evs = spdef_evs + QString::number(std::get<2>(theDefModifier)) + " ";
         }
 
-        spdef_evs = spdef_evs + "/ " + QString::number(std::get<2>(theResult));
+         spdef_evs = spdef_evs + QString::number(std::get<2>(theResult));
 
         if( thePokemon.getNature() == Stats::CALM || thePokemon.getNature() == Stats::GENTLE || thePokemon.getNature() == Stats::SASSY || thePokemon.getNature() == Stats::CAREFUL ) spdef_evs = spdef_evs + "+ SpD ";
         else if( thePokemon.getNature() == Stats::NAUGHTY || thePokemon.getNature() == Stats::LAX || thePokemon.getNature() == Stats::NAIVE || thePokemon.getNature() == Stats::RASH ) spdef_evs = spdef_evs + "- SpD ";
