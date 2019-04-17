@@ -273,6 +273,7 @@ void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std
 
             std::vector<Turn> temp_turns = theTurns;
             Turn temp_turn;
+            temp_turn.setHits(temp_turns[it].getHits());
             temp_turn.addMove(pokemon_buffer, temp_turns[it].getMoves()[0].second);
 
             temp_turns[it] = temp_turn;

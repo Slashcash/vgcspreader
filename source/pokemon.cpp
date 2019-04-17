@@ -894,6 +894,7 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
                 //reversing because of the offensive nature of the calc
                 Turn temp_turn;
                 temp_turn.addMove(attacker, theTurn[it].getMoves()[0].second);
+                temp_turn.setHits(theTurn[it].getHits());
 
                 float ko_prob;
                 if( attacker.getEV(Stats::ATK) + attacker.getEV(Stats::SPATK) > assignable_evs ) to_add = false;
@@ -1000,6 +1001,7 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
 
         Turn temp_turn;
         temp_turn.addMove(buffer, theTurn[it].getMoves()[0].second);
+        temp_turn.setHits(theTurn[it].getHits());
 
         final_result.atk_ko_prob.push_back(theDefendingPokemon[it].getKOProbability(temp_turn));
         final_result.atk_damage_perc.push_back(theDefendingPokemon[it].getDamagePercentage(temp_turn));
