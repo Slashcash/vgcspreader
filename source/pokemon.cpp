@@ -2,9 +2,11 @@
 #include <iostream>
 #include <algorithm>
 #include <thread>
+#include <iterator>
 
 #include "pokemon.hpp"
 #include "turn.hpp"
+#include "move.hpp"
 
 #include <QDebug>
 
@@ -574,9 +576,9 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
     //this would'nt be a valid calculation
     if( theTurn.size() != theDefModifiers.size() ) {
         DefenseResult temp;
-        temp.hp_ev = -2;
-        temp.def_ev = -2;
-        temp.spdef_ev = -2;
+        temp.hp_ev.push_back(-2);
+        temp.def_ev.push_back(-2);
+        temp.spdef_ev.push_back(-2);
 
         return temp;
     }
@@ -584,86 +586,12 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
     //if there is no attack in the vector
     if( theTurn.empty() ) {
         DefenseResult temp;
-        temp.hp_ev = -3;
-        temp.def_ev = -3;
-        temp.spdef_ev = -3;
+        temp.hp_ev.push_back(-3);
+        temp.def_ev.push_back(-3);
+        temp.spdef_ev.push_back(-3);
 
         return temp;
     }
-
-    auto results = resistMoveLoop(theTurn, theDefModifiers);
-    //if no result has been found
-    if( results.empty() && !abort_calculation ) {
-        DefenseResult temp;
-        temp.hp_ev = -1;
-        temp.def_ev = -1;
-        temp.spdef_ev = -1;
-
-        return temp;
-    }
-
-    //if an abort has been requested
-    else if( abort_calculation ) {
-        DefenseResult temp;
-        temp.hp_ev = -4;
-        temp.def_ev = -4;
-        temp.spdef_ev = -4;
-
-        return temp;
-    }
-
-    DefenseResult returnable;
-
-    //finding all the minimum elements
-    std::vector<unsigned int> sum_results;
-    //creating the vector with the sums
-    for( auto it = results.begin(); it < results.end(); it++ ) sum_results.push_back(std::get<0>(*it)+std::get<1>(*it)+std::get<2>(*it));
-    //finding the minimum sums
-    auto min_index = std::min_element(sum_results.begin(), sum_results.end());
-    std::vector<std::vector<unsigned int>::iterator> final_results;
-    //all of them
-    for(auto it = sum_results.begin(); it < sum_results.end(); it++) if( *it == *min_index ) final_results.push_back(it);
-
-    //finding the one with the max hp
-    std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> returnable_results;
-    for(auto it = final_results.begin(); it < final_results.end(); it++) returnable_results.push_back(results[std::distance(sum_results.begin(), *it)]);
-
-    std::tuple<uint8_t, uint8_t, uint8_t> final_pair = returnable_results[0];
-    for(auto it = returnable_results.begin(); it < returnable_results.end(); it++)
-        if( std::get<0>(*it) >= std::get<0>(final_pair) ) final_pair = *it;
-
-    returnable.hp_ev = std::get<0>(final_pair);
-    returnable.def_ev = std::get<1>(final_pair);
-    returnable.spdef_ev = std::get<2>(final_pair);
-
-    //now calculating all the damages
-    Pokemon buffer = *this;
-    buffer.setEV(Stats::HP, std::get<0>(final_pair));
-    buffer.setEV(Stats::DEF, std::get<1>(final_pair));
-    buffer.setEV(Stats::SPDEF, std::get<2>(final_pair));
-
-    for( auto it = 0; it < theTurn.size(); it++ ) {
-        buffer.setModifier(Stats::HP, std::get<0>(theDefModifiers[it]));
-        buffer.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
-        buffer.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
-        returnable.def_ko_prob.push_back(buffer.getKOProbability(theTurn[it]));
-        returnable.def_damage_perc.push_back(buffer.getDamagePercentage(theTurn[it]));
-        returnable.def_damage_int.push_back(buffer.getDamageInt(theTurn[it]));
-    }
-
-    return returnable;
-}
-
-std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers) {
-    const unsigned int MAX_EVS = 510;
-    const unsigned int MAX_EVS_SINGLE_STAT = 252;
-    const unsigned int ARRAY_SIZE = MAX_EVS_SINGLE_STAT + 1;
-
-    unsigned int THREAD_NUM = std::thread::hardware_concurrency();
-    if( THREAD_NUM == 0 ) THREAD_NUM = 1; //otherwise single thread machines would bug out
-    std::vector<std::thread*> threads;
-
-    Pokemon defender = *this;
 
     //calculating if we could use the faster loop
     Turn::Type previous = theTurn.begin()->getType();
@@ -679,6 +607,96 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
         else simplified_type = Move::SPECIAL;
     }
 
+    auto results = resistMoveLoop(theTurn, theDefModifiers, simplified, simplified_type);
+    //if no result has been found
+    if( results.empty() && !abort_calculation ) {
+        DefenseResult temp;
+        temp.hp_ev.push_back(-1);
+        temp.def_ev.push_back(-1);
+        temp.spdef_ev.push_back(-1);
+
+        return temp;
+    }
+
+    //if an abort has been requested
+    else if( abort_calculation ) {
+        DefenseResult temp;
+        temp.hp_ev.push_back(-4);
+        temp.def_ev.push_back(-4);
+        temp.spdef_ev.push_back(-4);
+
+        return temp;
+    }
+
+    DefenseResult returnable;
+
+    for(unsigned int i = 0; i < RESULT_TYPE_NUM; i++) {
+        const float WEIGHT = 1.5; //this is the weight used when calculating spreads more focused on hp (the bigger is weight the more they are focused on hp)
+        float effective_weight;
+        if( i == 0 ) effective_weight = 1;
+        else effective_weight = WEIGHT * i;
+
+        //finding all the minimum elements
+        std::vector<unsigned int> sum_results;
+        //creating the vector with the sums
+        for( auto it = results.begin(); it < results.end(); it++ ) sum_results.push_back(std::get<0>(*it) + std::get<1>(*it) * effective_weight + std::get<2>(*it) * effective_weight );
+        //finding the minimum sums
+        auto min_index = std::min_element(sum_results.begin(), sum_results.end());
+        std::vector<std::vector<unsigned int>::iterator> final_results;
+        //all of them
+        for(auto it = sum_results.begin(); it < sum_results.end(); it++) if( *it == *min_index ) final_results.push_back(it);
+
+        //finding the one with the max hp
+        std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> returnable_results;
+        for(auto it = final_results.begin(); it < final_results.end(); it++) returnable_results.push_back(results[std::distance(sum_results.begin(), *it)]);
+
+        std::tuple<uint8_t, uint8_t, uint8_t> final_pair = returnable_results[0];
+        for(auto it = returnable_results.begin(); it < returnable_results.end(); it++)
+            if( std::get<0>(*it) >= std::get<0>(final_pair) ) final_pair = *it;
+
+        if( (i == 0) || (returnable.hp_ev[i-1] != std::get<0>(final_pair) || returnable.def_ev[i-1] != std::get<1>(final_pair) || returnable.spdef_ev[i-1] != std::get<2>(final_pair)  ) ) {
+            returnable.hp_ev.push_back(std::get<0>(final_pair));
+            returnable.def_ev.push_back(std::get<1>(final_pair));
+            returnable.spdef_ev.push_back(std::get<2>(final_pair));
+        }
+
+        //if( !simplified ) break; //if we are not in a simplified loop (meaning we are calculating for attacks on different sides) there is really no need to move on
+    }
+
+    //now calculating all the damages
+    for( unsigned int i = 0; i < returnable.hp_ev.size(); i++ ) { //we use hp.ev.size but we could really use any of the 3
+        Pokemon buffer = *this;
+        buffer.setEV(Stats::HP, returnable.hp_ev[0]);
+        buffer.setEV(Stats::DEF, returnable.def_ev[0]);
+        buffer.setEV(Stats::SPDEF, returnable.spdef_ev[0]);
+
+        returnable.def_ko_prob.push_back(std::vector<float>());
+        returnable.def_damage_perc.push_back(std::vector<std::vector<float>>());
+        returnable.def_damage_int.push_back(std::vector<std::vector<int>>());
+        for( auto it = 0; it < theTurn.size(); it++ ) {
+            buffer.setModifier(Stats::HP, std::get<0>(theDefModifiers[it]));
+            buffer.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
+            buffer.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
+            returnable.def_ko_prob[i].push_back(buffer.getKOProbability(theTurn[it]));
+            returnable.def_damage_perc[i].push_back(buffer.getDamagePercentage(theTurn[it]));
+            returnable.def_damage_int[i].push_back(buffer.getDamageInt(theTurn[it]));
+        }
+    }
+
+    return returnable;
+}
+
+std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, const bool isSimplified, const Move::Category simplifiedType) {
+    const unsigned int MAX_EVS = 510;
+    const unsigned int MAX_EVS_SINGLE_STAT = 252;
+    const unsigned int ARRAY_SIZE = MAX_EVS_SINGLE_STAT + 1;
+
+    unsigned int THREAD_NUM = std::thread::hardware_concurrency();
+    if( THREAD_NUM == 0 ) THREAD_NUM = 1; //otherwise single thread machines would bug out
+    std::vector<std::thread*> threads;
+
+    Pokemon defender = *this;
+
     unsigned int assignable_evs = MAX_EVS - (defender.getEV(Stats::ATK) + defender.getEV(Stats::SPATK) + defender.getEV(Stats::SPE));
     defender.setAllEV(0, 0, 0, 0, 0, 0);
 
@@ -688,16 +706,16 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     results_buffer.resize(theTurn.size());
     for(auto it = results_buffer.begin(); it < results_buffer.end(); it++) it->resize(ARRAY_SIZE*ARRAY_SIZE*ARRAY_SIZE);
 
-    for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+    for(unsigned int hp_assigned = getEV(Stats::HP); hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
         defender.setEV(Stats::HP, hp_assigned);
 
-        for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
-            if( simplified && simplified_type == Move::PHYSICAL && spdef_assigned > 0 ) break;
+        for(unsigned int spdef_assigned = getEV(Stats::SPDEF); spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
+            if( isSimplified && simplifiedType == Move::PHYSICAL && spdef_assigned > getEV(Stats::SPDEF) ) break;
                 defender.setEV(Stats::SPDEF, spdef_assigned);
 
-                for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
+                for(unsigned int def_assigned = getEV(Stats::DEF); def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
                     //qDebug() << QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
-                    if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
+                    if( isSimplified && simplifiedType == Move::SPECIAL && def_assigned > getEV(Stats::DEF) ) break;
                     //if an abort has been requested we return an empty result
                     if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
 
@@ -755,16 +773,16 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
         if( to_increment ) tolerances.back()++;
         */
 
-        for(unsigned int hp_assigned = 0; hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+        for(unsigned int hp_assigned = getEV(Stats::HP); hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
 
-            for(unsigned int spdef_assigned = 0; spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
-                if( simplified && simplified_type == Move::PHYSICAL && spdef_assigned > 0 ) break;
+            for(unsigned int spdef_assigned = getEV(Stats::SPDEF); spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
+                if( isSimplified && simplifiedType == Move::PHYSICAL && spdef_assigned > getEV(Stats::SPDEF) ) break;
 
-                for(unsigned int def_assigned = 0; def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
+                for(unsigned int def_assigned = getEV(Stats::DEF); def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
                     //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
                     //if an abort request is made
                     if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
-                    if( simplified && simplified_type == Move::SPECIAL && def_assigned > 0 ) break;
+                    if( isSimplified && simplifiedType == Move::SPECIAL && def_assigned > getEV(Stats::DEF) ) break;
 
                     bool to_add = true;
                     for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
@@ -828,8 +846,8 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
     //this would'nt be a valid calculation
     if( theTurn.size() != theAtkModifier.size() || theTurn.size() != theDefendingPokemon.size() ) {
         AttackResult temp;
-        temp.atk_ev = -2;
-        temp.spatk_ev = -2;
+        temp.atk_ev.push_back(-2);
+        temp.spatk_ev.push_back(-2);
 
         return temp;
     }
@@ -837,8 +855,8 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
     //if there is no attack in the vector
     if( theTurn.empty() ) {
         AttackResult temp;
-        temp.atk_ev = -3;
-        temp.spatk_ev = -3;
+        temp.atk_ev.push_back(-3);
+        temp.spatk_ev.push_back(-3);
 
         return temp;
     }
@@ -873,14 +891,14 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
     results_buffer.resize(theTurn.size());
     for(auto it = results_buffer.begin(); it < results_buffer.end(); it++) it->resize(ARRAY_SIZE*ARRAY_SIZE);
 
-    for(unsigned int spatk_assigned = 0; spatk_assigned < MAX_EVS_SINGLE_STAT + 1; spatk_assigned = spatk_assigned + calculateEVSNextStat(attacker, Stats::SPATK, spatk_assigned)) {
-        if( simplified && simplified_type == Move::PHYSICAL && spatk_assigned > 0 ) break;
+    for(unsigned int spatk_assigned = getEV(Stats::SPATK); spatk_assigned < MAX_EVS_SINGLE_STAT + 1; spatk_assigned = spatk_assigned + calculateEVSNextStat(attacker, Stats::SPATK, spatk_assigned)) {
+        if( simplified && simplified_type == Move::PHYSICAL && spatk_assigned > getEV(Stats::SPATK) ) break;
         attacker.setEV(Stats::SPATK, spatk_assigned);
 
-        for(unsigned int atk_assigned = 0; atk_assigned < MAX_EVS_SINGLE_STAT + 1; atk_assigned = atk_assigned + calculateEVSNextStat(attacker, Stats::ATK, atk_assigned)) {
-            if( simplified && simplified_type == Move::SPECIAL && atk_assigned > 0 ) break;
+        for(unsigned int atk_assigned = getEV(Stats::ATK); atk_assigned < MAX_EVS_SINGLE_STAT + 1; atk_assigned = atk_assigned + calculateEVSNextStat(attacker, Stats::ATK, atk_assigned)) {
+            if( simplified && simplified_type == Move::SPECIAL && atk_assigned > getEV(Stats::ATK) ) break;
             //if an abort has been requested we return an empty result
-            if( abort_calculation ) { AttackResult temp; temp.atk_ev = -4; temp.spatk_ev = -4; return temp; }
+            if( abort_calculation ) { AttackResult temp; temp.atk_ev.push_back(-4); temp.spatk_ev.push_back(-4); return temp; }
 
             attacker.setEV(Stats::ATK, atk_assigned);
 
@@ -938,13 +956,13 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
         */
 
         for(unsigned int spatk_assigned = 0; spatk_assigned < MAX_EVS_SINGLE_STAT + 1; spatk_assigned = spatk_assigned + calculateEVSNextStat(attacker, Stats::SPATK, spatk_assigned)) {
-            if( simplified && simplified_type == Move::PHYSICAL && spatk_assigned > 0 ) break;
+            if( simplified && simplified_type == Move::PHYSICAL && spatk_assigned > getEV(Stats::SPATK) ) break;
 
             for(unsigned int atk_assigned = 0; atk_assigned < MAX_EVS_SINGLE_STAT + 1; atk_assigned = atk_assigned + calculateEVSNextStat(attacker, Stats::ATK, atk_assigned)) {
                 //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
                 //if an abort request is made
-                if( abort_calculation ) { AttackResult temp; temp.atk_ev = -4; temp.spatk_ev = -4; return temp; }
-                if( simplified && simplified_type == Move::SPECIAL && atk_assigned > 0 ) break;
+                if( abort_calculation ) { AttackResult temp; temp.atk_ev.push_back(-4); temp.spatk_ev.push_back(-4); return temp; }
+                if( simplified && simplified_type == Move::SPECIAL && atk_assigned > getEV(Stats::ATK) ) break;
 
                 bool to_add = true;
                 for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
@@ -963,8 +981,8 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
     //if no result has been found
     if( results.empty() && !abort_calculation ) {
         AttackResult temp;
-        temp.atk_ev = -1;
-        temp.spatk_ev = -1;
+        temp.atk_ev.push_back(-1);
+        temp.spatk_ev.push_back(-1);
 
         return temp;
     }
@@ -972,8 +990,8 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
     //if an abort has been requested
     else if( abort_calculation ) {
         AttackResult temp;
-        temp.atk_ev = -4;
-        temp.spatk_ev = -4;
+        temp.atk_ev.push_back(-4);
+        temp.spatk_ev.push_back(-4);
 
         return temp;
     }
@@ -986,14 +1004,17 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
     auto min_index = std::min_element(sum_results.begin(), sum_results.end());
 
     AttackResult final_result;
-    final_result.atk_ev = results[std::distance(sum_results.begin(), min_index)].first;
-    final_result.spatk_ev = results[std::distance(sum_results.begin(), min_index)].second;
+    final_result.atk_ev.push_back(results[std::distance(sum_results.begin(), min_index)].first);
+    final_result.spatk_ev.push_back(results[std::distance(sum_results.begin(), min_index)].second);
 
     //now calculating all the damages
     Pokemon buffer = *this;
-    buffer.setEV(Stats::ATK, final_result.atk_ev);
-    buffer.setEV(Stats::SPATK, final_result.spatk_ev);
+    buffer.setEV(Stats::ATK, final_result.atk_ev[0]);
+    buffer.setEV(Stats::SPATK, final_result.spatk_ev[0]);
 
+    final_result.atk_ko_prob.push_back(std::vector<float>());
+    final_result.atk_damage_perc.push_back(std::vector<std::vector<float>>());
+    final_result.atk_damage_int.push_back(std::vector<std::vector<int>>());
     for( auto it = 0; it < theTurn.size(); it++ ) {
         //doing this switch because the Turn is used in an offensive sense
         buffer.setModifier(Stats::ATK, theAtkModifier[it].first);
@@ -1003,9 +1024,9 @@ AttackResult Pokemon::koMove(const std::vector<Turn>& theTurn, const std::vector
         temp_turn.addMove(buffer, theTurn[it].getMoves()[0].second);
         temp_turn.setHits(theTurn[it].getHits());
 
-        final_result.atk_ko_prob.push_back(theDefendingPokemon[it].getKOProbability(temp_turn));
-        final_result.atk_damage_perc.push_back(theDefendingPokemon[it].getDamagePercentage(temp_turn));
-        final_result.atk_damage_int.push_back(theDefendingPokemon[it].getDamageInt(temp_turn));
+        final_result.atk_ko_prob[0].push_back(theDefendingPokemon[it].getKOProbability(temp_turn));
+        final_result.atk_damage_perc[0].push_back(theDefendingPokemon[it].getDamagePercentage(temp_turn));
+        final_result.atk_damage_int[0].push_back(theDefendingPokemon[it].getDamageInt(temp_turn));
     }
 
     return final_result;
@@ -1017,21 +1038,54 @@ std::pair<DefenseResult, AttackResult> Pokemon::calculateEVSDistrisbution(const 
 
     if( theInput.priority == PRIORITY_DEFENSE ) {
         auto def_result = buffer.resistMove(theInput.def_turn, theInput.def_modifier);
-        buffer.setEV(Stats::HP, def_result.hp_ev);
-        buffer.setEV(Stats::DEF, def_result.def_ev);
-        buffer.setEV(Stats::SPDEF, def_result.spdef_ev);
+        AttackResult atk_result;
+        for(unsigned int i = 0; i < def_result.hp_ev.size(); i++) { //we use hp.ev but really could use any of the 3
+            buffer.setEV(Stats::HP, def_result.hp_ev[i]);
+            buffer.setEV(Stats::DEF, def_result.def_ev[i]);
+            buffer.setEV(Stats::SPDEF, def_result.spdef_ev[i]);
 
-        auto atk_result = buffer.koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
+            auto atk_buffer = buffer.koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
+
+            if( atk_buffer.isEmpty() && i > 0 ) { //if the alternative spreads are unsuitable because they don't match for the offensive side we erase them
+                def_result.hp_ev.erase(def_result.hp_ev.begin()+i);
+                def_result.def_ev.erase(def_result.def_ev.begin()+i);
+                def_result.spdef_ev.erase(def_result.spdef_ev.begin()+i);
+                def_result.def_ko_prob.erase(def_result.def_ko_prob.begin()+i);
+                def_result.def_damage_int.erase(def_result.def_damage_int.begin()+i);
+                def_result.def_damage_perc.erase(def_result.def_damage_perc.begin()+i);
+                i--;
+            }
+
+            else {
+                atk_result.atk_ev.push_back(atk_buffer.atk_ev[0]);
+                atk_result.spatk_ev.push_back(atk_buffer.spatk_ev[0]);
+                if( !atk_buffer.atk_ko_prob.empty() ) atk_result.atk_ko_prob.push_back(atk_buffer.atk_ko_prob[0]); //because in case of error the function returns empty vectors
+                if( !atk_buffer.atk_damage_int.empty() ) atk_result.atk_damage_int.push_back(atk_buffer.atk_damage_int[0]);
+                if( !atk_buffer.atk_damage_perc.empty() ) atk_result.atk_damage_perc.push_back(atk_buffer.atk_damage_perc[0]);
+            }
+
+        }
 
         return std::make_pair(def_result, atk_result);
     }
 
     else {
         auto atk_result = buffer.koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
-        buffer.setEV(Stats::ATK, atk_result.atk_ev);
-        buffer.setEV(Stats::SPATK, atk_result.spatk_ev);
+        buffer.setEV(Stats::ATK, atk_result.atk_ev[0]);
+        buffer.setEV(Stats::SPATK, atk_result.spatk_ev[0]);
 
         auto def_result = buffer.resistMove(theInput.def_turn, theInput.def_modifier);
+
+        //if the defense result returned more than 1 suitable spread we fill the atk result with the same result just for coherence
+        if( def_result.hp_ev.size() > 1 ) { //honestly we could check any of them
+            for( unsigned int i = 1; i < def_result.hp_ev.size(); i++ ) {
+                atk_result.atk_ev.push_back(atk_result.atk_ev[i-1]);
+                atk_result.spatk_ev.push_back(atk_result.spatk_ev[i-1]);
+                atk_result.atk_ko_prob.push_back(atk_result.atk_ko_prob[i-1]);
+                atk_result.atk_damage_int.push_back(atk_result.atk_damage_int[i-1]);
+                atk_result.atk_damage_perc.push_back(atk_result.atk_damage_perc[i-1]);
+            }
+        }
 
         return std::make_pair(def_result, atk_result);
     }

@@ -6,6 +6,8 @@
 #include <QTabWidget>
 
 ResultWindow::ResultWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) {
+    result_pokemon = new Pokemon(1); //just random assignment
+
     QHBoxLayout* main_layout = new QHBoxLayout;
 
     setLayout(main_layout);
@@ -27,6 +29,10 @@ void ResultWindow::createResultGroupBox() {
 
     //result groupbox
     result_groupbox->setLayout(result_layout);
+
+    QComboBox* result_type_combobox = new QComboBox;
+    result_type_combobox->setObjectName("result_type_combobox");
+    result_layout->addWidget(result_type_combobox);
 
     QLabel* sprite = new QLabel;
     sprite->setObjectName("sprite");
@@ -53,6 +59,10 @@ void ResultWindow::createResultGroupBox() {
     spdef_evs->setObjectName("spdef_evs");
     result_layout->addWidget(spdef_evs);
 
+    QLabel* spe_evs = new QLabel(tr("Speed EVS: ")+"0");
+    spe_evs->setObjectName("spe_evs");
+    result_layout->addWidget(spe_evs);
+
     result_layout->addSpacing(15);
 
     QLabel* remaining_evs = new QLabel(tr("Remaining EVS: ")+"0");
@@ -68,6 +78,10 @@ void ResultWindow::createResultGroupBox() {
     no_input_label->setObjectName("no_input_label");
     no_input_label->setVisible(false);
     result_layout->addWidget(no_input_label);
+
+    //connecting signals
+    connect(result_type_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(setResultType(int)));
+
 }
 
 void ResultWindow::createCalcGroupBox() {
@@ -122,11 +136,13 @@ void ResultWindow::createCalcGroupBox() {
 void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theDefendTurns, const std::vector<Turn>& theAttackTurns, const std::vector<Pokemon>& theDefPokemonInAtk, const DefenseResult theDefenseResult, const AttackResult theAttackResult) {
     //if no valid spread exists
     if( theDefenseResult.isEmpty() || theAttackResult.isEmpty() ) {
+        result_groupbox->findChild<QComboBox*>("result_type_combobox")->setVisible(false);
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("spe_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(true);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(false);
@@ -137,11 +153,13 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
 
     //if there is no input
     else if( theDefenseResult.isEmptyInput() && theAttackResult.isEmptyInput() ) {
+        result_groupbox->findChild<QComboBox*>("result_type_combobox")->setVisible(false);
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("spe_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(true);
@@ -154,11 +172,13 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
     else {
         calc_groupbox->findChild<QTabWidget*>("result_tab")->setCurrentIndex(0);
 
+        result_groupbox->findChild<QComboBox*>("result_type_combobox")->setVisible(true);
         result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("def_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("spe_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(false);
@@ -167,68 +187,37 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         calc_groupbox->setVisible(true);
         calc_groupbox->findChild<QTextEdit*>("text_edit_defense")->clear();
         calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->clear();
+        result_groupbox->findChild<QComboBox*>("result_type_combobox")->clear();
 
-        //setting correct sprite
-        QPixmap sprite_pixmap;
-        QString sprite_path;
-        bool load_result;
+        //filling the member variables
+        *result_pokemon = thePokemon;
+        result_def_modifier = theDefModifier;
+        result_atk_modifier = theAtkModifier;
+        result_def_turns = theDefendTurns;
+        result_atk_turns = theAttackTurns;
+        result_pkmn_attack = theDefPokemonInAtk;
+        result_def = theDefenseResult;
+        result_atk = theAttackResult;
 
-        if( thePokemon.getForm() == 0 ) sprite_path = ":/db/sprites/" + QString::number(thePokemon.getPokedexNumber()) + ".png";
-        else sprite_path = ":/db/sprites/" + QString::number(thePokemon.getPokedexNumber()) + "-" + QString::number(thePokemon.getForm()) + ".png";
+        //constructing the result type combobox
+        if( theDefenseResult.hp_ev.size() == 1 ) result_groupbox->findChild<QComboBox*>("result_type_combobox")->setVisible(false);
 
-        sprite_pixmap.load(sprite_path);
-        const int SPRITE_SCALE_FACTOR = 2;
-        sprite_pixmap = sprite_pixmap.scaled(sprite_pixmap.width() * SPRITE_SCALE_FACTOR, sprite_pixmap.height() * SPRITE_SCALE_FACTOR);
+        else {
+            for( unsigned int i = 0; i < theDefenseResult.hp_ev.size(); i++ ) {
+                if( i == 0 ) result_groupbox->findChild<QComboBox*>("result_type_combobox")->addItem(tr("Most Efficient Spread"));
+                if( i == 1 ) result_groupbox->findChild<QComboBox*>("result_type_combobox")->addItem(tr("HP Balanced Spread"));
+            }
 
-        QLabel* sprite = result_groupbox->findChild<QLabel*>("sprite");
-        sprite->setPixmap(sprite_pixmap);
+            result_groupbox->findChild<QComboBox*>("result_type_combobox")->setCurrentIndex(0);
 
-        result_groupbox->findChild<QLabel*>("hp_evs")->setText(tr("HP EVS: ")+QString::number(theDefenseResult.hp_ev));
-        result_groupbox->findChild<QLabel*>("def_evs")->setText(tr("Defense EVS: ")+QString::number(theDefenseResult.def_ev));
-        result_groupbox->findChild<QLabel*>("spdef_evs")->setText(tr("Sp. Defense EVS: ")+QString::number(theDefenseResult.spdef_ev));
-        result_groupbox->findChild<QLabel*>("atk_evs")->setText(tr("Attack EVS: ")+QString::number(theAttackResult.atk_ev));
-        result_groupbox->findChild<QLabel*>("spatk_evs")->setText(tr("Sp. Attack EVS: ")+QString::number(theAttackResult.spatk_ev));        result_groupbox->findChild<QLabel*>("spatk_evs")->setText(tr("Sp. Attack EVS: ")+QString::number(theAttackResult.spatk_ev));
-
-        //calculating how many evs do remain to use
-        int rem_hp = theDefenseResult.hp_ev;
-        if( rem_hp < 0 ) rem_hp = 0; //all of there are necessaries because in some special cases the returned result is < 0
-
-        int rem_def = theDefenseResult.def_ev;
-        if( rem_def < 0 ) rem_def = 0;
-
-        int rem_spdef = theDefenseResult.spdef_ev;
-        if( rem_spdef < 0 ) rem_spdef = 0;
-
-        int rem_atk = theAttackResult.atk_ev;
-        if( rem_atk < 0 ) rem_atk = 0;
-
-        int rem_spatk = theAttackResult.spatk_ev;
-        if( rem_spatk < 0 ) rem_spatk = 0;
-
-        int rem_spe = thePokemon.getEV(Stats::SPE);
-        if( rem_spe < 0 ) rem_spe = 0;
-
-        result_groupbox->findChild<QLabel*>("remaining_evs")->setText(tr("Remaining EVS: ")+QString::number(508 - rem_hp - rem_def - rem_spdef - rem_atk - rem_spatk - rem_spe));
-
-        if( theDefenseResult.isEmptyInput() ) {
-            result_groupbox->findChild<QLabel*>("hp_evs")->setVisible(false);
-            result_groupbox->findChild<QLabel*>("def_evs")->setVisible(false);
-            result_groupbox->findChild<QLabel*>("spdef_evs")->setVisible(false);
         }
 
-        //this two conditions can't both be true
+        setResultType(0);
 
-        if( theAttackResult.isEmptyInput() ) {
-            result_groupbox->findChild<QLabel*>("atk_evs")->setVisible(false);
-            result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(false);
-        }
-
-        setResultDefense(thePokemon, theDefModifier, theDefendTurns, theDefenseResult);
-        setResultAttack(thePokemon, theDefPokemonInAtk, theAtkModifier, theAttackTurns,theAttackResult);
     }
 }
 
-void ResultWindow::setResultDefense(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const DefenseResult theResult) {
+void ResultWindow::setResultDefense(const Pokemon& theDefendingPokemon, const std::vector<defense_modifier>& theDefModifier, const std::vector<Turn>& theTurns, const DefenseResult theResult, const int index) {
     if( theResult.isEmptyInput()  ) {
         calc_groupbox->findChild<QTextEdit*>("text_edit_defense")->setVisible(false);
         calc_groupbox->findChild<QLabel*>("noattacks_defense_label")->setVisible(true);
@@ -241,19 +230,19 @@ void ResultWindow::setResultDefense(const Pokemon& theDefendingPokemon, const st
         for( unsigned int it = 0; it < theTurns.size(); it++ ) {
             Pokemon pokemon_buffer = theDefendingPokemon;
 
-            pokemon_buffer.setEV(Stats::HP, theResult.hp_ev);
-            pokemon_buffer.setEV(Stats::DEF, theResult.def_ev);
-            pokemon_buffer.setEV(Stats::SPDEF, theResult.spdef_ev);
+            pokemon_buffer.setEV(Stats::HP, theResult.hp_ev[index]);
+            pokemon_buffer.setEV(Stats::DEF, theResult.def_ev[index]);
+            pokemon_buffer.setEV(Stats::SPDEF, theResult.spdef_ev[index]);
             pokemon_buffer.setModifier(Stats::DEF, std::get<1>(theDefModifier[it]));
             pokemon_buffer.setModifier(Stats::SPDEF, std::get<2>(theDefModifier[it]));
-
-            QString final_result = getCompleteString(theTurns[it], pokemon_buffer, true, theResult.def_ko_prob[it], theResult.def_damage_perc[it]);
+            QString final_result = getCompleteString(theTurns[it], pokemon_buffer, true, theResult.def_ko_prob[index][it], theResult.def_damage_perc[index][it]);
             calc_groupbox->findChild<QTextEdit*>("text_edit_defense")->setText(calc_groupbox->findChild<QTextEdit*>("text_edit_defense")->toPlainText() + final_result + "\n\n");
+
         }
     }
 }
 
-void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std::vector<Pokemon>& theDefendingPokemon, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theTurns, const AttackResult theResult) {
+void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std::vector<Pokemon>& theDefendingPokemon, const std::vector<attack_modifier>& theAtkModifier, const std::vector<Turn>& theTurns, const AttackResult theResult, const int index) {
     if( theResult.isEmptyInput()  ) {
         calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->setVisible(false);
         calc_groupbox->findChild<QLabel*>("noattacks_attack_label")->setVisible(true);
@@ -266,8 +255,8 @@ void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std
         for( unsigned int it = 0; it < theTurns.size(); it++ ) {
             //we need this switch because of the dual defensive/offensive nature of the Turn class
             Pokemon pokemon_buffer = theAttackingPokemon;
-            pokemon_buffer.setEV(Stats::ATK, theResult.atk_ev);
-            pokemon_buffer.setEV(Stats::SPATK, theResult.spatk_ev);
+            pokemon_buffer.setEV(Stats::ATK, theResult.atk_ev[index]);
+            pokemon_buffer.setEV(Stats::SPATK, theResult.spatk_ev[index]);
             pokemon_buffer.setModifier(Stats::ATK, theAtkModifier[it].first);
             pokemon_buffer.setModifier(Stats::SPATK, theAtkModifier[it].second);
 
@@ -278,7 +267,7 @@ void ResultWindow::setResultAttack(const Pokemon& theAttackingPokemon, const std
 
             temp_turns[it] = temp_turn;
 
-            QString final_result = getCompleteString(temp_turns[it], theDefendingPokemon[it], false, theResult.atk_ko_prob[it], theResult.atk_damage_perc[it]);
+            QString final_result = getCompleteString(temp_turns[it], theDefendingPokemon[it], false, theResult.atk_ko_prob[index][it], theResult.atk_damage_perc[index][it]);
             calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->setText(calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->toPlainText() + final_result + "\n\n");
         }
     }
@@ -355,7 +344,7 @@ QString ResultWindow::getDefendPokemon(const Pokemon& thePokemon, const std::tup
 
     //spdef
     QString spdef_evs;
-    spdef_evs = spdef_evs + "/ ";
+    spdef_evs = spdef_evs + " / ";
     if( theMove.getMoveCategory() == Move::SPECIAL || isDualDefense ) {
         if( std::get<2>(theDefModifier) != 0 ) {
             if( std::get<2>(theDefModifier) > 0 ) spdef_evs = spdef_evs + "+";
@@ -366,7 +355,7 @@ QString ResultWindow::getDefendPokemon(const Pokemon& thePokemon, const std::tup
 
         if( thePokemon.getNature() == Stats::CALM || thePokemon.getNature() == Stats::GENTLE || thePokemon.getNature() == Stats::SASSY || thePokemon.getNature() == Stats::CAREFUL ) spdef_evs = spdef_evs + "+ SpD ";
         else if( thePokemon.getNature() == Stats::NAUGHTY || thePokemon.getNature() == Stats::LAX || thePokemon.getNature() == Stats::NAIVE || thePokemon.getNature() == Stats::RASH ) spdef_evs = spdef_evs + "- SpD ";
-        else spdef_evs = spdef_evs + "SpD ";
+        else spdef_evs = spdef_evs + " SpD ";
     }
 
     //item
@@ -504,6 +493,7 @@ QString ResultWindow::getCompleteString(const Turn& theTurn, const Pokemon& theD
     QString modifier_result;
     QString damage_result;
 
+
     //FIRST POKEMON
     first_result = getAttackPokemon(theTurn.getMoves()[0].first, theTurn.getMoves()[0].second);
 
@@ -526,4 +516,77 @@ QString ResultWindow::getCompleteString(const Turn& theTurn, const Pokemon& theD
     damage_result = getResults(theTurn, theDefendingPokemon, theRoll, theDamagePerc);
 
     return first_result + second_result + defender_result + modifier_result + damage_result;
+}
+
+void ResultWindow::setResultType(int index) {
+    if( index >= 0) { //to prevent the crash when clearing the combobox
+        calc_groupbox->findChild<QTextEdit*>("text_edit_defense")->clear();
+        calc_groupbox->findChild<QTextEdit*>("text_edit_attack")->clear();
+
+        //setting correct sprite
+        QPixmap sprite_pixmap;
+        QString sprite_path;
+        bool load_result;
+
+        if( result_pokemon->getForm() == 0 ) sprite_path = ":/db/sprites/" + QString::number(result_pokemon->getPokedexNumber()) + ".png";
+        else sprite_path = ":/db/sprites/" + QString::number(result_pokemon->getPokedexNumber()) + "-" + QString::number(result_pokemon->getForm()) + ".png";
+
+        sprite_pixmap.load(sprite_path);
+        const int SPRITE_SCALE_FACTOR = 2;
+        sprite_pixmap = sprite_pixmap.scaled(sprite_pixmap.width() * SPRITE_SCALE_FACTOR, sprite_pixmap.height() * SPRITE_SCALE_FACTOR);
+
+        QLabel* sprite = result_groupbox->findChild<QLabel*>("sprite");
+        sprite->setPixmap(sprite_pixmap);
+
+        int show_hp_evs;
+        if( result_def.hp_ev[0] < 0 ) show_hp_evs = result_pokemon->getEV(Stats::HP);
+        else show_hp_evs = result_def.hp_ev[index];
+        result_groupbox->findChild<QLabel*>("hp_evs")->setText(tr("HP EVS: ")+QString::number(show_hp_evs));
+
+        int show_atk_evs;
+        if( result_atk.atk_ev[0] < 0 ) show_atk_evs = result_pokemon->getEV(Stats::ATK);
+        else show_atk_evs = result_atk.atk_ev[index];
+        result_groupbox->findChild<QLabel*>("atk_evs")->setText(tr("Attack EVS: ")+QString::number(show_atk_evs));
+
+        int show_def_evs;
+        if( result_def.def_ev[0] < 0 ) show_def_evs = result_pokemon->getEV(Stats::DEF);
+        else show_def_evs = result_def.def_ev[index];
+        result_groupbox->findChild<QLabel*>("def_evs")->setText(tr("Defense EVS: ")+QString::number(show_def_evs));
+
+        int show_spatk_evs;
+        if( result_atk.spatk_ev[0] < 0 ) show_spatk_evs = result_pokemon->getEV(Stats::SPATK);
+        else show_spatk_evs = result_atk.spatk_ev[index];
+        result_groupbox->findChild<QLabel*>("spatk_evs")->setText(tr("Sp. Attack EVS: ")+QString::number(show_spatk_evs));
+
+        int show_spdef_evs;
+        if( result_def.spdef_ev[0] < 0 ) show_spdef_evs = result_pokemon->getEV(Stats::SPDEF);
+        else show_spdef_evs = result_def.spdef_ev[index];
+        result_groupbox->findChild<QLabel*>("spdef_evs")->setText(tr("Sp. Defense EVS: ")+QString::number(show_spdef_evs));
+
+        result_groupbox->findChild<QLabel*>("spe_evs")->setText(tr("Speed EVS: ")+QString::number(result_pokemon->getEV(Stats::SPE)));
+
+        //calculating how many evs do remain to use
+        int rem_hp = result_def.hp_ev[index];
+        if( rem_hp < 0 ) rem_hp = 0; //all of there are necessaries because in some special cases the returned result is < 0
+
+        int rem_def = result_def.def_ev[index];
+        if( rem_def < 0 ) rem_def = 0;
+
+        int rem_spdef = result_def.spdef_ev[index];
+        if( rem_spdef < 0 ) rem_spdef = 0;
+
+        int rem_atk = result_atk.atk_ev[index];
+        if( rem_atk < 0 ) rem_atk = 0;
+
+        int rem_spatk = result_atk.spatk_ev[index];
+        if( rem_spatk < 0 ) rem_spatk = 0;
+
+        int rem_spe = result_pokemon->getEV(Stats::SPE);
+        if( rem_spe < 0 ) rem_spe = 0;
+
+        result_groupbox->findChild<QLabel*>("remaining_evs")->setText(tr("Remaining EVS: ")+QString::number(508 - rem_hp - rem_def - rem_spdef - rem_atk - rem_spatk - rem_spe));
+
+        setResultDefense(*result_pokemon, result_def_modifier, result_def_turns, result_def, index);
+        setResultAttack(*result_pokemon, result_pkmn_attack, result_atk_modifier, result_atk_turns,result_atk, index);
+    }
 }

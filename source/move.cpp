@@ -1,4 +1,5 @@
 #include "move.hpp"
+#include "pokemon.hpp"
 
 Move::Move(const Moves theMoveIndex) {
     index = theMoveIndex;

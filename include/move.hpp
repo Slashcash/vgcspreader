@@ -5,8 +5,8 @@
 #include <string>
 
 #include "modifier.hpp"
-#include "pokemon.hpp"
 #include "moves.hpp"
+#include "types.hpp"
 
 class Move {
     public:

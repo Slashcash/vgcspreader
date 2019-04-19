@@ -299,22 +299,6 @@ void MainWindow::createDefendingPokemonGroupBox() {
     //some spacing
     species_types_layout->insertSpacing(5, 20);
 
-    //---assigned evs---//
-    QHBoxLayout* assigned_layout = new QHBoxLayout;
-    assigned_layout->setAlignment(Qt::AlignLeft);
-    assigned_layout->setSpacing(10);
-
-    //already assigned evs
-    QLabel* assignedev_label = new QLabel(tr("Already assigned EV:"));
-    assigned_layout->addWidget(assignedev_label);
-
-    QSpinBox* assignedev = new QSpinBox;
-    assignedev->setObjectName("defending_assignedev_spinbox");
-    assignedev->setRange(0, 508);
-    assigned_layout->addWidget(assignedev);
-
-    species_types_layout->addLayout(assigned_layout);
-
     //adding everything to the window
     defending_layout->addLayout(species_types_layout);
 
@@ -323,7 +307,7 @@ void MainWindow::createDefendingPokemonGroupBox() {
 
     //---MAIN FORM---//
     QVBoxLayout* main_form_layout = new QVBoxLayout;
-    main_form_layout->setAlignment(Qt::AlignTop);
+    main_form_layout->setAlignment(Qt::AlignVCenter);
 
     //---information section---///
     QFormLayout* form_layout = new QFormLayout;
@@ -393,78 +377,104 @@ void MainWindow::createDefendingPokemonGroupBox() {
     items->setMaximumWidth(abilities_width);
     abilities->setMaximumWidth(abilities_width);
 
-    //some spacing
-    main_form_layout->insertSpacing(1, 10);
+    //adding everything to the layout
+    defending_layout->addLayout(main_form_layout);
 
-    //---modifiers---//
-    QHBoxLayout* modifiers_layout_1 = new QHBoxLayout;
-    modifiers_layout_1->setAlignment(Qt::AlignLeft);
-    modifiers_layout_1->setSpacing(10);
+    defending_layout->addSpacing(20);
+
+    //---iv modifiers---//
+    QGroupBox* iv_groupbox = new QGroupBox(tr("IV:"));
+
+    QFormLayout* modifiers_layout = new QFormLayout;
+    iv_groupbox->setLayout(modifiers_layout);
 
     //hp iv
-    QLabel* hpiv_label = new QLabel(tr("HP IV:"));
-    hpiv_label->setObjectName("defending_hpiv_label");
-    modifiers_layout_1->addWidget(hpiv_label);
-
     QSpinBox* hpiv = new QSpinBox;
     hpiv->setObjectName("defending_hpiv_spinbox");
     hpiv->setRange(0, 31);
     hpiv->setValue(31);
-    modifiers_layout_1->addWidget(hpiv);
-
-    //def iv
-    QLabel* defiv_label = new QLabel(tr("Def IV:"));
-    defiv_label->setObjectName("defending_defiv_label");
-    modifiers_layout_1->addWidget(defiv_label);
-
-    QSpinBox* defiv = new QSpinBox;
-    defiv->setRange(0, 31);
-    defiv->setValue(31);
-    defiv->setObjectName("defending_defiv_spinbox");
-    modifiers_layout_1->addWidget(defiv);
-
-    //spdef iv
-    QLabel* defending_spdefiv_label = new QLabel(tr("Sp. Def IV:"));
-    defending_spdefiv_label->setObjectName("defending_spdefiv_label");
-    modifiers_layout_1->addWidget(defending_spdefiv_label);
-
-    QSpinBox* spdefiv = new QSpinBox;
-    spdefiv->setObjectName("defending_spdefiv_spinbox");
-    spdefiv->setRange(0, 31);
-    spdefiv->setValue(31);
-    modifiers_layout_1->addWidget(spdefiv);
-
-    QHBoxLayout* modifiers_layout_2 = new QHBoxLayout;
-    modifiers_layout_2->setAlignment(Qt::AlignLeft);
-    modifiers_layout_2->setSpacing(10);
+    modifiers_layout->addRow(tr("HP IV:"), hpiv);
 
     //atk iv
-    QLabel* defending_atkiv_label = new QLabel(tr("Atk IV:"));
-    defending_atkiv_label->setObjectName("defending_atkiv_label");
-    modifiers_layout_2->addWidget(defending_atkiv_label);
-
     QSpinBox* atkiv = new QSpinBox;
     atkiv->setObjectName("defending_atkiv_spinbox");
     atkiv->setRange(0, 31);
     atkiv->setValue(31);
-    modifiers_layout_2->addWidget(atkiv);
+    modifiers_layout->addRow(tr("Atk IV:"), atkiv);
+
+    //def iv
+    QSpinBox* defiv = new QSpinBox;
+    defiv->setRange(0, 31);
+    defiv->setValue(31);
+    defiv->setObjectName("defending_defiv_spinbox");
+    modifiers_layout->addRow(tr("Def IV:"), defiv);
 
     //spatk iv
-    QLabel* defending_spatkiv_label = new QLabel(tr("Sp. Atk IV:"));
-    defending_spatkiv_label->setObjectName("defending_spatkiv_label");
-    modifiers_layout_2->addWidget(defending_spatkiv_label);
-
     QSpinBox* spatkiv = new QSpinBox;
-    spatkiv->setObjectName("defending_spatkiv_spinbox");
     spatkiv->setRange(0, 31);
     spatkiv->setValue(31);
-    modifiers_layout_2->addWidget(spatkiv);
+    spatkiv->setObjectName("defending_spatkiv_spinbox");
+    modifiers_layout->addRow(tr("Sp. Atk IV:"), spatkiv);
 
-    main_form_layout->addLayout(modifiers_layout_1);
-    main_form_layout->addLayout(modifiers_layout_2);
+    //spdef iv
+    QSpinBox* spdefiv = new QSpinBox;
+    spdefiv->setObjectName("defending_spdefiv_spinbox");
+    spdefiv->setRange(0, 31);
+    spdefiv->setValue(31);
+    modifiers_layout->addRow(tr("Sp. Def IV:"), spdefiv);
 
-    //adding everything to the layout
-    defending_layout->addLayout(main_form_layout);
+    //spe iv
+    QSpinBox* speiv = new QSpinBox;
+    speiv->setObjectName("defending_speiv_spinbox");
+    speiv->setRange(0, 31);
+    speiv->setValue(31);
+    modifiers_layout->addRow(tr("Spe IV:"), speiv);
+
+    defending_layout->addWidget(iv_groupbox);
+
+    //already assigned evs
+    QGroupBox* assigned_groupbox = new QGroupBox(tr("Already assigned EVS:"));
+
+    QFormLayout* assigned_layout = new QFormLayout;
+    assigned_groupbox->setLayout(assigned_layout);
+
+    //hp evs
+    QSpinBox* assigned_hp = new QSpinBox;
+    assigned_hp->setObjectName("defending_hpev_spinbox");
+    assigned_hp->setRange(0, 252);
+    assigned_layout->addRow(tr("HP EVS:"), assigned_hp);
+
+    //atk evs
+    QSpinBox* assigned_atk = new QSpinBox;
+    assigned_atk->setObjectName("defending_atkev_spinbox");
+    assigned_atk->setRange(0, 252);
+    assigned_layout->addRow(tr("Atk EVS:"), assigned_atk);
+
+    //def evs
+    QSpinBox* assigned_def = new QSpinBox;
+    assigned_def->setObjectName("defending_defev_spinbox");
+    assigned_def->setRange(0, 252);
+    assigned_layout->addRow(tr("Def EVS:"), assigned_def);
+
+    //spatk evs
+    QSpinBox* assigned_spatk = new QSpinBox;
+    assigned_spatk->setObjectName("defending_spatkev_spinbox");
+    assigned_spatk->setRange(0, 252);
+    assigned_layout->addRow(tr("Sp. Atk EVS:"), assigned_spatk);
+
+    //spdef evs
+    QSpinBox* assigned_spdef = new QSpinBox;
+    assigned_spdef->setObjectName("defending_spdefev_spinbox");
+    assigned_spdef->setRange(0, 252);
+    assigned_layout->addRow(tr("Sp. Def EVS:"), assigned_spdef);
+
+    //spe evs
+    QSpinBox* assigned_spe = new QSpinBox;
+    assigned_spe->setObjectName("defending_speev_spinbox");
+    assigned_spe->setRange(0, 252);
+    assigned_layout->addRow(tr("Spe EVS:"), assigned_spe);
+
+    defending_layout->addWidget(assigned_groupbox);
 
     //CONNECTING SIGNALS
     connect(species, SIGNAL(currentIndexChanged(int)), this, SLOT(setDefendingPokemonSpecies(int)));
@@ -699,10 +709,20 @@ void MainWindow::clear(QAbstractButton* theButton) {
         defending_groupbox->findChild<QComboBox*>("defending_forms_combobox")->setCurrentIndex(0);
         defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->setCurrentIndex(0);
         defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->setCurrentIndex(0);
+
         defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->setValue(31);
+        defending_groupbox->findChild<QSpinBox*>("defending_atkiv_spinbox")->setValue(31);
         defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->setValue(31);
+        defending_groupbox->findChild<QSpinBox*>("defending_spatkiv_spinbox")->setValue(31);
         defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->setValue(31);
-        defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->setValue(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_speiv_spinbox")->setValue(31);
+
+        defending_groupbox->findChild<QSpinBox*>("defending_hpev_spinbox")->setValue(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->setValue(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_defev_spinbox")->setValue(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->setValue(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_spdefev_spinbox")->setValue(0);
+        defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->setValue(0);
 
         moves_groupbox->findChild<QPushButton*>("moves_edit_button")->setEnabled(false);
         moves_groupbox->findChild<QPushButton*>("moves_delete_button")->setEnabled(false);
@@ -727,10 +747,20 @@ void MainWindow::calculate() {
     selected_pokemon->setNature((Stats::Nature)defending_groupbox->findChild<QComboBox*>("defending_nature_combobox")->currentIndex());
     selected_pokemon->setAbility((Ability)defending_groupbox->findChild<QComboBox*>("defending_abilities_combobox")->currentIndex());
     selected_pokemon->setItem(Item(defending_groupbox->findChild<QComboBox*>("defending_items_combobox")->currentIndex()));
+
     selected_pokemon->setIV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpiv_spinbox")->value());
+    selected_pokemon->setIV(Stats::ATK, defending_groupbox->findChild<QSpinBox*>("defending_atkiv_spinbox")->value());
     selected_pokemon->setIV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defiv_spinbox")->value());
+    selected_pokemon->setIV(Stats::SPATK, defending_groupbox->findChild<QSpinBox*>("defending_spatkiv_spinbox")->value());
     selected_pokemon->setIV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefiv_spinbox")->value());
-    selected_pokemon->setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_assignedev_spinbox")->value());
+    selected_pokemon->setIV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_speiv_spinbox")->value());
+
+    selected_pokemon->setEV(Stats::HP, defending_groupbox->findChild<QSpinBox*>("defending_hpev_spinbox")->value());
+    selected_pokemon->setEV(Stats::ATK, defending_groupbox->findChild<QSpinBox*>("defending_atkev_spinbox")->value());
+    selected_pokemon->setEV(Stats::DEF, defending_groupbox->findChild<QSpinBox*>("defending_defev_spinbox")->value());
+    selected_pokemon->setEV(Stats::SPATK, defending_groupbox->findChild<QSpinBox*>("defending_spatkev_spinbox")->value());
+    selected_pokemon->setEV(Stats::SPDEF, defending_groupbox->findChild<QSpinBox*>("defending_spdefev_spinbox")->value());
+    selected_pokemon->setEV(Stats::SPE, defending_groupbox->findChild<QSpinBox*>("defending_speev_spinbox")->value());
 
     //enabling the stop button
     bottom_buttons->findChild<QPushButton*>("stop_button")->setVisible(true);
