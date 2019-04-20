@@ -609,7 +609,7 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
 
     auto results = resistMoveLoop(theTurn, theDefModifiers, simplified, simplified_type);
     //if no result has been found
-    if( results.empty() && !abort_calculation ) {
+    if( results.first.empty() && !abort_calculation ) { //checking any of the two would be good
         DefenseResult temp;
         temp.hp_ev.push_back(-1);
         temp.def_ev.push_back(-1);
@@ -639,7 +639,13 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
         //finding all the minimum elements
         std::vector<unsigned int> sum_results;
         //creating the vector with the sums
-        for( auto it = results.begin(); it < results.end(); it++ ) sum_results.push_back(std::get<0>(*it) + std::get<1>(*it) * effective_weight + std::get<2>(*it) * effective_weight );
+
+        //different vectors for different euristhics
+        std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> temp_vec;
+        if( i == 0 ) temp_vec = results.first;
+        else if ( i == 1 ) temp_vec = results.second;
+
+        for( auto it = temp_vec.begin(); it < temp_vec.end(); it++ ) sum_results.push_back(std::get<0>(*it) + std::get<1>(*it) * effective_weight + std::get<2>(*it) * effective_weight );
         //finding the minimum sums
         auto min_index = std::min_element(sum_results.begin(), sum_results.end());
         std::vector<std::vector<unsigned int>::iterator> final_results;
@@ -648,7 +654,7 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
 
         //finding the one with the max hp
         std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> returnable_results;
-        for(auto it = final_results.begin(); it < final_results.end(); it++) returnable_results.push_back(results[std::distance(sum_results.begin(), *it)]);
+        for(auto it = final_results.begin(); it < final_results.end(); it++) returnable_results.push_back(temp_vec[std::distance(sum_results.begin(), *it)]);
 
         std::tuple<uint8_t, uint8_t, uint8_t> final_pair = returnable_results[0];
         for(auto it = returnable_results.begin(); it < returnable_results.end(); it++)
@@ -666,9 +672,9 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
     //now calculating all the damages
     for( unsigned int i = 0; i < returnable.hp_ev.size(); i++ ) { //we use hp.ev.size but we could really use any of the 3
         Pokemon buffer = *this;
-        buffer.setEV(Stats::HP, returnable.hp_ev[0]);
-        buffer.setEV(Stats::DEF, returnable.def_ev[0]);
-        buffer.setEV(Stats::SPDEF, returnable.spdef_ev[0]);
+        buffer.setEV(Stats::HP, returnable.hp_ev[i]);
+        buffer.setEV(Stats::DEF, returnable.def_ev[i]);
+        buffer.setEV(Stats::SPDEF, returnable.spdef_ev[i]);
 
         returnable.def_ko_prob.push_back(std::vector<float>());
         returnable.def_damage_perc.push_back(std::vector<std::vector<float>>());
@@ -686,7 +692,7 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
     return returnable;
 }
 
-std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, const bool isSimplified, const Move::Category simplifiedType) {
+std::pair<std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>> Pokemon::resistMoveLoop(const std::vector<Turn>& theTurn, const std::vector<defense_modifier>& theDefModifiers, const bool isSimplified, const Move::Category simplifiedType) {
     const unsigned int MAX_EVS = 510;
     const unsigned int MAX_EVS_SINGLE_STAT = 252;
     const unsigned int ARRAY_SIZE = MAX_EVS_SINGLE_STAT + 1;
@@ -701,6 +707,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     defender.setAllEV(0, 0, 0, 0, 0, 0);
 
     std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> results;
+    std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> alternative_results; //this one contains all the results that are suitable for the second euristhics but not for the first one
 
     std::vector<std::vector<float>> results_buffer;
     results_buffer.resize(theTurn.size());
@@ -717,7 +724,7 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
                     //qDebug() << QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
                     if( isSimplified && simplifiedType == Move::SPECIAL && def_assigned > getEV(Stats::DEF) ) break;
                     //if an abort has been requested we return an empty result
-                    if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
+                    if( abort_calculation ) return std::make_pair(std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>(), std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>());
 
                     defender.setEV(Stats::DEF, def_assigned);
 
@@ -741,69 +748,80 @@ std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> Pokemon::resistMoveLoop(const
     threads.clear();
 
     //if an abort has been requested between the loop and the join operation we return an empty result
-    if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
+    if( abort_calculation ) return std::make_pair(std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>(), std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>());
 
     //if no result is found we search some rolls
+    bool roll_found = false;
     unsigned int roll_count = 0;
+    unsigned int roll_count_min = 0;
     const unsigned int MAX_ROLL = 70;
+    const unsigned int MIN_ROLL = 20;
     const unsigned int ROLL_OFFSET = 1;
     std::vector<float> tolerances;
     tolerances.resize(theTurn.size(), 0);
 
-    while( results.empty() && roll_count < (MAX_ROLL+1) * theTurn.size() && !abort_calculation/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
-        //for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
+    if( results.empty() ) {
+        while( (!roll_found || roll_count_min < (MIN_ROLL+1) * theTurn.size()) && roll_count < (MAX_ROLL+1) * theTurn.size() && !abort_calculation/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
+            //for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
+    qDebug() << roll_count_min;
+            unsigned int tolerance_index = roll_count / (MAX_ROLL+1);
+            (*(tolerances.end()-1-tolerance_index)) += ROLL_OFFSET;
 
-        unsigned int tolerance_index = roll_count / (MAX_ROLL+1);
-        (*(tolerances.end()-1-tolerance_index)) += ROLL_OFFSET;
-
-        /*these are two different algorithm that produce different result i like the first one more so i'm keeping it for now
-        bool to_increment = true;
-        for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) {
-            if( *it == MAX_ROLL ) {
-                bool to_increment_local = true;
-                for( auto it2 = it+1; it2 < tolerances.end(); it2++ ) if( *it2 != MAX_ROLL ) to_increment_local = false;
-                if( to_increment_local && (*(tolerances.begin())) != MAX_ROLL ) {
-                    (*(it-1)) += ROLL_OFFSET;
-                    for(auto it3 = it; it3 < tolerances.end(); it3++) *it3 = 0;
-                    to_increment = false;
-                }
-            }
-        }
-
-        if( to_increment ) tolerances.back()++;
-        */
-
-        for(unsigned int hp_assigned = getEV(Stats::HP); hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
-
-            for(unsigned int spdef_assigned = getEV(Stats::SPDEF); spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
-                if( isSimplified && simplifiedType == Move::PHYSICAL && spdef_assigned > getEV(Stats::SPDEF) ) break;
-
-                for(unsigned int def_assigned = getEV(Stats::DEF); def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
-                    //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
-                    //if an abort request is made
-                    if( abort_calculation ) return std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>();
-                    if( isSimplified && simplifiedType == Move::SPECIAL && def_assigned > getEV(Stats::DEF) ) break;
-
-                    bool to_add = true;
-                    for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
-                        defender.setCurrentHPPercentage(std::get<0>(theDefModifiers[it]));
-                        defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
-                        defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
-                        if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
-                        else if( results_buffer[it][hp_assigned +  def_assigned * ARRAY_SIZE + spdef_assigned * ARRAY_SIZE * ARRAY_SIZE] > (0 + tolerances[it]) ) to_add = false;
+            /*these are two different algorithm that produce different result i like the first one more so i'm keeping it for now
+            bool to_increment = true;
+            for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) {
+                if( *it == MAX_ROLL ) {
+                    bool to_increment_local = true;
+                    for( auto it2 = it+1; it2 < tolerances.end(); it2++ ) if( *it2 != MAX_ROLL ) to_increment_local = false;
+                    if( to_increment_local && (*(tolerances.begin())) != MAX_ROLL ) {
+                        (*(it-1)) += ROLL_OFFSET;
+                        for(auto it3 = it; it3 < tolerances.end(); it3++) *it3 = 0;
+                        to_increment = false;
                     }
-
-                    if( to_add ) results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
                 }
             }
 
-        }
+            if( to_increment ) tolerances.back()++;
+            */
 
-        roll_count++;
+            for(unsigned int hp_assigned = getEV(Stats::HP); hp_assigned < MAX_EVS_SINGLE_STAT + 1; hp_assigned = hp_assigned + calculateEVSNextStat(defender, Stats::HP, hp_assigned)) {
+
+                for(unsigned int spdef_assigned = getEV(Stats::SPDEF); spdef_assigned < MAX_EVS_SINGLE_STAT + 1; spdef_assigned = spdef_assigned + calculateEVSNextStat(defender, Stats::SPDEF, spdef_assigned)) {
+                    if( isSimplified && simplifiedType == Move::PHYSICAL && spdef_assigned > getEV(Stats::SPDEF) ) break;
+
+                    for(unsigned int def_assigned = getEV(Stats::DEF); def_assigned < MAX_EVS_SINGLE_STAT + 1; def_assigned = def_assigned + calculateEVSNextStat(defender, Stats::DEF, def_assigned)) {
+                        //qDebug() << QString::number(roll_count) + " " + QString::number(hp_assigned) + " " + QString::number(spdef_assigned) + " " + QString::number(def_assigned);
+                        //if an abort request is made
+                        if( abort_calculation ) return std::make_pair(std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>(), std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>());
+                        if( isSimplified && simplifiedType == Move::SPECIAL && def_assigned > getEV(Stats::DEF) ) break;
+
+                        bool to_add = true;
+                        for(unsigned int it = 0; it < theTurn.size() && to_add; it++ ) {
+                            defender.setCurrentHPPercentage(std::get<0>(theDefModifiers[it]));
+                            defender.setModifier(Stats::DEF, std::get<1>(theDefModifiers[it]));
+                            defender.setModifier(Stats::SPDEF, std::get<2>(theDefModifiers[it]));
+                            if( hp_assigned + def_assigned + spdef_assigned > assignable_evs ) to_add = false;
+                            else if( results_buffer[it][hp_assigned +  def_assigned * ARRAY_SIZE + spdef_assigned * ARRAY_SIZE * ARRAY_SIZE] > (0 + tolerances[it]) ) to_add = false;
+                        }
+
+                        if( to_add ) {
+                            if( roll_found && roll_count_min > 0 ) alternative_results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
+                            else results.push_back(std::make_tuple(hp_assigned, def_assigned, spdef_assigned));
+                            roll_found = true;
+                        }
+                    }
+                }
+
+            }
+
+            if( roll_found ) roll_count_min++;
+            roll_count++;
+        }
     }
 
-
-    return results;
+    //merging the two vectors
+    alternative_results.insert(alternative_results.end(), results.begin(), results.end());
+    return std::make_pair(results, alternative_results);
 }
 
 void Pokemon::resistMoveLoopThread(Pokemon theDefender, const std::vector<Turn>& theTurn, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>& theResult, const std::vector<defense_modifier>& theDefModifiers, std::vector<std::vector<float>>& theResultBuffer, const unsigned int theAssignableEVS) {

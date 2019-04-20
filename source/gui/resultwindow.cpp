@@ -567,22 +567,22 @@ void ResultWindow::setResultType(int index) {
 
         //calculating how many evs do remain to use
         int rem_hp = result_def.hp_ev[index];
-        if( rem_hp < 0 ) rem_hp = 0; //all of there are necessaries because in some special cases the returned result is < 0
+        if( rem_hp < 0 ) rem_hp = result_pokemon->getEV(Stats::HP); //all of there are necessaries because in some special cases the returned result is < 0
 
         int rem_def = result_def.def_ev[index];
-        if( rem_def < 0 ) rem_def = 0;
+        if( rem_def < 0 ) rem_def = result_pokemon->getEV(Stats::DEF);
 
         int rem_spdef = result_def.spdef_ev[index];
-        if( rem_spdef < 0 ) rem_spdef = 0;
+        if( rem_spdef < 0 ) rem_spdef = result_pokemon->getEV(Stats::SPDEF);
 
         int rem_atk = result_atk.atk_ev[index];
-        if( rem_atk < 0 ) rem_atk = 0;
+        if( rem_atk < 0 ) rem_atk = result_pokemon->getEV(Stats::ATK);
 
         int rem_spatk = result_atk.spatk_ev[index];
-        if( rem_spatk < 0 ) rem_spatk = 0;
+        if( rem_spatk < 0 ) rem_spatk = result_pokemon->getEV(Stats::SPATK);
 
         int rem_spe = result_pokemon->getEV(Stats::SPE);
-        if( rem_spe < 0 ) rem_spe = 0;
+        if( rem_spe < 0 ) rem_spe = result_pokemon->getEV(Stats::SPE);
 
         result_groupbox->findChild<QLabel*>("remaining_evs")->setText(tr("Remaining EVS: ")+QString::number(508 - rem_hp - rem_def - rem_spdef - rem_atk - rem_spatk - rem_spe));
 
