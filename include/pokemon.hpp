@@ -18,6 +18,7 @@
 #include "defenseresult.hpp"
 #include "attackresult.hpp"
 #include "move.hpp"
+#include <QDebug>
 
 class Turn;
 
@@ -132,7 +133,7 @@ class Pokemon {
         std::vector<int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;
         float getKOProbability(const Turn& theTurn) const;
-        FinalResult calculateEVSDistrisbution(const EVCalculationInput& theInput);
+        FinalResult calculateEVSDistrisbution(const EVCalculationInput& theInput); //this function is generally not thread safe, we call it in a separate thread but we know what we're doing :D
         int outspeedPokemon(const std::vector<Pokemon>& theVector);
 };
 

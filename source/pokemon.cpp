@@ -1037,14 +1037,18 @@ std::pair<DefenseResult, AttackResult> Pokemon::calculateEVSDistrisbution(const 
     Pokemon buffer = *this;
 
     if( theInput.priority == PRIORITY_DEFENSE ) {
-        auto def_result = buffer.resistMove(theInput.def_turn, theInput.def_modifier);
+        auto def_result = resistMove(theInput.def_turn, theInput.def_modifier);
+        //saving these variable because we change them and we need to restore them back later
+        unsigned int tamp_hp = getEV(Stats::HP);
+        unsigned int tamp_def = getEV(Stats::DEF);
+        unsigned int tamp_spdef = getEV(Stats::SPDEF);
         AttackResult atk_result;
         for(unsigned int i = 0; i < def_result.hp_ev.size(); i++) { //we use hp.ev but really could use any of the 3
-            buffer.setEV(Stats::HP, def_result.hp_ev[i]);
-            buffer.setEV(Stats::DEF, def_result.def_ev[i]);
-            buffer.setEV(Stats::SPDEF, def_result.spdef_ev[i]);
+            setEV(Stats::HP, def_result.hp_ev[i]);
+            setEV(Stats::DEF, def_result.def_ev[i]);
+            setEV(Stats::SPDEF, def_result.spdef_ev[i]);
 
-            auto atk_buffer = buffer.koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
+            auto atk_buffer = koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
 
             if( atk_buffer.isEmpty() && i > 0 ) { //if the alternative spreads are unsuitable because they don't match for the offensive side we erase them
                 def_result.hp_ev.erase(def_result.hp_ev.begin()+i);
@@ -1066,15 +1070,24 @@ std::pair<DefenseResult, AttackResult> Pokemon::calculateEVSDistrisbution(const 
 
         }
 
+        //restoring them
+        setEV(Stats::HP, tamp_hp);
+        setEV(Stats::DEF, tamp_def);
+        setEV(Stats::SPDEF, tamp_spdef);
+
         return std::make_pair(def_result, atk_result);
     }
 
     else {
-        auto atk_result = buffer.koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
-        buffer.setEV(Stats::ATK, atk_result.atk_ev[0]);
-        buffer.setEV(Stats::SPATK, atk_result.spatk_ev[0]);
+        auto atk_result = koMove(theInput.atk_turn, theInput.defending_pokemon, theInput.atk_modifier);
+        //same as before, saving them because we need to restore them
+        unsigned int tamp_atk = getEV(Stats::ATK);
+        unsigned int tamp_spatk = getEV(Stats::SPATK);
 
-        auto def_result = buffer.resistMove(theInput.def_turn, theInput.def_modifier);
+        setEV(Stats::ATK, atk_result.atk_ev[0]);
+        setEV(Stats::SPATK, atk_result.spatk_ev[0]);
+
+        auto def_result = resistMove(theInput.def_turn, theInput.def_modifier);
 
         //if the defense result returned more than 1 suitable spread we fill the atk result with the same result just for coherence
         if( def_result.hp_ev.size() > 1 ) { //honestly we could check any of them
@@ -1087,6 +1100,8 @@ std::pair<DefenseResult, AttackResult> Pokemon::calculateEVSDistrisbution(const 
             }
         }
 
+        setEV(Stats::ATK, tamp_atk);
+        setEV(Stats::SPATK, tamp_spatk);
         return std::make_pair(def_result, atk_result);
     }
 }
