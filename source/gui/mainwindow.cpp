@@ -819,7 +819,7 @@ void MainWindow::calculateFinished() {
 }
 
 void MainWindow::calculateStop() {
-    selected_pokemon->abortCalculation();
+    if( selected_pokemon != nullptr ) selected_pokemon->abortCalculation();
 }
 
 void MainWindow::reject() {

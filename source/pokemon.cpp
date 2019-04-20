@@ -631,7 +631,7 @@ DefenseResult Pokemon::resistMove(const std::vector<Turn>& theTurn, const std::v
     DefenseResult returnable;
 
     for(unsigned int i = 0; i < RESULT_TYPE_NUM; i++) {
-        const float WEIGHT = 1.5; //this is the weight used when calculating spreads more focused on hp (the bigger is weight the more they are focused on hp)
+        const float WEIGHT = 2; //this is the weight used when calculating spreads more focused on hp (the bigger is weight the more they are focused on hp)
         float effective_weight;
         if( i == 0 ) effective_weight = 1;
         else effective_weight = WEIGHT * i;
