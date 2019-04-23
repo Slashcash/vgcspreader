@@ -85,7 +85,6 @@ Brine
 Water Spout  
 Sacred Sword  
 Psyshock  
-Foul Play  
 Eruption  
 Knock Off  
 Moongeist Beam  
