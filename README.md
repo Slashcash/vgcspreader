@@ -32,6 +32,9 @@ Long story short: benchmarks you want to hit have to be inserted in an order of 
 ## What's with the Prioritize Defense / Prioritize Attack option?
 If you have some defensive and offensive benchmark that can only be hit with rolls at best, prioritizing the offensive or the defensive side will output spreads that give better rolls on the defensive or offensive side.
 
+## And what's with the two different spread distributions provided?
+In most of the cases VGCSpreader can output another spread other than the classic MINIMUM INVESTMENTS/MAXIMUM RESULTS spread, it is provided in the result window under the name of **Balanced HP Distribution**, it provides a slightly suboptimal spread which features an heavier investments on hp. It is useful in that situations where you can sacrifice some evs or some damage rolls in favour of a distribution that is more geared towards hp instead of being defense-centric. Give it a try.
+
 ## Item, Moves and abilities supported 
 As this is still in a testing phase only a limited amount of item, moves and abilities are supported with a correct damage calculation:
 
