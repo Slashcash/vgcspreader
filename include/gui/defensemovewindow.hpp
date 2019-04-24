@@ -18,11 +18,13 @@ class DefenseMoveWindow : public QDialog {
     Q_OBJECT
 
     private slots:
-        void setMove1(int index);
         void setSpecies1(int index);
         void setForm1(int index);
         void setForm2(int index);
+        void setMove1(int index);
         void setMove2(int index);
+        void setMoveCategory1(int index);
+        void setMoveCategory2(int index);
         void setSpecies2(int index);
         void activateAtk2(int state);
         void solveMove(void);

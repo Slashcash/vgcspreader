@@ -318,6 +318,7 @@ void DefenseMoveWindow::createAtk1GroupBox() {
     connect(species, SIGNAL(currentIndexChanged(int)), this, SLOT(setSpecies1(int)));
     connect(forms, SIGNAL(currentIndexChanged(int)), this, SLOT(setForm1(int)));
     connect(moves, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove1(int)));
+    connect(move_category, SIGNAL(currentIndexChanged(int)), this, SLOT(setMoveCategory1(int)));
 
     //setting index 0
     species->setCurrentIndex(1); //setting it to 1 because the signal is currentindexCHANGED, i am so stupid lol
@@ -613,6 +614,8 @@ void DefenseMoveWindow::createAtk2GroupBox() {
     connect(forms, SIGNAL(currentIndexChanged(int)), this, SLOT(setForm2(int)));
     connect(moves, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove2(int)));
     connect(activated, SIGNAL(stateChanged(int)), this, SLOT(activateAtk2(int)));
+    connect(move_category, SIGNAL(currentIndexChanged(int)), this, SLOT(setMoveCategory2(int)));
+
 
     //activating attack number 2
     activated->setChecked(true);
@@ -1157,4 +1160,32 @@ QString DefenseMoveWindow::retrieveFormName(const int species, const int form) {
     }*/
 
     else return "Form " + QString::number(form);
+}
+
+void DefenseMoveWindow::setMoveCategory1(int index) {
+    if( index == Move::Category::PHYSICAL ) {
+        atk1_groupbox->findChild<QLabel*>("atk1_iv_label")->setText(tr("Atk IV"));
+        atk1_groupbox->findChild<QLabel*>("atk1_ev_label")->setText(tr("Atk EV"));
+        atk1_groupbox->findChild<QLabel*>("atk1_modifier_label")->setText(tr("Atk Modifier"));
+    }
+
+    else {
+        atk1_groupbox->findChild<QLabel*>("atk1_iv_label")->setText(tr("Sp. Atk IV"));
+        atk1_groupbox->findChild<QLabel*>("atk1_ev_label")->setText(tr("Sp. Atk EV"));
+        atk1_groupbox->findChild<QLabel*>("atk1_modifier_label")->setText(tr("Sp. Atk Modifier"));
+    }
+}
+
+void DefenseMoveWindow::setMoveCategory2(int index) {
+    if( index == Move::Category::PHYSICAL ) {
+        atk2_groupbox->findChild<QLabel*>("atk2_iv_label")->setText(tr("Atk IV"));
+        atk2_groupbox->findChild<QLabel*>("atk2_ev_label")->setText(tr("Atk EV"));
+        atk2_groupbox->findChild<QLabel*>("atk2_modifier_label")->setText(tr("Atk Modifier"));
+    }
+
+    else {
+        atk2_groupbox->findChild<QLabel*>("atk2_iv_label")->setText(tr("Sp. Atk IV"));
+        atk2_groupbox->findChild<QLabel*>("atk2_ev_label")->setText(tr("Sp. Atk EV"));
+        atk2_groupbox->findChild<QLabel*>("atk2_modifier_label")->setText(tr("Sp. Atk Modifier"));
+    }
 }

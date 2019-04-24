@@ -12,6 +12,7 @@ class AttackMoveWindow : public QDialog {
 
     private slots:
         void setMove(int index);
+        void setMoveCategory(int index);
         void setSpecies(int index);
         void setForm(int index);
         void solveMove(void);

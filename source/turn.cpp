@@ -3,6 +3,7 @@
 Turn::Turn() {
     hits = 1;
     type = TYPE_NONE;
+    is_foul_play = false;
 }
 
 void Turn::addMove(const Pokemon& thePokemon, const Move& theMove) {
@@ -38,6 +39,8 @@ void Turn::addMove(const Pokemon& thePokemon, const Move& theMove) {
     if( thePokemon.getAbility() == Ability::Dark_Aura )
         for(auto it = moves.begin(); it < moves.end(); it++)
             it->second.setDarkAura(true);
+
+    if(  theMove.getMoveIndex() == Moves::Foul_Play ) is_foul_play = true;
 
     //ADDING A MOVE IF THE POKEMON HAS PARENTAL BOND
     if( moves.back().first.getAbility() == Ability::Parental_Bond && moves.back().second.getTarget() == Move::Target::SINGLE && !moves.back().second.isZ() ) {

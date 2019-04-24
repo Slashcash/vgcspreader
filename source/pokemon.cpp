@@ -122,8 +122,6 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::ATK] = (((((2 * base[form][Stats::ATK] + stats.getIV(Stats::ATK) + stats.getEV(Stats::ATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getItem() == Items::Choice_Band ) total[Stats::ATK] = total[Stats::ATK] * 1.5;
-    if( getAbility() == Ability::Huge_Power ) total[Stats::ATK] = total[Stats::ATK] * 2;
     boosted[Stats::ATK] = total[Stats::ATK] * atk_modifier_multiplier;
 
     //calculate def
@@ -138,7 +136,6 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::DEF] = (((((2 * base[form][Stats::DEF] + stats.getIV(Stats::DEF) + stats.getEV(Stats::DEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getAbility() == Ability::Fur_Coat ) total[Stats::DEF] = total[Stats::DEF] * 2;
     boosted[Stats::DEF] = total[Stats::DEF] * def_modifier_multiplier;
 
     //calculate spatk
@@ -153,7 +150,6 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::SPATK] = (((((2 * base[form][Stats::SPATK] + stats.getIV(Stats::SPATK) + stats.getEV(Stats::SPATK)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getItem() == Items::Choice_Specs ) total[Stats::SPATK] = total[Stats::SPATK] * 1.5;
     boosted[Stats::SPATK] = total[Stats::SPATK] * spatk_modifier_multiplier;
 
     //calculate spdef
@@ -168,7 +164,6 @@ void Pokemon::calculateTotal() {
     else nature_multiplier = 1;
 
     total[Stats::SPDEF] = (((((2 * base[form][Stats::SPDEF] + stats.getIV(Stats::SPDEF) + stats.getEV(Stats::SPDEF)/4) * stats.getLevel())/100)+5) * nature_multiplier);
-    if( getItem() == Items::Assault_Vest ) total[Stats::SPDEF] = total[Stats::SPDEF] * 1.5;
     boosted[Stats::SPDEF] = total[Stats::SPDEF] * spdef_modifier_multiplier;
 
     //calculate spe
@@ -331,18 +326,36 @@ uint16_t Pokemon::calculateDefenseInMove(const Move& theMove) const {
         if( theMove.getMoveCategory() == Move::PHYSICAL || (theMove.getMoveIndex() == Moves::Psyshock && !theMove.isZ()) ) {
             if( (getModifier(Stats::DEF) > 0) || (theMove.getMoveIndex() == Moves::Darkest_Lariat && !theMove.isZ()) || (theMove.getMoveIndex() == Moves::Sacred_Sword && !theMove.isZ()) ) defense = getStat(Stats::DEF);
             else defense = getBoostedStat(Stats::DEF);
+
+            if( getAbility() == Ability::Fur_Coat ) defense = defense * 2;
+
         }
 
         else {
             if( getModifier(Stats::SPDEF) > 0 ) defense = getStat(Stats::SPDEF);
             else defense = getBoostedStat(Stats::SPDEF);
+
+            if( getItem() == Items::Assault_Vest ) defense = defense * 1.5;
         }
     }
 
     else {
-        if( theMove.getMoveCategory() == Move::PHYSICAL || (theMove.getMoveIndex() == Moves::Psyshock && !theMove.isZ()) ) defense = getBoostedStat(Stats::DEF);
-        else if( (theMove.getMoveIndex() == Moves::Darkest_Lariat && !theMove.isZ()) || (theMove.getMoveIndex() == Moves::Sacred_Sword && !theMove.isZ()) ) defense = getStat(Stats::DEF);
-        else defense = getBoostedStat(Stats::SPDEF);
+        if( theMove.getMoveCategory() == Move::PHYSICAL || (theMove.getMoveIndex() == Moves::Psyshock && !theMove.isZ()) ) {
+            defense = getBoostedStat(Stats::DEF);
+
+            if( getAbility() == Ability::Fur_Coat ) defense = defense * 2;
+        }
+
+        else if( (theMove.getMoveIndex() == Moves::Darkest_Lariat && !theMove.isZ()) || (theMove.getMoveIndex() == Moves::Sacred_Sword && !theMove.isZ()) ) {
+            defense = getStat(Stats::DEF);
+            if( getAbility() == Ability::Fur_Coat ) defense = defense * 2;
+        }
+
+        else {
+            defense = getBoostedStat(Stats::SPDEF);
+
+            if( getItem() == Items::Assault_Vest ) defense = defense * 1.5;
+        }
     }
 
     return defense;
@@ -357,49 +370,89 @@ uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& 
         if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) {
             if( getModifier(Stats::ATK) < 0 ) attack = getStat(Stats::ATK);
             else attack = getBoostedStat(Stats::ATK);
+
+            if( theAttacker.getItem() == Items::Choice_Band ) attack = attack * 1.5;
+            if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
         }
 
         //photon geyser & light that burns the sky
-        if( (theMove.getMoveIndex() == Moves::Photon_Geyser && !theMove.isZ()) || theMove.getMoveIndex() == Moves::Light_That_Burns_the_Sky ) {
+        else if( (theMove.getMoveIndex() == Moves::Photon_Geyser && !theMove.isZ()) || theMove.getMoveIndex() == Moves::Light_That_Burns_the_Sky ) {
             if( theAttacker.getBoostedStat(Stats::ATK) > theAttacker.getBoostedStat(Stats::SPATK) ) {
                 if( theAttacker.getModifier(Stats::ATK) < 0 ) attack = theAttacker.getStat(Stats::ATK);
                 else attack = theAttacker.getBoostedStat(Stats::ATK);
+
+                if( theAttacker.getItem() == Items::Choice_Band ) attack = attack * 1.5;
+                if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
+
             }
 
             else {
                 if( theAttacker.getModifier(Stats::SPATK) < 0 ) attack = theAttacker.getStat(Stats::SPATK);
                 else attack = theAttacker.getBoostedStat(Stats::SPATK);
+
+                if( theAttacker.getItem() == Items::Choice_Specs ) attack = attack * 1.5;
+                if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
             }
         }
 
         //usual phys
-        if( theMove.getMoveCategory() == Move::PHYSICAL ) {
+        else if( theMove.getMoveCategory() == Move::PHYSICAL ) {
             if( theAttacker.getModifier(Stats::ATK) < 0 ) attack = theAttacker.getStat(Stats::ATK);
             else attack = theAttacker.getBoostedStat(Stats::ATK);
+
+            if( theAttacker.getItem() == Items::Choice_Band ) attack = attack * 1.5;
+            if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
         }
 
         //usual special
         else {
             if( theAttacker.getModifier(Stats::SPATK) < 0 ) attack = theAttacker.getStat(Stats::SPATK);
             else attack = theAttacker.getBoostedStat(Stats::SPATK);
+
+            if( theAttacker.getItem() == Items::Choice_Specs ) attack = attack * 1.5;
+
         }
     }
 
     else {
         //foul play
-        if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) attack = getBoostedStat(Stats::ATK);
+        if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) {
+            attack = getBoostedStat(Stats::ATK);
+
+            if( theAttacker.getItem() == Items::Choice_Band ) attack = attack * 1.5;
+            if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
+        }
 
         //photon geyser & light that burns the sky
-        if( (theMove.getMoveIndex() == Moves::Photon_Geyser && !theMove.isZ()) || theMove.getMoveIndex() == Moves::Light_That_Burns_the_Sky ) {
-            if( theAttacker.getBoostedStat(Stats::ATK) > theAttacker.getBoostedStat(Stats::SPATK) ) attack = theAttacker.getBoostedStat(Stats::ATK);
-            else attack = theAttacker.getBoostedStat(Stats::SPATK);
+        else if( (theMove.getMoveIndex() == Moves::Photon_Geyser && !theMove.isZ()) || theMove.getMoveIndex() == Moves::Light_That_Burns_the_Sky ) {
+            if( theAttacker.getBoostedStat(Stats::ATK) > theAttacker.getBoostedStat(Stats::SPATK) ) {
+                attack = theAttacker.getBoostedStat(Stats::ATK);
+
+                if( theAttacker.getItem() == Items::Choice_Band ) attack = attack * 1.5;
+                if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
+            }
+
+            else {
+                attack = theAttacker.getBoostedStat(Stats::SPATK);
+                if( theAttacker.getItem() == Items::Choice_Specs ) attack = attack * 1.5;
+            }
         }
 
         //usual phys
-        else if( theMove.getMoveCategory() == Move::PHYSICAL ) attack = theAttacker.getBoostedStat(Stats::ATK);
+        else if( theMove.getMoveCategory() == Move::PHYSICAL ) {
+            attack = theAttacker.getBoostedStat(Stats::ATK);
+
+            if( theAttacker.getItem() == Items::Choice_Band ) attack = attack * 1.5;
+            if( getAbility() == Ability::Huge_Power ) attack = attack * 2;
+        }
+
 
         //usual special
-        else attack = theAttacker.getBoostedStat(Stats::SPATK);
+        else {
+            attack = theAttacker.getBoostedStat(Stats::SPATK);
+            if( theAttacker.getItem() == Items::Choice_Specs ) attack = attack * 1.5;
+
+        }
     }
 
     if( theAttacker.getAbility() == Ability::Blaze && theAttacker.getCurrentHPPercentage() <= float(100/3) && theMove.getMoveType() == Type::Fire ) attack = attack * 1.5;
@@ -1082,7 +1135,12 @@ std::pair<DefenseResult, AttackResult> Pokemon::calculateEVSDistrisbution(const 
     //we do this calculation on a copy of *this
     Pokemon buffer = *this;
 
-    if( theInput.priority == PRIORITY_DEFENSE ) {
+    //we check if any of the turn contains the move FOUL PLAY, if so the PRIORITIZE DEFENSE option should not be considered otherwise the damage calculation would be wrong
+    bool foul_play = false;
+    for( auto it = theInput.def_turn.begin(); it < theInput.def_turn.end(); it++ )
+        if( it->isFoulPlay() ) foul_play = true;
+
+    if( theInput.priority == PRIORITY_DEFENSE && !foul_play ) {
         auto def_result = resistMove(theInput.def_turn, theInput.def_modifier);
         //saving these variable because we change them and we need to restore them back later
         unsigned int tamp_hp = getEV(Stats::HP);

@@ -351,6 +351,7 @@ void AttackMoveWindow::createMoveGroupbox() {
 
     //setting signals
     connect(moves, SIGNAL(currentIndexChanged(int)), this, SLOT(setMove(int)));
+    connect(move_category, SIGNAL(currentIndexChanged(int)), this, SLOT(setMoveCategory(int)));
 
     //setting index 0
     moves->setCurrentIndex(1); //setting it to 1 because the signal is currentindexCHANGED, i am so stupid lol
@@ -651,4 +652,20 @@ void AttackMoveWindow::setAsTurn(const Turn& theTurn, const Pokemon& theDefendin
     else atk_modifier_groupbox->findChild<QSpinBox*>("attacking_atk_modifier")->setValue(std::get<0>(theAttackModifier));
 
     atk_modifier_groupbox->findChild<QSpinBox*>("attacking_hits_modifier")->setValue(theTurn.getHits());
+}
+
+void AttackMoveWindow::setMoveCategory(int index) {
+    if( index == Move::Category::PHYSICAL ) {
+        defending_pokemon_groupbox->findChild<QLabel*>("def_iv_label")->setText(tr("Def IV"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_ev_label")->setText(tr("Def EV"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_modifier_label")->setText(tr("Def Modifier"));
+        atk_modifier_groupbox->findChild<QLabel*>("attacking_atk_modifier_label")->setText(tr("Attack Modifier"));
+    }
+
+    else {
+        defending_pokemon_groupbox->findChild<QLabel*>("def_iv_label")->setText(tr("Sp. Def IV"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_ev_label")->setText(tr("Sp. Def EV"));
+        defending_pokemon_groupbox->findChild<QLabel*>("def_modifier_label")->setText(tr("Sp. Def Modifier"));
+        atk_modifier_groupbox->findChild<QLabel*>("attacking_atk_modifier_label")->setText(tr("Sp. Attack Modifier"));
+    }
 }

@@ -18,10 +18,12 @@ class Turn {
         };
 
         std::vector<std::pair<Pokemon, Move>> getMovesEffective() const;
+        bool isFoulPlay() const { return is_foul_play; } //this is needed because foul play is a special move, and we have to deactivate the PRIORITIZE DEFENSE OPTION if any of the turn contains the foul play move
 
         friend class Pokemon;
         std::vector<std::pair<Pokemon, Move>> moves;
         unsigned int hits;
+        bool is_foul_play;
 
         Type type;
 
