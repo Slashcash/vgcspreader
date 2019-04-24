@@ -310,8 +310,8 @@ float Pokemon::calculateOtherModifier(const Pokemon& theAttacker, const Move& th
     else if( getAbility() == Ability::Prism_Armor && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 0.75;
     else if( theAttacker.getAbility() == Ability::Neuroforce && calculateTypeModifier(theAttacker, theMove) >= 2 ) modifier = modifier * 1.25;
 
-    //these effects are ignored by solgaleo & lunala peculiar moves and zekrom e reshiram abilities
-    if( theMove.getMoveIndex() != Moves::Moongeist_Beam && theMove.getMoveIndex() != Moves::Sunsteel_Strike && theMove.getMoveIndex() != Moves::Menacing_Moonraze_Maelstrom && theMove.getMoveIndex() != Moves::Searing_Sunraze_Smash && theAttacker.getAbility() != Ability::Turboblaze && theAttacker.getAbility() != Ability::Teravolt) {
+    //these effects are ignored by solgaleo & lunala & necrozma peculiar moves & zekrom e reshiram abilities
+    if( theMove.getMoveIndex() != Moves::Moongeist_Beam && theMove.getMoveIndex() != Moves::Sunsteel_Strike && theMove.getMoveIndex() != Moves::Menacing_Moonraze_Maelstrom && theMove.getMoveIndex() != Moves::Searing_Sunraze_Smash && theMove.getMoveIndex() != Moves::Photon_Geyser && theMove.getMoveIndex() != Moves::Light_That_Burns_the_Sky && theAttacker.getAbility() != Ability::Turboblaze && theAttacker.getAbility() != Ability::Teravolt) {
         if( getAbility() == Ability::Wonder_Guard && calculateTypeModifier(theAttacker, theMove) < 2 ) modifier = modifier * 0;
         else if( getAbility() == Ability::Multiscale && getCurrentHPPercentage() == 100 ) modifier = modifier * 0.5;
         else if( (getAbility() == Ability::Filter || getAbility() == Ability::Solid_Rock) && calculateTypeModifier(theAttacker, theMove) > 2  ) modifier = modifier * 0.75;
@@ -349,19 +349,36 @@ uint16_t Pokemon::calculateDefenseInMove(const Move& theMove) const {
 }
 
 uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& theMove) const {
+    //this function is a fucking mess
     uint16_t attack;
 
     if( theMove.isCrit() ) {
-        if( theMove.getMoveCategory() == Move::PHYSICAL ) {
-            if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) {
-                if( getModifier(Stats::ATK) < 0 ) attack = getStat(Stats::ATK);
-                else attack = getBoostedStat(Stats::ATK);
+        //foul play
+        if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) {
+            if( getModifier(Stats::ATK) < 0 ) attack = getStat(Stats::ATK);
+            else attack = getBoostedStat(Stats::ATK);
+        }
+
+        //photon geyser & light that burns the sky
+        if( (theMove.getMoveIndex() == Moves::Photon_Geyser && !theMove.isZ()) || theMove.getMoveIndex() == Moves::Light_That_Burns_the_Sky ) {
+            if( theAttacker.getBoostedStat(Stats::ATK) > theAttacker.getBoostedStat(Stats::SPATK) ) {
+                if( theAttacker.getModifier(Stats::ATK) < 0 ) attack = theAttacker.getStat(Stats::ATK);
+                else attack = theAttacker.getBoostedStat(Stats::ATK);
             }
 
-            else if( theAttacker.getModifier(Stats::ATK) < 0 ) attack = theAttacker.getStat(Stats::ATK);
+            else {
+                if( theAttacker.getModifier(Stats::SPATK) < 0 ) attack = theAttacker.getStat(Stats::SPATK);
+                else attack = theAttacker.getBoostedStat(Stats::SPATK);
+            }
+        }
+
+        //usual phys
+        if( theMove.getMoveCategory() == Move::PHYSICAL ) {
+            if( theAttacker.getModifier(Stats::ATK) < 0 ) attack = theAttacker.getStat(Stats::ATK);
             else attack = theAttacker.getBoostedStat(Stats::ATK);
         }
 
+        //usual special
         else {
             if( theAttacker.getModifier(Stats::SPATK) < 0 ) attack = theAttacker.getStat(Stats::SPATK);
             else attack = theAttacker.getBoostedStat(Stats::SPATK);
@@ -369,8 +386,19 @@ uint16_t Pokemon::calculateAttackInMove(const Pokemon& theAttacker, const Move& 
     }
 
     else {
+        //foul play
         if( theMove.getMoveIndex() == Moves::Foul_Play && !theMove.isZ() ) attack = getBoostedStat(Stats::ATK);
+
+        //photon geyser & light that burns the sky
+        if( (theMove.getMoveIndex() == Moves::Photon_Geyser && !theMove.isZ()) || theMove.getMoveIndex() == Moves::Light_That_Burns_the_Sky ) {
+            if( theAttacker.getBoostedStat(Stats::ATK) > theAttacker.getBoostedStat(Stats::SPATK) ) attack = theAttacker.getBoostedStat(Stats::ATK);
+            else attack = theAttacker.getBoostedStat(Stats::SPATK);
+        }
+
+        //usual phys
         else if( theMove.getMoveCategory() == Move::PHYSICAL ) attack = theAttacker.getBoostedStat(Stats::ATK);
+
+        //usual special
         else attack = theAttacker.getBoostedStat(Stats::SPATK);
     }
 
