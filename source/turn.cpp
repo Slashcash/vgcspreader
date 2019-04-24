@@ -7,14 +7,16 @@ Turn::Turn() {
 
 void Turn::addMove(const Pokemon& thePokemon, const Move& theMove) {
     if( moves.empty() ) {
-        if( theMove.getMoveCategory() == Move::PHYSICAL ) type = PHYSICAL;
+        if( theMove.getMoveIndex() == Moves::Psyshock ) type = MIXED; //psyshock gets a different treatment because it is a special move that attacks on defenses
+        else if( theMove.getMoveCategory() == Move::PHYSICAL ) type = PHYSICAL;
         else if( theMove.getMoveCategory() == Move::SPECIAL) type = SPECIAL;
         else type = TYPE_NONE;
     }
 
     else {
         Type new_type;
-        if( theMove.getMoveCategory() == Move::PHYSICAL ) new_type = PHYSICAL;
+        if( theMove.getMoveIndex() == Moves::Psyshock ) type = MIXED; //psyshock gets a different treatment because it is a special move that attacks on defenses
+        else if( theMove.getMoveCategory() == Move::PHYSICAL ) new_type = PHYSICAL;
         else if( theMove.getMoveCategory() == Move::SPECIAL) new_type = SPECIAL;
         else new_type = TYPE_NONE;
 
