@@ -94,6 +94,7 @@ Moongeist Beam
 Menacing Moonraze Maelstrom  
 Sunsteel Strike  
 Searing Sunraze Smash  
+Light That Burns the Sky
 
 ## Please be aware
 This is still a software in an heavy beta state and under testing, always make sure the distribution it calculates are correct using an external damage calculator.
