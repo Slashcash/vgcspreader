@@ -220,6 +220,36 @@ uint8_t PokemonDB::getReducingBerryType(const unsigned int theItemIndex) const {
     else return 0;
 }
 
+bool PokemonDB::isItemHPRestoringBerry(const unsigned int theItemIndex) const {
+    if( loaded ) {
+        unsigned int offset = ITEM_OFFSET * theItemIndex + 3;
+
+        return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
+}
+
+uint8_t PokemonDB::getHPRestoringBerryActivation(const unsigned int theItemIndex) const {
+    if( loaded ) {
+        unsigned int offset = ITEM_OFFSET * theItemIndex + 4;
+
+        return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
+}
+
+uint8_t PokemonDB::getHPRestoringBerryPercentage(const unsigned int theItemIndex) const {
+    if( loaded ) {
+        unsigned int offset = ITEM_OFFSET * theItemIndex + 5;
+
+        return db_binary_items.str().at(offset);
+    }
+
+    else return 0;
+}
+
 unsigned int PokemonDB::getPokemonFormesNumber(const unsigned int thePokedexNumber) const {
     if( loaded ) {
         unsigned int offset = (POKEMON_OFFSET * thePokedexNumber) + 32;

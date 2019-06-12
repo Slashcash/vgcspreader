@@ -1,4 +1,5 @@
 None
+Aguav Berry
 Assault Vest
 Babiri Berry
 Charti Berry
@@ -8,16 +9,21 @@ Choice Specs
 Chople Berry
 Coba Berry
 Colbur Berry
+Figy Berry
 Haban Berry
+Iapapa Berry
 Kasib Berry
 Kebia Berry
 Life Orb
+Mago Berry 
 Occa Berry
 Passho Berry
 Payapa Berry
 Rindo Berry
 Roseli Berry
 Shuca Berry
+Sitrus Berry
 Tanga Berry
 Wacan Berry
+Wiki Berry
 Yache Berry

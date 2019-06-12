@@ -467,9 +467,11 @@ QString ResultWindow::getResults(const Turn& theTurn, const Pokemon& thePokemon,
     //doing this to match showdown's output format
     float min_damage;
     float max_damage;
-    min_damage = std::floor(*theDamagePerc.begin()*10) / 10;
+    min_damage = *std::min_element(theDamagePerc.begin(), theDamagePerc.end());
+    min_damage = std::floor(min_damage*10) / 10;
 
-    max_damage = std::floor(theDamagePerc.back()*10) / 10;
+    max_damage = *std::max_element(theDamagePerc.begin(), theDamagePerc.end());
+    max_damage = std::floor(max_damage*10) / 10;
 
     QString damage_result = "(" + QString::number(min_damage, 'f', 1) + "% - " + QString::number(max_damage, 'f', 1) + "%)" /*+ "\n("*/;
 

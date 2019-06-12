@@ -9,7 +9,7 @@ class PokemonDB {
     private:
         static const unsigned int POKEMON_OFFSET = 84;
         static const unsigned int MOVE_OFFSET = 8;
-        static const unsigned int ITEM_OFFSET = 3;
+        static const unsigned int ITEM_OFFSET = 6;
 
         bool loaded;
         std::istringstream db_binary_species;
@@ -35,6 +35,9 @@ class PokemonDB {
         std::array<uint16_t, 3> getPokemonAbilities(const unsigned int thePokedexNumber, const unsigned int theForm) const;
         bool isItemRemovable(const unsigned int theItemIndex) const;
         bool isItemReducingBerry(const unsigned int theItemIndex) const;
+        bool isItemHPRestoringBerry(const unsigned int theItemIndex) const;
+        uint8_t getHPRestoringBerryActivation(const unsigned int theItemIndex) const;
+        uint8_t getHPRestoringBerryPercentage(const unsigned int theItemIndex) const;
         uint8_t getReducingBerryType(const unsigned int theItemIndex) const;
 };
 

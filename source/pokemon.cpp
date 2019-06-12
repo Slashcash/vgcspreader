@@ -554,28 +554,38 @@ std::vector<float> Pokemon::getDamagePercentage(const Turn& theTurn) const {
     return buffer;
 }
 
-void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<int>& theIntVector, std::vector<std::pair<Pokemon, Move>>& theVector, const unsigned int theHitNumber, std::vector<std::pair<Pokemon, Move>>::iterator& it) const {
+void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vector<int>& theIntVector, std::vector<bool>& theBerryVector, std::vector<std::pair<Pokemon, Move>>& theVector, const unsigned int theHitNumber, std::vector<std::pair<Pokemon, Move>>::iterator& it) const {
     std::vector<std::pair<Pokemon, Move>> buffer_vector = theVector; //WE DO THIS BECAUSE LATER ON WE NEED TO MODIFY SOME OF THE TURN FOR DAMAGE CALCULATION PURPOSES AND IT'S BETTER TO MODIFY A COPY OF THE VECTOR
     std::vector<std::pair<Pokemon, Move>>::iterator buffer_it = it;
 
     if( it == theVector.begin() ) {
         theIntVector = theDefendingPokemon.getDamage(buffer_it->first, buffer_it->second);
+
+        //this vector holds informations about consumed berries for each damage roll dealt
+        for(auto it = theIntVector.begin(); it < theIntVector.end(); it++) theBerryVector.push_back(false);
+
     }
 
     else if( it == theVector.end() ) return;
 
     else {
         std::vector<int> buffer;
+        std::vector<bool> new_berries;
         for(unsigned int j = 0; j < theIntVector.size(); j++) {
             int new_hp = theDefendingPokemon.getCurrentHP() - theIntVector[j];
             if( new_hp < 0 ) new_hp = 0;
             if( new_hp > theDefendingPokemon.getBoostedStat(Stats::HP) ) new_hp = theDefendingPokemon.getStat(Stats::HP);
             theDefendingPokemon.setCurrentHPPercentage((new_hp/theDefendingPokemon.getBoostedStat(Stats::HP))*100);
             auto new_damages = theDefendingPokemon.getDamage(it->first, it->second);
-            for( auto it2 = new_damages.begin(); it2 < new_damages.end(); it2++ ) buffer.push_back(*it2 + theIntVector[j]);
+
+            for( auto it2 = new_damages.begin(); it2 < new_damages.end(); it2++ ) {
+                buffer.push_back(*it2 + theIntVector[j]);
+                new_berries.push_back(theBerryVector[j]);
+            }
         }
 
         theIntVector = buffer;
+        theBerryVector = new_berries;
     }
 
     //INFRA TURN MODIFIERS (these effects apply after each attack in a turn)
@@ -589,6 +599,21 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
     }
     if( buffer_it->second.getMoveIndex() == Moves::Knock_Off && theDefendingPokemon.getItem().isRemovable() && !buffer_it->second.isZ() && !buffer_it->second.isParentalBondMove() ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none after a knock off
     if( theDefendingPokemon.getItem().isReducingBerry() && theDefendingPokemon.getItem().getReducingBerryType() == buffer_it->second.getMoveType() && calculateTypeModifier(buffer_it->first, buffer_it->second) >= 2 ) theDefendingPokemon.setItem(Item(Items::None)); //setting the item as none if a reducing berry is consumed
+
+    //taking the restoring berries into account
+    if( theDefendingPokemon.getItem().isRestoringBerry() ) {
+        for(unsigned int i = 0; i < theIntVector.size(); i++) {
+            int hp_remaining = theDefendingPokemon.getBoostedStat(Stats::HP) - theIntVector[i];
+            float hp_percentage_remaining = ((float(hp_remaining) / float(theDefendingPokemon.getBoostedStat(Stats::HP))) * 100);
+            if( hp_percentage_remaining <= theDefendingPokemon.getItem().getRestoringActivation() && hp_percentage_remaining > 0 && theBerryVector[i] == false ) { //if this is true we restore some hps using berries
+                qDebug() << "BERRY ACTIVATED";
+                theBerryVector[i] = true;
+                int damage_restoring = (theDefendingPokemon.getBoostedStat(Stats::HP) / 100) * theDefendingPokemon.getItem().getRestoringPercentage();
+                theIntVector[i] = theIntVector[i] - damage_restoring;
+            }
+        }
+    }
+
 
     //END OF TURN MODIFIERS (these effects apply at the end of the turn
     //if the pokemon is not dead and some effects are in place we modify the damages
@@ -610,15 +635,16 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
     }
 
     it++;
-    recursiveDamageCalculation(theDefendingPokemon, theIntVector, theVector, theHitNumber, it);
+    recursiveDamageCalculation(theDefendingPokemon, theIntVector, theBerryVector, theVector, theHitNumber, it);
 }
 
 std::vector<int> Pokemon::getDamageInt(const Turn& theTurn) const {
     std::vector<std::pair<Pokemon, Move>> buffer = theTurn.getMovesEffective();
     std::vector<std::pair<Pokemon, Move>>::iterator it = buffer.begin();
     std::vector<int> vec;
+    std::vector<bool> berry_vec;
 
-    recursiveDamageCalculation(*this, vec, buffer, theTurn.getHits(), it);
+    recursiveDamageCalculation(*this, vec, berry_vec, buffer, theTurn.getHits(), it);
     return vec;
 }
 
@@ -844,7 +870,7 @@ std::pair<std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>, std::vector<std::t
     if( results.empty() ) {
         while( (!roll_found || roll_count_min < (MIN_ROLL+1) * theTurn.size()) && roll_count < (MAX_ROLL+1) * theTurn.size() && !abort_calculation/*((MAX_ROLL+1)*(pow(MAX_ROLL+1, theTurn.size()-1))) used for the alternative version of the algorithm*/ ) {
             //for( auto it = tolerances.begin(); it < tolerances.end(); it++ ) qDebug() << *it;
-    qDebug() << roll_count_min;
+
             unsigned int tolerance_index = roll_count / (MAX_ROLL+1);
             (*(tolerances.end()-1-tolerance_index)) += ROLL_OFFSET;
 

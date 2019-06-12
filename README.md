@@ -75,6 +75,7 @@ Assault Vest
 Choice Band  
 Choice Specs  
 All the damage reduction berries (es: Payapa Berry)  
+All the hp restoring berrie (es: Iapapa Berry)  
 
 Items which do not affect damage calculation like Eject Button are normally supported.
 
