@@ -218,6 +218,7 @@ Power Whip
 Power-Up Punch
 Precipice Blades
 Prismatic Laser
+Psichic
 Psychic Fangs
 Psycho Boost
 Psycho Cut

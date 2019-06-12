@@ -222,6 +222,7 @@ enum Moves {
 	Power_Up_Punch,
 	Precipice_Blades,
 	Prismatic_Laser,
+	Psichic,
 	Psychic_Fangs,
 	Psycho_Boost,
 	Psycho_Cut,
@@ -324,7 +325,7 @@ enum Moves {
 	X_Scissor,
 	Zap_Cannon,
 	Zen_Headbutt,
-    Zing_Zap,
+	Zing_Zap
 };
 
 #endif
