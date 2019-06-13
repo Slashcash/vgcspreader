@@ -6,7 +6,7 @@ Move::Move(const Moves theMoveIndex) {
 
     base_power = (unsigned int)Pokemon::db.getMoveBasePower(theMoveIndex);
     z_base_power = (unsigned int)Pokemon::db.getMoveBasePowerZ(theMoveIndex);
-    if( Pokemon::db.isSignatureZ(theMoveIndex) ) is_signature_z = true;
+    if( Pokemon::db.isMoveSignatureZ(theMoveIndex) ) is_signature_z = true;
     else is_signature_z = false;
     is_z = false;
     move_category = (Category)Pokemon::db.getMoveCategory(theMoveIndex);

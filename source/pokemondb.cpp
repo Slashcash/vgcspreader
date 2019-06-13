@@ -1,11 +1,9 @@
 #include "pokemondb.hpp"
 
-#include <QFile>
-#include <QDebug>
-
 PokemonDB::PokemonDB() {
     loaded = false;
 
+    //should we launch an exception if something goes wrong here? Probably so
     loaded = load();
 }
 
@@ -13,26 +11,20 @@ bool PokemonDB::load() {
     if( !loaded ) {
         Q_INIT_RESOURCE(resources);
 
-        //loading the species binary (and then converting it to ostringstream because this was pre-qt legacy code)
-        QFile input_file_binary_species(":/db/personal_species.bin");
-        input_file_binary_species.open(QIODevice::ReadOnly);
-        QByteArray species_data = input_file_binary_species.readAll();
+        //loading the species binary
+        QFile input_file_species(":/db/personal_species.bin");
+        if( !input_file_species.open(QIODevice::ReadOnly) ) return false;
+        species_data = input_file_species.readAll();
 
-        db_binary_species.str(species_data.toStdString());
+        //loading the moves binary
+        QFile input_file_moves(":/db/personal_moves.bin");
+        if( !input_file_moves.open(QIODevice::ReadOnly) ) return false;
+        moves_data = input_file_moves.readAll();
 
-        //loading the moves binary (and then converting it to ostringstream because this was pre-qt legacy code)
-        QFile input_file_binary_moves(":/db/personal_moves.bin"); //HARDCODED BECAUSE I'M LAZY
-        input_file_binary_moves.open(QIODevice::ReadOnly);
-        QByteArray moves_data = input_file_binary_moves.readAll();
-
-        db_binary_moves.str(moves_data.toStdString());
-
-        //loading the items binary (and then converting it to ostringstream because this was pre-qt legacy code)
-        QFile input_file_binary_items(":/db/personal_items.bin"); //HARDCODED BECAUSE I'M LAZY
-        input_file_binary_items.open(QIODevice::ReadOnly);
-        QByteArray items_data = input_file_binary_items.readAll();
-
-        db_binary_items.str(items_data.toStdString());
+        //loading the items binary
+        QFile input_file_items(":/db/personal_items.bin");
+        if( !input_file_items.open(QIODevice::ReadOnly) ) return false;
+        items_data = input_file_items.readAll();
 
         return true;
     }
@@ -40,222 +32,59 @@ bool PokemonDB::load() {
     else return true;
 }
 
-uint16_t PokemonDB::getPokemonStat(const unsigned int thePokedexNumber, const unsigned int theForm, const Stats::Stat& theStat) const {
-    if( loaded ) {
-        unsigned int stat_offset;
-        if( theStat == Stats::HP ) stat_offset = 0;
-        else if( theStat == Stats::ATK ) stat_offset = 1;
-        else if( theStat == Stats::DEF ) stat_offset = 2;
-        else if( theStat == Stats::SPE ) stat_offset = 3;
-        else if( theStat == Stats::SPATK ) stat_offset = 4;
-        else if( theStat == Stats::SPDEF ) stat_offset = 5;
-        else stat_offset = 0;
+std::array<Type, 2> PokemonDB::getPokemonType(const unsigned int thePokedexNumber, const unsigned int theForm) const {
+    auto buffer = readSpeciesData(getPokemonOffset(thePokedexNumber, theForm) + TYPE_OFFSET, TYPE_SIZE);
+    std::array<Type, 2> result;
+    result[0] = static_cast<Type>(buffer[0]);
+    result[1] = static_cast<Type>(buffer[1]);
 
-        unsigned int pokedex_offset;
-        if( theForm == 0) pokedex_offset = POKEMON_OFFSET * thePokedexNumber;
-        else {
-            unsigned int FORM_INDEX_OFFSET = POKEMON_OFFSET * thePokedexNumber + 28;
-
-            uint8_t part1 = db_binary_species.str().at(FORM_INDEX_OFFSET);
-            uint8_t part2 = db_binary_species.str().at(FORM_INDEX_OFFSET+1);
-
-            unsigned int form_index = 256U * part2 + part1; //because it is saved in two separate bytes
-
-            pokedex_offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET);
-
-        }
-
-        unsigned int final_offset = pokedex_offset + stat_offset;
-
-        return db_binary_species.str().at(final_offset);
-    }
-
-    else return 0;
-}
-
-std::array<uint8_t, 2> PokemonDB::getPokemonType(const unsigned int thePokedexNumber, const unsigned int theForm) const {
-    if( loaded ) {
-        unsigned int offset;
-        if( theForm == 0) offset = (POKEMON_OFFSET * thePokedexNumber) + 6;
-        else {
-            unsigned int FORM_INDEX_OFFSET = POKEMON_OFFSET * thePokedexNumber + 28;
-
-            uint8_t part1 = db_binary_species.str().at(FORM_INDEX_OFFSET);
-            uint8_t part2 = db_binary_species.str().at(FORM_INDEX_OFFSET+1);
-
-            unsigned int form_index = 256U * part2 + part1; //because it is saved in two separate bytes
-
-            offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET + 6);
-        }
-
-        std::array<uint8_t, 2> buffer;
-        buffer[0] = db_binary_species.str().at(offset);
-        buffer[1] = db_binary_species.str().at(offset+1);
-
-        return buffer;
-    }
-
-    else return std::array<uint8_t, 2>();
+    return result;
 }
 
 unsigned int PokemonDB::getMoveBasePower(const unsigned int theMoveIndex) const {
-    if( loaded ) {
-        unsigned int offset = MOVE_OFFSET * theMoveIndex;
+    auto buffer = readMovesData(getMoveOffset(theMoveIndex) + MOVEBP_OFFSET, MOVEBP_SIZE);
 
-        uint8_t part1 = db_binary_moves.str().at(offset);
-        uint8_t part2 = db_binary_moves.str().at(offset+1);
-
-        return 256U * part2 + part1; //because it is saved in two separate bytes
-    }
-
-    else return 0;
+    return 256U * buffer[1] + buffer[0]; //because it is saved in two separate bytes
 }
 
 unsigned int PokemonDB::getMoveBasePowerZ(const unsigned int theMoveIndex) const {
-    if( loaded ) {
-        unsigned int offset = MOVE_OFFSET * theMoveIndex + 5;
+    auto buffer = readMovesData(getMoveOffset(theMoveIndex) + MOVEBPZ_OFFSET, MOVEBPZ_SIZE);
 
-        uint8_t part1 = db_binary_moves.str().at(offset);
-        uint8_t part2 = db_binary_moves.str().at(offset+1);
-
-        return 256U * part2 + part1; //because it is saved in two separate bytes
-    }
-
-    else return 0;
+    return 256U * buffer[1] + buffer[0]; //because it is saved in two separate bytes
 }
 
-bool PokemonDB::isSignatureZ(const unsigned int theMoveIndex) const {
-    if( loaded ) {
-        unsigned int offset = MOVE_OFFSET * theMoveIndex + 7;
+std::array<Ability, 3> PokemonDB::getPokemonAbilities(const unsigned int thePokedexNumber, const unsigned int theForm) const {
+    auto buffer = readSpeciesData(getPokemonOffset(thePokedexNumber, theForm) + ABILITY_OFFSET, ABILITY_SIZE);
+    std::array<Ability, 3> result;
+    result[0] = static_cast<Ability>(buffer[0]);
+    result[1] = static_cast<Ability>(buffer[1]);
+    result[2] = static_cast<Ability>(buffer[2]);
 
-        return db_binary_moves.str().at(offset);
-    }
-
-    else return 0;
+    return result;
 }
 
-uint8_t PokemonDB::getMoveType(const unsigned int theMoveIndex) const {
+std::vector<uint8_t> PokemonDB::readData(const QByteArray& theData, const unsigned int theOffset, const unsigned int theSize) const {
     if( loaded ) {
-        unsigned int offset = MOVE_OFFSET * theMoveIndex + 2;
-
-        return db_binary_moves.str().at(offset);
-    }
-
-    else return 18;
-}
-
-uint8_t PokemonDB::getMoveCategory(const unsigned int theMoveIndex) const {
-    if( loaded ) {
-        unsigned int offset = MOVE_OFFSET * theMoveIndex + 3;
-
-        return db_binary_moves.str().at(offset);
-    }
-
-    else return 0;
-}
-
-uint8_t PokemonDB::isMoveSpread(const unsigned int theMoveIndex) const {
-    if( loaded ) {
-        unsigned int offset = MOVE_OFFSET * theMoveIndex + 4;
-
-        return db_binary_moves.str().at(offset);
-    }
-
-    else return 0;
-}
-
-std::array<uint16_t, 3> PokemonDB::getPokemonAbilities(const unsigned int thePokedexNumber, const unsigned int theForm) const {
-    if( loaded ) {
-        unsigned int offset;
-        if( theForm == 0) offset = (POKEMON_OFFSET * thePokedexNumber) + 24;
-        else {
-            unsigned int FORM_INDEX_OFFSET = POKEMON_OFFSET * thePokedexNumber + 28;
-
-            uint8_t part1 = db_binary_species.str().at(FORM_INDEX_OFFSET);
-            uint8_t part2 = db_binary_species.str().at(FORM_INDEX_OFFSET+1);
-
-            unsigned int form_index = 256U * part2 + part1; //because it is saved in two separate bytes
-
-            offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET + 24);
-        }
-
-        std::array<uint16_t, 3> buffer;
-        buffer[0] = (uint8_t)db_binary_species.str().at(offset); //THIS CAST IS SO STUPID
-        buffer[1] = (uint8_t)db_binary_species.str().at(offset+1);
-        buffer[2] = (uint8_t)db_binary_species.str().at(offset+2);
-
+        std::vector<uint8_t> buffer;
+        for(unsigned int i = theOffset; i < theOffset + theSize; i++) buffer.push_back(static_cast<uint8_t>(theData.at(static_cast<int>(i))));
+        
         return buffer;
     }
-
-    else return std::array<uint16_t, 3>();
+    
+    else return std::vector<uint8_t>();
 }
 
-bool PokemonDB::isItemRemovable(const unsigned int theItemIndex) const {
-    if( loaded ) {
-        unsigned int offset = ITEM_OFFSET * theItemIndex;
-
-        return db_binary_items.str().at(offset);
+unsigned int PokemonDB::getPokemonOffset(const unsigned int thePokedexNumber, const unsigned int theForm) const {
+    unsigned int offset;
+    if( theForm == 0) offset = POKEMON_OFFSET * thePokedexNumber;
+    
+    else {
+        unsigned int form_offset = POKEMON_OFFSET * thePokedexNumber + FORM_OFFSET;
+        std::vector<uint8_t> form_buffer = readSpeciesData(form_offset, FORM_SIZE);
+        
+        unsigned int form_index = 256U * form_buffer[1] + form_buffer[0];
+        offset = (form_index * POKEMON_OFFSET) + ((theForm-1) * POKEMON_OFFSET);
     }
-
-    else return 0;
-}
-
-bool PokemonDB::isItemReducingBerry(const unsigned int theItemIndex) const {
-    if( loaded ) {
-        unsigned int offset = ITEM_OFFSET * theItemIndex + 1;
-
-        return db_binary_items.str().at(offset);
-    }
-
-    else return 0;
-}
-
-uint8_t PokemonDB::getReducingBerryType(const unsigned int theItemIndex) const {
-    if( loaded ) {
-        unsigned int offset = ITEM_OFFSET * theItemIndex + 2;
-
-        return db_binary_items.str().at(offset);
-    }
-
-    else return 0;
-}
-
-bool PokemonDB::isItemHPRestoringBerry(const unsigned int theItemIndex) const {
-    if( loaded ) {
-        unsigned int offset = ITEM_OFFSET * theItemIndex + 3;
-
-        return db_binary_items.str().at(offset);
-    }
-
-    else return 0;
-}
-
-uint8_t PokemonDB::getHPRestoringBerryActivation(const unsigned int theItemIndex) const {
-    if( loaded ) {
-        unsigned int offset = ITEM_OFFSET * theItemIndex + 4;
-
-        return db_binary_items.str().at(offset);
-    }
-
-    else return 0;
-}
-
-uint8_t PokemonDB::getHPRestoringBerryPercentage(const unsigned int theItemIndex) const {
-    if( loaded ) {
-        unsigned int offset = ITEM_OFFSET * theItemIndex + 5;
-
-        return db_binary_items.str().at(offset);
-    }
-
-    else return 0;
-}
-
-unsigned int PokemonDB::getPokemonFormesNumber(const unsigned int thePokedexNumber) const {
-    if( loaded ) {
-        unsigned int offset = (POKEMON_OFFSET * thePokedexNumber) + 32;
-
-        return db_binary_species.str().at(offset);
-    }
-
-    else return 0;
+    
+    return offset;
 }

@@ -606,7 +606,6 @@ void Pokemon::recursiveDamageCalculation(Pokemon theDefendingPokemon, std::vecto
             int hp_remaining = theDefendingPokemon.getBoostedStat(Stats::HP) - theIntVector[i];
             float hp_percentage_remaining = ((float(hp_remaining) / float(theDefendingPokemon.getBoostedStat(Stats::HP))) * 100);
             if( hp_percentage_remaining <= theDefendingPokemon.getItem().getRestoringActivation() && hp_percentage_remaining > 0 && theBerryVector[i] == false ) { //if this is true we restore some hps using berries
-                qDebug() << "BERRY ACTIVATED";
                 theBerryVector[i] = true;
                 int damage_restoring = (theDefendingPokemon.getBoostedStat(Stats::HP) / 100) * theDefendingPokemon.getItem().getRestoringPercentage();
                 theIntVector[i] = theIntVector[i] - damage_restoring;
