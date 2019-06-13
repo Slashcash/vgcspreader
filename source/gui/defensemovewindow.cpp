@@ -715,7 +715,7 @@ void DefenseMoveWindow::createDefendingGroupBox() {
     terrain_combobox->addItem(tr("None"));
     terrain_combobox->addItem(tr("Grassy"));
     terrain_combobox->addItem(tr("Electric"));
-    terrain_combobox->addItem(tr("Psychich"));
+    terrain_combobox->addItem(tr("Psychic"));
     terrain_combobox->addItem(tr("Misty"));
 
     terrain_layout->addWidget(terrain_combobox);
