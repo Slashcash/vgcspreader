@@ -10,9 +10,9 @@ class Stats {
             HP = 0,
             ATK,
             DEF,
+            SPE,
             SPATK,
             SPDEF,
-            SPE,
             STAT_NUM
         };
 
