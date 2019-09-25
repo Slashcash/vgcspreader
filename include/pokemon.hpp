@@ -129,6 +129,8 @@ class Pokemon {
         bool isGrounded() const { return grounded; }
         unsigned int getForm() const { return form; }
         unsigned int getFormesNumber() const { return formes_number; }
+        float getDEFTier() const;
+        float getSPDEFTier() const;
 
         std::vector<int> getDamageInt(const Turn& theTurn) const;
         std::vector<float> getDamagePercentage(const Turn& theTurn) const;

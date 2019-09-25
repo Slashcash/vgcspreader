@@ -69,6 +69,16 @@ void ResultWindow::createResultGroupBox() {
     remaining_evs->setObjectName("remaining_evs");
     result_layout->addWidget(remaining_evs);
 
+    result_layout->addSpacing(15);
+
+    QLabel* def_score = new QLabel(tr("Defense Score: ")+"0");
+    def_score->setObjectName("def_score");
+    result_layout->addWidget(def_score);
+
+    QLabel* spdef_score = new QLabel(tr("Sp. Defense Score: ")+"0");
+    spdef_score->setObjectName("spdef_score");
+    result_layout->addWidget(spdef_score);
+
     QLabel* no_spread_label = new QLabel(tr("Sorry, no such spread exists"));
     no_spread_label->setObjectName("no_spread_label");
     no_spread_label->setVisible(false);
@@ -147,6 +157,8 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(true);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("def_score")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("spdef_score")->setVisible(false);
 
         calc_groupbox->setVisible(false);
     }
@@ -161,6 +173,8 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("spe_evs")->setVisible(false);
         result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("def_score")->setVisible(false);
+        result_groupbox->findChild<QLabel*>("spdef_score")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(true);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(false);
@@ -180,6 +194,8 @@ void ResultWindow::setResult(const Pokemon& thePokemon, const std::vector<defens
         result_groupbox->findChild<QLabel*>("spatk_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("spe_evs")->setVisible(true);
         result_groupbox->findChild<QLabel*>("remaining_evs")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("def_score")->setVisible(true);
+        result_groupbox->findChild<QLabel*>("spdef_score")->setVisible(true);
         result_groupbox->findChild<QLabel*>("no_spread_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("no_input_label")->setVisible(false);
         result_groupbox->findChild<QLabel*>("sprite")->setVisible(true);
@@ -587,6 +603,15 @@ void ResultWindow::setResultType(int index) {
         if( rem_spe < 0 ) rem_spe = result_pokemon->getEV(Stats::SPE);
 
         result_groupbox->findChild<QLabel*>("remaining_evs")->setText(tr("Remaining EVS: ")+QString::number(508 - rem_hp - rem_def - rem_spdef - rem_atk - rem_spatk - rem_spe));
+
+        //calculating the defense tier on a copy of the pokemon
+        Pokemon tier_buffer = *result_pokemon;
+        tier_buffer.setEV(Stats::HP, result_def.hp_ev[index]);
+        tier_buffer.setEV(Stats::DEF, result_def.def_ev[index]);
+        tier_buffer.setEV(Stats::SPDEF, result_def.spdef_ev[index]);
+
+        result_groupbox->findChild<QLabel*>("def_score")->setText(tr("Def. Score: ")+QString::number(tier_buffer.getDEFTier(), 'f', 1));
+        result_groupbox->findChild<QLabel*>("spdef_score")->setText(tr("Sp. Def. Score: ")+QString::number(tier_buffer.getSPDEFTier(), 'f', 1));
 
         setResultDefense(*result_pokemon, result_def_modifier, result_def_turns, result_def, index);
         setResultAttack(*result_pokemon, result_pkmn_attack, result_atk_modifier, result_atk_turns,result_atk, index);

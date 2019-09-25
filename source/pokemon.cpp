@@ -1234,3 +1234,13 @@ std::pair<DefenseResult, AttackResult> Pokemon::calculateEVSDistrisbution(const 
         return std::make_pair(def_result, atk_result);
     }
 }
+
+float Pokemon::getDEFTier() const {
+    float score = getStat(Stats::HP) * getStat(Stats::DEF);
+    return log(score) / log(1.1);
+}
+
+float Pokemon::getSPDEFTier() const {
+    float score = getStat(Stats::HP) * getStat(Stats::SPDEF);
+    return log(score) / log(1.1);
+}
