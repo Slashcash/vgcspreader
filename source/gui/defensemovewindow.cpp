@@ -19,6 +19,11 @@
 DefenseMoveWindow::DefenseMoveWindow(QWidget* parent, Qt::WindowFlags f) : QDialog(parent, f) {
     QVBoxLayout* main_layout = new QVBoxLayout;
 
+    //creating the add preset window
+    addpreset_window = new AddPresetWindow(this);
+    addpreset_window->setObjectName("AddPresetWindow");
+    addpreset_window->setWindowTitle("VGCSpreader");
+
     //creating the tab
     tabs = new QTabWidget;
     main_layout->addWidget(tabs);
@@ -34,11 +39,17 @@ DefenseMoveWindow::DefenseMoveWindow(QWidget* parent, Qt::WindowFlags f) : QDial
     main_layout->addWidget(defending_groupbox);
 
     bottom_button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+
+    QPushButton* preset_button = new QPushButton(tr("Save as Preset"));
+
+    bottom_button_box->addButton(preset_button, QDialogButtonBox::ButtonRole::ActionRole);
+
     main_layout->addWidget(bottom_button_box, Qt::AlignRight);
 
     setLayout(main_layout);
 
     //SIGNALS
+    connect(preset_button, SIGNAL(clicked(bool)), this, SLOT(addPreset(bool)));
     connect(bottom_button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(bottom_button_box, SIGNAL(accepted()), this, SLOT(solveMove(void)));
     connect(bottom_button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -953,7 +964,7 @@ void DefenseMoveWindow::activateAtk2(int state) {
     atk2_groupbox->findChild<QCheckBox*>("atk2_z")->setEnabled(value);
 }
 
-void DefenseMoveWindow::solveMove(void) {
+void DefenseMoveWindow::solveMove(const bool preset, const QString& preset_name) {
     Pokemon attacking1(atk1_groupbox->findChild<QComboBox*>("atk1_species_combobox")->currentIndex()+1);
     attacking1.setForm(atk1_groupbox->findChild<QComboBox*>("atk1_forms_combobox")->currentIndex());
 
@@ -1029,7 +1040,8 @@ void DefenseMoveWindow::solveMove(void) {
 
     defense_modifier def_mod = std::make_tuple(defending_groupbox->findChild<QSpinBox*>("defending_hp_modifier")->value(), defending_groupbox->findChild<QSpinBox*>("defending_def_modifier")->value(), defending_groupbox->findChild<QSpinBox*>("defending_spdef_modifier")->value());
 
-    ((MainWindow*)parentWidget())->addDefenseTurn(turn, def_mod);
+    if( !preset ) ((MainWindow*)parentWidget())->addDefenseTurn(turn, def_mod);
+    else ((MainWindow*)parentWidget())->addAsPreset(preset_name, turn, def_mod);
 }
 
 void DefenseMoveWindow::setAsBlank() {
@@ -1188,4 +1200,9 @@ void DefenseMoveWindow::setMoveCategory2(int index) {
         atk2_groupbox->findChild<QLabel*>("atk2_ev_label")->setText(tr("Sp. Atk EV"));
         atk2_groupbox->findChild<QLabel*>("atk2_modifier_label")->setText(tr("Sp. Atk Modifier"));
     }
+}
+
+void DefenseMoveWindow::addPreset(bool) {
+    addpreset_window->setModal(true);
+    addpreset_window->setVisible(true);
 }

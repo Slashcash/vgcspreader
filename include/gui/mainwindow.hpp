@@ -17,8 +17,12 @@
 #include "attackmovewindow.hpp"
 #include "resultwindow.hpp"
 #include "alertwindow.hpp"
+#include "presetwindow.hpp"
 #include "turn.hpp"
 #include "pokemon.hpp"
+#include "tinyxml2.h"
+
+typedef std::tuple<QString, Turn, defense_modifier> Preset;
 
 class MainWindow : public QDialog {
     Q_OBJECT
@@ -28,6 +32,7 @@ class MainWindow : public QDialog {
         void setDefendingPokemonForm(int index);
         void setButtonClickable(int row, int column);
         void eraseMove(bool checked);
+        void addPreset(bool checked);
         void solveMoveDefense();
         void solveMoveAttack();
         void openMoveWindow(bool checked);
@@ -44,6 +49,7 @@ class MainWindow : public QDialog {
         AttackMoveWindow* attack_move_window;
         ResultWindow* result_window;
         AlertWindow* alert_window;
+        PresetWindow* preset_window;
 
         QFutureWatcher<void> future_watcher;
         QFuture<FinalResult> future;
@@ -73,11 +79,15 @@ class MainWindow : public QDialog {
         void openMoveWindowAttack();
         void openMoveWindowEditDefense();
         void openMoveWindowEditAttack();
+        void LoadPresetsFromFile();
 
     protected:
         void reject();
 
     public:
+        std::vector<Preset> presets; //HERE BECAUSE THIS PROGRAM IS A MESS
+        tinyxml2::XMLDocument xml_preset; //THIS TOO
+
         MainWindow();
 
         const std::vector<QString>& getSpeciesNames() const { return species_names; }
@@ -89,10 +99,11 @@ class MainWindow : public QDialog {
         const std::vector<QString>& getMovesNames() const { return moves_names; }
         void addDefenseTurn(const Turn& theTurn, const defense_modifier& theModifier);
         void addAttackTurn(const Turn& theTurn, const Pokemon& theDefendingPokemon, const attack_modifier& theModifier);
+        void addAsPreset(const QString& theName, const Turn& theTurn, const defense_modifier& theDefModifier);
+        void solveMovePreset(const int index);
 
         //MISC
         QString retrieveFormName(const int species, const int form);
-
 };
 
 #endif // MAINWINDOW_HPP

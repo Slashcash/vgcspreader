@@ -35,6 +35,12 @@ If you have some defensive and offensive benchmark that can only be hit with rol
 ## And what's with the two different spread distributions provided?
 In most of the cases VGCSpreader can output another spread other than the classic MINIMUM INVESTMENTS/MAXIMUM RESULTS spread, it is provided in the result window under the name of **Balanced HP Distribution**, it provides a slightly suboptimal spread which features an heavier investments on hp. It is useful in that situations where you can sacrifice some evs or some damage rolls in favour of a distribution that is more geared towards hp instead of being defense-centric. Give it a try.
 
+##Saving Presets
+If you often calculate the same attacks on the defensive side you can save them as presets so you will not need to re-enter them manually everytime. It will save you a lot of time. Set your desired attack, save it as a preset, assign a name to it and add them whenever you need it. It should be pretty straightforward.
+
+##What is the "Defensive Score" provided in the result window?
+It's a mathematical concept that may help you calculate damages during your games and VGCSPreader calculates it for you. You can find more information about this mathematical concept and instructions on how to use it on this Smogon's topic [here](https://www.smogon.com/forums/threads/defense-and-special-defense-tiers.24931/) 
+
 ## Item, Moves and abilities supported 
 As this is still in a testing phase only a limited amount of item, moves and abilities are supported with a correct damage calculation:
 

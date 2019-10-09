@@ -13,6 +13,7 @@
 #include <QTabWidget>
 
 #include "turn.hpp"
+#include "addpresetwindow.hpp"
 
 class DefenseMoveWindow : public QDialog {
     Q_OBJECT
@@ -27,7 +28,10 @@ class DefenseMoveWindow : public QDialog {
         void setMoveCategory2(int index);
         void setSpecies2(int index);
         void activateAtk2(int state);
-        void solveMove(void);
+        void addPreset(bool);
+
+    public slots:
+        void solveMove(const bool preset = false, const QString& preset_name = ""); //LAZYYYYYYYYY
 
     private:
         QGroupBox* atk1_groupbox;
@@ -35,6 +39,8 @@ class DefenseMoveWindow : public QDialog {
         QGroupBox* defending_groupbox;
         QGroupBox* modifier_groupbox;
         QTabWidget* tabs;
+        AddPresetWindow* addpreset_window;
+
 
         bool edit_mode;
 

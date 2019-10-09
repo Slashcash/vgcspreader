@@ -22,6 +22,8 @@ MainWindow::MainWindow() {
     setWindowTitle("VGCSpreader");
     selected_pokemon = nullptr;
 
+    LoadPresetsFromFile();
+
     createDefendingPokemonGroupBox();
     createMovesGroupBox();
 
@@ -53,8 +55,12 @@ MainWindow::MainWindow() {
     result_window->setWindowTitle("VGCSpreader");
 
     alert_window = new AlertWindow(this);
-    alert_window->setObjectName("ResultWindow");
+    alert_window->setObjectName("AlertWindow");
     alert_window->setWindowTitle("VGCSpreader");
+
+    preset_window = new PresetWindow(this);
+    preset_window->setObjectName("PresetWindow");
+    preset_window->setWindowTitle("VGCSpreader");
 
     //bottom buttons
     bottom_buttons = new QDialogButtonBox;
@@ -89,6 +95,9 @@ void MainWindow::moveTabChanged(int index) {
 
     moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setCurrentItem(nullptr);
     moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setCurrentItem(nullptr);
+
+    if( index == 0 ) moves_groupbox->findChild<QPushButton*>("moves_preset_button")->setEnabled(true);
+    else moves_groupbox->findChild<QPushButton*>("moves_preset_button")->setEnabled(false);
 
 }
 
@@ -502,6 +511,11 @@ void MainWindow::createMovesGroupBox() {
     moves_add_button->setObjectName("moves_add_button");
     button_layout->addWidget(moves_add_button);
 
+    //MOVES ADD PRESET BUTTON
+    QPushButton* moves_preset_button = new QPushButton(tr("Add a Preset"));
+    moves_preset_button->setObjectName("moves_preset_button");
+    button_layout->addWidget(moves_preset_button);
+
     //MOVES EDIT BUTTON
     QPushButton* moves_edit_button = new QPushButton(tr("Edit"));
     moves_edit_button->setObjectName("moves_edit_button");
@@ -577,6 +591,7 @@ void MainWindow::createMovesGroupBox() {
     connect(moves_defense_view, SIGNAL(cellClicked(int,int)), this, SLOT(setButtonClickable(int,int)));
     connect(moves_attack_view, SIGNAL(cellClicked(int,int)), this, SLOT(setButtonClickable(int,int)));
     connect(moves_delete_button, SIGNAL(clicked(bool)), this, SLOT(eraseMove(bool)));
+    connect(moves_preset_button, SIGNAL(clicked(bool)), this, SLOT(addPreset(bool)));
     connect(moves_add_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindow(bool)));
     connect(moves_edit_button, SIGNAL(clicked(bool)), this, SLOT(openMoveWindowEdit(bool)));
     connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(moveTabChanged(int)));
@@ -885,5 +900,268 @@ void MainWindow::solveMoveAttack() {
         moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->setItem(moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->currentRow(), 0, new QTableWidgetItem(move1));
 
         moves_groupbox->findChild<QTableWidget*>("moves_attack_view")->resizeColumnToContents(0);
+    }
+}
+
+void MainWindow::addPreset(bool checked) {
+    preset_window->setVisible(true);
+
+    std::vector<QString> buffer;
+    for(auto it = presets.begin(); it < presets.end(); it++) buffer.push_back(std::get<0>(*it));
+
+    preset_window->loadComboBox(buffer);
+}
+
+void MainWindow::addAsPreset(const QString& theName, const Turn& theTurn, const defense_modifier& theDefModifier) {
+    presets.push_back(std::make_tuple(theName, theTurn, theDefModifier));
+
+    //create a root node if it doesn't exists
+    if( xml_preset.RootElement() == nullptr ) {
+        tinyxml2::XMLNode* root = xml_preset.NewElement("Presets");
+        xml_preset.InsertFirstChild(root);
+    }
+
+    //title
+    tinyxml2::XMLElement* title_node = xml_preset.NewElement("Title");
+    title_node->SetText(theName.toStdString().c_str());
+
+    auto move_count = std::get<1>(presets.back()).getMoveNum();
+
+    for(auto i = 0; i < move_count; i++) {
+        //first of all we find the move category
+        auto move_category = std::get<1>(presets.back()).getMoves()[i].second.getMoveCategory();
+
+        //pokemon 1
+        std::string pokemon_string;
+        if( i == 0 ) pokemon_string = "Pokemon1";
+        else pokemon_string = "Pokemon2";
+        tinyxml2::XMLElement* pokemon_node = xml_preset.NewElement(pokemon_string.c_str());
+        title_node->InsertEndChild(pokemon_node);
+
+        //species
+        tinyxml2::XMLElement* species_node = xml_preset.NewElement("Species");
+        species_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getPokedexNumber());
+        pokemon_node->InsertEndChild(species_node);
+
+        //form
+        tinyxml2::XMLElement* form_node = xml_preset.NewElement("Form");
+        unsigned int form = std::get<1>(presets.back()).getMoves()[i].first.getForm();
+        form_node->SetText(form);
+        pokemon_node->InsertEndChild(form_node);
+
+        //type1
+        tinyxml2::XMLElement* type1_node = xml_preset.NewElement("Type1");
+        type1_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getTypes()[form][0]);
+        pokemon_node->InsertEndChild(type1_node);
+
+        //type2
+        tinyxml2::XMLElement* type2_node = xml_preset.NewElement("Type2");
+        type2_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getTypes()[form][1]);
+        pokemon_node->InsertEndChild(type2_node);
+
+        //nature
+        tinyxml2::XMLElement* nature_node = xml_preset.NewElement("Nature");
+        nature_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getNature());
+        pokemon_node->InsertEndChild(nature_node);
+
+        //ability
+        tinyxml2::XMLElement* ability_node = xml_preset.NewElement("Ability");
+        ability_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getAbility());
+        pokemon_node->InsertEndChild(ability_node);
+
+        //item
+        tinyxml2::XMLElement* item_node = xml_preset.NewElement("Item");
+        item_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getItem().getIndex());
+        pokemon_node->InsertEndChild(item_node);
+
+        //iv
+        tinyxml2::XMLElement* iv_node = xml_preset.NewElement("IV");
+        if( move_category == Move::Category::PHYSICAL ) iv_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getIV(Stats::ATK));
+        else iv_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getIV(Stats::SPATK));
+        pokemon_node->InsertEndChild(iv_node);
+
+        //ev
+        tinyxml2::XMLElement* ev_node = xml_preset.NewElement("EV");
+        if( move_category == Move::Category::PHYSICAL ) ev_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getEV(Stats::ATK));
+        else ev_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getEV(Stats::SPATK));
+        pokemon_node->InsertEndChild(ev_node);
+
+        //modifier
+        tinyxml2::XMLElement* modifier_node = xml_preset.NewElement("Modifier");
+        if( move_category == Move::Category::PHYSICAL ) modifier_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getModifier(Stats::ATK));
+        else modifier_node->SetText(std::get<1>(presets.back()).getMoves()[i].first.getModifier(Stats::SPATK));
+        pokemon_node->InsertEndChild(modifier_node);
+
+        //move
+        tinyxml2::XMLElement* move_node = xml_preset.NewElement("Move");
+        move_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.getMoveIndex());
+        pokemon_node->InsertEndChild(move_node);
+
+        //movetype
+        tinyxml2::XMLElement* movetype_node = xml_preset.NewElement("Movetype");
+        movetype_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.getMoveType());
+        pokemon_node->InsertEndChild(movetype_node);
+
+        //movetarget
+        tinyxml2::XMLElement* movetarget_node = xml_preset.NewElement("Movetarget");
+        movetarget_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.getTarget());
+        pokemon_node->InsertEndChild(movetarget_node);
+
+        //movecategory
+        tinyxml2::XMLElement* movecategory_node = xml_preset.NewElement("Movecategory");
+        movecategory_node->SetText(move_category);
+        pokemon_node->InsertEndChild(movecategory_node);
+
+        //movebp
+        tinyxml2::XMLElement* movebp_node = xml_preset.NewElement("Movebp");
+        movebp_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.getBasePower());
+        pokemon_node->InsertEndChild(movebp_node);
+
+        //movecrit
+        tinyxml2::XMLElement* movecrit_node = xml_preset.NewElement("Movecrit");
+        movecrit_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.isCrit());
+        pokemon_node->InsertEndChild(movecrit_node);
+
+        //movez
+        tinyxml2::XMLElement* movez_node = xml_preset.NewElement("Movez");
+        movez_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.isZ());
+        pokemon_node->InsertEndChild(movez_node);
+
+        //terrain
+        tinyxml2::XMLElement* terrain_node = xml_preset.NewElement("Terrain");
+        terrain_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.getTerrain());
+        pokemon_node->InsertEndChild(terrain_node);
+
+        //weather
+        tinyxml2::XMLElement* weather_node = xml_preset.NewElement("Weather");
+        weather_node->SetText(std::get<1>(presets.back()).getMoves()[i].second.getWeather());
+        pokemon_node->InsertEndChild(weather_node);
+    }
+
+    //defense modifier
+    tinyxml2::XMLElement* defmod_node = xml_preset.NewElement("Defmodifier");
+    defmod_node->SetText(std::get<1>(std::get<2>(presets.back())));
+    title_node->InsertEndChild(defmod_node);
+
+    //spdefense modifier
+    tinyxml2::XMLElement* spdefmod_node = xml_preset.NewElement("Spdefmodifier");
+    spdefmod_node->SetText(std::get<2>(std::get<2>(presets.back())));
+    title_node->InsertEndChild(spdefmod_node);
+
+    //hppercentage modifier
+    tinyxml2::XMLElement* hpmod_node = xml_preset.NewElement("HPmodifier");
+    hpmod_node->SetText(std::get<0>(std::get<2>(presets.back())));
+    title_node->InsertEndChild(hpmod_node);
+
+    //hits
+    tinyxml2::XMLElement* hits_node = xml_preset.NewElement("Hits");
+    hits_node->SetText(std::get<1>(presets.back()).getHits());
+    title_node->InsertEndChild(hits_node);
+
+    xml_preset.LastChild()->InsertEndChild(title_node);
+
+    xml_preset.SaveFile("presets.xml");
+}
+
+void MainWindow::solveMovePreset(const int index) {
+    turns_def.push_back(std::get<1>(presets[index]));
+    modifiers_def.push_back(std::get<2>(presets[index]));
+
+    moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setRowCount(moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->rowCount()+1);
+
+    auto buffer = turns_def.back().getMoves();
+
+    QString move_name_1;
+    if( buffer[0].second.isZ() ) move_name_1 = tr("Z-") + moves_names[buffer[0].second.getMoveIndex()];
+    else move_name_1 = moves_names[buffer[0].second.getMoveIndex()];
+    QString move1(species_names[buffer[0].first.getPokedexNumber()-1] + " " + move_name_1);
+
+   moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns_def.size()-1, 0, new QTableWidgetItem(move1));
+
+    moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->resizeColumnToContents(0);
+
+    if( turns_def.back().getMoveNum() > 1 ) {
+        QString move_name_2;
+        if( buffer[1].second.isZ() ) move_name_2 = tr("Z-") + moves_names[buffer[1].second.getMoveIndex()];
+        else move_name_2 = moves_names[buffer[1].second.getMoveIndex()];
+
+        QString move2(species_names[buffer[1].first.getPokedexNumber()-1] + " " + move_name_2);
+
+        QTableWidgetItem* plus_sign = new QTableWidgetItem("+");
+        plus_sign->setTextAlignment(Qt::AlignCenter);
+        moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns_def.size()-1, 1, plus_sign);
+        moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->setItem(turns_def.size()-1, 2, new QTableWidgetItem(move2));
+        moves_groupbox->findChild<QTableWidget*>("moves_defense_view")->resizeColumnToContents(2);
+    }
+}
+
+void MainWindow::LoadPresetsFromFile() {
+    xml_preset.LoadFile("presets.xml");
+
+    tinyxml2::XMLElement* root;
+
+    //create a root node if it doesn't exists
+    if( (root = xml_preset.RootElement()) == nullptr ) {
+        tinyxml2::XMLNode* root = xml_preset.NewElement("Presets");
+        xml_preset.InsertFirstChild(root);
+    }
+
+    else {
+        auto element = root->FirstChildElement();
+
+        while( element != nullptr ) {
+            Preset buffer;
+
+            //name
+            std::get<0>(buffer) = element->GetText();
+
+            auto move_element_temp = element->FirstChildElement();
+            auto move_element = element->FirstChildElement();
+
+            while( move_element != nullptr ) {
+                Pokemon pkmn_buffer(std::atoi(move_element->FirstChildElement("Species")->GetText()));
+
+                Move move_buffer(Moves(std::atoi(move_element->FirstChildElement("Move")->GetText())));
+                move_buffer.setMoveCategory(Move::Category(std::atoi(move_element->FirstChildElement("Movecategory")->GetText())));
+
+                pkmn_buffer.setForm(std::atoi(move_element->FirstChildElement("Form")->GetText()));
+                pkmn_buffer.setType(0, Type(std::atoi(move_element->FirstChildElement("Type1")->GetText())));
+                pkmn_buffer.setType(1, Type(std::atoi(move_element->FirstChildElement("Type2")->GetText())));
+                pkmn_buffer.setNature(Stats::Nature(std::atoi(move_element->FirstChildElement("Nature")->GetText())));
+                pkmn_buffer.setAbility(Ability(std::atoi(move_element->FirstChildElement("Ability")->GetText())));
+                pkmn_buffer.setItem(Item(std::atoi(move_element->FirstChildElement("Item")->GetText())));
+
+                if( move_buffer.getMoveCategory() == Move::Category::PHYSICAL ) {
+                    pkmn_buffer.setIV(Stats::ATK, std::atoi(move_element->FirstChildElement("IV")->GetText()));
+                    pkmn_buffer.setEV(Stats::ATK, std::atoi(move_element->FirstChildElement("EV")->GetText()));
+                    pkmn_buffer.setModifier(Stats::ATK, std::atoi(move_element->FirstChildElement("Modifier")->GetText()));
+                }
+
+                else {
+                    pkmn_buffer.setIV(Stats::SPATK, std::atoi(move_element->FirstChildElement("IV")->GetText()));
+                    pkmn_buffer.setEV(Stats::SPATK, std::atoi(move_element->FirstChildElement("EV")->GetText()));
+                    pkmn_buffer.setModifier(Stats::SPATK, std::atoi(move_element->FirstChildElement("Modifier")->GetText()));
+                }
+
+                move_buffer.setMoveType(Type(std::atoi(move_element->FirstChildElement("Movetype")->GetText())));
+                move_buffer.setTarget(Move::Target(std::atoi(move_element->FirstChildElement("Movetarget")->GetText())));
+                move_buffer.setBasePower(std::atoi(move_element->FirstChildElement("Movebp")->GetText()));
+                move_buffer.setCrit(move_element->FirstChildElement("Movetype")->BoolText());
+                move_buffer.setZ(move_element->FirstChildElement("Movez")->BoolText());
+                move_buffer.setTerrain(Move::Terrain(std::atoi(move_element->FirstChildElement("Terrain")->GetText())));
+                move_buffer.setWeather(Move::Weather(std::atoi(move_element->FirstChildElement("Weather")->GetText())));
+
+                std::get<1>(buffer).addMove(pkmn_buffer, move_buffer);
+                move_element = move_element->NextSiblingElement("Pokemon2");
+            }
+
+            std::get<1>(buffer).setHits(std::atoi(move_element_temp->NextSiblingElement("Hits")->GetText()));
+            std::get<0>(std::get<2>(buffer)) = std::atoi(move_element_temp->NextSiblingElement("HPmodifier")->GetText());
+            std::get<1>(std::get<2>(buffer)) = std::atoi(move_element_temp->NextSiblingElement("Defmodifier")->GetText());
+            std::get<2>(std::get<2>(buffer)) = std::atoi(move_element_temp->NextSiblingElement("Spdefmodifier")->GetText());
+
+            presets.push_back(buffer);
+            element = element->NextSiblingElement();
+        }
     }
 }
